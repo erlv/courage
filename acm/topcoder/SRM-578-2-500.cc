@@ -17,8 +17,11 @@
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <cstring>
 
 #define ABS(X) ( (X) > 0 ? (X) : (-(X) ) )
+#define LL long long
+
 using namespace std;
 
 /** 
@@ -31,7 +34,9 @@ using namespace std;
  *      have at least 1 goose.
  *  3. The problems is how to find out the v-cell set numbers.
  *     Using Graph Search ? ( TODO: why)
- *
+ *  Links:
+ *   Problem: http://community.topcoder.com/stat?c=problem_statement&pm=12545&rd=15498
+ *   Analysis: http://apps.topcoder.com/wiki/display/tc/SRM+578
  */
 
 /**
@@ -40,9 +45,52 @@ using namespace std;
  * RETURN: the number of possible sets of geese in the cage.
  */
 class GooseInZooDivTwo {
+  vector<string> F;
+  int vis[55][55];
+  int d,R,C;
+
 public:
+
+  void DFS(int r, int c) {
+    vis[r][c] = 1;
+    int i,j;
+    for( i = 0; i < R; i++) {
+      for( j = 0; j < C; j++) {
+	if( (F[i][j] == 'v') && (ABS(r-i) + ABS(c - j) <= d) && (vis[i][j] == 0)) {
+	  DFS(i,j);
+	}
+      }
+    }
+  }
+
   int count(vector <string> field, int dist) {
+    int i,j;
+    int cnt;
+
+    F= field;
+    d = dist;
+
+    memset( vis, 0, sizeof(vis));
+
+    R = field.size();
+    C = field[0].size();
     
+    cnt = 0;
+    for( i= 0; i < R; i++) 
+      for(j=0; j < C; j++) {
+	if( vis[i][j] ) continue;
+	if( F[i][j] == '.') continue;
+	cnt++;
+	DFS(i, j);
+      }
+    
+    LL ans = 1;
+    for( i = 1; i <= cnt; i++) 
+      ans = (ans * 2)% 1000000007;
+
+    ans = ( ans - 1 + 1000000007 ) % 1000000007;
+
+    return ans;
   }
 };
 
