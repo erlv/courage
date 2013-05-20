@@ -1,9 +1,8 @@
 #+title: TODO list for Personal Code Base
 
 * ACM
-** TopCoder
-   
 
+** TopCoder
    - SRM-578-2-500.cc
    - SRM-TC13-R1A-L3.cc
 
