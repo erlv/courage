@@ -1,0 +1,92 @@
+#+title: CLRS Algorithm Learning
+
+
+*  Leture 1
+
+** Analysis of Algorithm
+
+** Insert Sort
+
+** Asymptotic Analysis
+
+** Merge Sort
+
+* Leture 2 
+
+** Asymptotic Notation
+
+*** Big O notation
+The upper bound.  
+   
+*** Omega notation
+The Lower bound
+
+*** Theta notation
+The tight bounds
+   
+*** little-o  and little-omega notation
+Unlike Big O and Big-omega notation which are  less or equal than and bigger or equal than,
+
+little-o and little-omega are just less than and bigger than.
+
+** Recurrences
+
+*** Substitution method
+General method:
+1. Guss the form of the solution
+2. Verity by induction
+3. Solve for constants
+
+*** Iterating the recurrence
+
+*** Recursion tree
+
+*** Master Method
+
+     
+
+* TopCoder Practice
+
+** Sort Problem
+
+Problem Links:
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12437][SRM 571-DII-L2]]
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D11801][SRM 536 DII L2]]
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12521][SRM 577 DII L2]]
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12514][SRM 577 DI L1]]
+
+*** Bubble Sort
+
+*** Insertion Sort
+
+*** Merge Sort
+
+*** Heap Sort
+
+*** Quick Sort
+
+*** Radix Sort
+
+** Graph
+
+*** Graph Traveral
+
+*** Max Flow Problem
+
+* Problem Set
+
+** Problem Set 1
+
+*** Exercise 1-1
+
+*** Exercise 1-2
+
+*** Exercise 1-3
+
+*** Exercise 1-4
+
+*** Problem 1-1 Asymptotic Notation
+
+*** Problem 1-2 Recurrences
+
+*** Problem 1-3 Unimodal Search
