@@ -77,8 +77,7 @@ General method:
 
 
 ** Fibonacci number
-   
-   
+      
 
 *** TODO Fibonacci is everywhere in nature
     Why is Fibonacci so important? Take a look at the wikipedia.
