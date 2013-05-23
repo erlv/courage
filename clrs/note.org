@@ -1,7 +1,7 @@
 #+title: CLRS Algorithm Learning
 
 
-*  Leture 1
+* Leture 1
 
 ** Analysis of Algorithm
 
@@ -10,6 +10,7 @@
 ** Asymptotic Analysis
 
 ** Merge Sort
+
 
 * Leture 2 
 
@@ -44,6 +45,106 @@ General method:
 *** Master Method
 
      
+
+* Lecture 3 Divide and Conquer
+
+  DC is one of the several powerful techniques for algorithm design.
+  DC could be analyzed using recurrences and the master method
+  DC strategy often leads to efficient algos.
+
+
+  The design paradigm:
+  - *Divide* the problem(instance) into subproblem
+  - *Conquer* the subproblems by solving them recursively
+  - *Combine* subproblem solutions
+
+
+
+** Binary Search
+
+   The Algorithm:
+   - *Divide*: check the middle element
+   - *Conquer*: recursively search 1 subarray
+   - *Combine*: Trivial
+
+
+** Powering a number
+
+*** The Naive Algorithm
+
+*** The Divide-and-Conquer Algorithm
+
+
+
+** Fibonacci number
+   
+   
+
+*** TODO Fibonacci is everywhere in nature
+    Why is Fibonacci so important? Take a look at the wikipedia.
+
+
+*** The naive recursive algorithm
+    Use the standard formula to recursively get the final value.
+
+    Complexity: Omega(Phi^n), Phi is the _golden ratio_ ( (1+ 5^(1/2))/2 ).
+
+
+*** The bottom-up way
+
+    Compute F_0, F_1, F_2,... F_n in order, so that the current F_i can reuse the former result.
+
+    Complexity: Theta(n)
+
+*** Naive directed way
+    There is also a direct computation method 
+    which is not reliable on currenty hardware due to the floating-point arithmetic precision problem.
+    
+    F_n = round( (Phi^n) / (5^(1/2)) ).
+
+    round(): round the expression value to the nearest integer.
+
+
+*** Recursive squaring algorithm
+
+    We use the theoorem of matrix multiplication to get the final result of F_n
+
+    Complexity: Theta(lg n)
+
+
+** Matrix multiplication
+   
+   C=A*B
+
+*** Standard Algorithm
+    The standard algorithm is a 3-level loops that could give a result c_ij
+
+    Complexity: Theta(n^3)
+
+*** The standard Divide-and-Conquer algorithm
+    - *Divide*: split the matrix into submatrices
+    - *Conquey*: get the result of the submatrice in C
+    - *Combine*: reassembe the submatrices into C
+
+      T(n)=8*T(n/2) + Theta(n^2)
+
+      Complexity: Theta(n^3)
+
+    
+*** Strassen's Divide-and-Conquer Algorithm
+
+    The above algorithm have 8 recursive multiplications. 
+    Strassen provided a way to only use 7 recursive  mults.
+
+    This is still a DC algorithm.
+    T(n) = 7T(n/2) + Theta(n^2)
+
+** VLSI tree layout
+   
+   *Problem*: Embed a complete binary tree with n leaves in a grid using minimal area
+
+    
+
 
 * TopCoder Practice
 
