@@ -22,10 +22,10 @@ using namespace std;
 
 
 class FoxAndMp3Easy {
-public:
-  
+
+private:  
   // Method 1: Just Generate the string and use STD sort to solve it.
-  vector <string> playList(int n) {
+  vector<string> method1(int n) {
     vector<string> res;
 
     // TODO: This way is not good for n>100, n>1000, and n > 10000
@@ -41,6 +41,28 @@ public:
     }
     sort(res.begin(), res.end());
     return res;
+  }
+
+  
+
+  // Method 2: Just adjust the compare functions to make the sort work
+  vector<string> method2(int n) {
+    vector<string> res;
+    int i;
+    for(i=0; i < n; i++) {
+      stringstream sstream1;
+      sstream1 << i+1;
+      res.push_back(sstream1.str());
+    }
+    sort(res.begin(), res.end(), method2_compare);
+    
+    //Get the first 50 elements of the vector
+    
+
+
+public:
+  vector <string> playList(int n) {
+    return method1(n);
   }
 };
 
