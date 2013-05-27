@@ -1,19 +1,76 @@
+#+title: CLRS pratice and solutions
 
 
-* Chapter 26
 
-** 26.1
+* TopCoder Practice
 
-*** 26.1-3
-    - multi sources => single source 
-      A flow in multi source is  a flow that from a source in the graph, to a sink of the graph.
-      For the equivalent single-source, we can just extend the flow so that it come from the supersource and goto the supersink.
-      As the capacity from the supersource to the real source, and the capacity from the sink to the supersink are all infinite.
-      A flow in multi source is identical in single-source flow netwok.
-    - single source =>multi sources
-      Because the edges connect the supersource are all connect to a source in the multi-sources flow network, so is the edge from sink to supersink.
-      Any flow from the supersource to the supersink will only goto one source and one sink, for the source and sink, it is an identical flow.
-      
 
-*** 26.1-4
-    
+** Sort Problem
+
+Problem Links:
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12437][SRM 571-DII-L2]]
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D11801][SRM 536 DII L2]]
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12521][SRM 577 DII L2]]
+- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12514][SRM 577 DI L1]]
+
+*** Bubble Sort
+
+*** Insertion Sort
+
+*** Merge Sort
+
+*** Heap Sort
+
+*** Quick Sort
+
+*** Radix Sort
+
+
+** Graph
+
+*** Graph Traveral
+
+*** Max Flow Problem
+
+
+
+* Problem Set
+
+** Problem Set 1
+
+*** Exercise 1-1
+
+*** Exercise 1-2
+
+*** Exercise 1-3
+
+*** Exercise 1-4
+
+*** Problem 1-1 Asymptotic Notation
+
+*** Problem 1-2 Recurrences
+
+*** Problem 1-3 Unimodal Search
+
+
+
+
+* Text book exercises
+
+** Chapter 26
+
+*** 26.1
+
+**** 26.1-3
+     - multi sources => single source 
+       A flow in multi source is  a flow that from a source in the graph, to a sink of the graph.
+       For the equivalent single-source, we can just extend the flow so that it come from the supersource and goto the supersink.
+       As the capacity from the supersource to the real source, and the capacity from the sink to the supersink are all infinite.
+       A flow in multi source is identical in single-source flow netwok.
+     - single source =>multi sources
+       Because the edges connect the supersource are all connect to a source in the multi-sources flow network, so is the edge from sink to supersink.
+       Any flow from the supersource to the supersink will only goto one source and one sink, for the source and sink, it is an identical flow.
+       
+
+**** 26.1-4
+     

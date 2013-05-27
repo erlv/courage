@@ -46,7 +46,9 @@ General method:
 
      
 
-* Lecture 3 Divide and Conquer
+* Lecture 3 
+
+  This lecture is mainly about *Divide and Conquer*.
 
   DC is one of the several powerful techniques for algorithm design.
   DC could be analyzed using recurrences and the master method
@@ -145,48 +147,112 @@ General method:
     
 
 
-* TopCoder Practice
 
-** Sort Problem
+* Lecture 4
 
-Problem Links:
-- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12437][SRM 571-DII-L2]]
-- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D11801][SRM 536 DII L2]]
-- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12521][SRM 577 DII L2]]
-- [[http://community.topcoder.com/stat?c%3Dproblem_statement&pm%3D12514][SRM 577 DI L1]]
+  This lecture is mainly about *Quick Sort*.
 
-*** Bubble Sort
+  
+** The Quick Sourt Algorithm
+   QuickSort is also a DC.
 
-*** Insertion Sort
+   Algorithm Steps:
+   - *Divide*: choose a pivot from the array, and use it to partition the array into 2 subarrays.
+     such that, all elements of one  subarray is all  less than or equal to the /pivot/,
+     and all elements in the other subarray is all greater than or equal to the /pivot/.
 
-*** Merge Sort
+   - *Conquer*: Recursively sort the two subarrays.
 
-*** Heap Sort
+   - *Combine*: Trivial.
 
-*** Quick Sort
+   The implementation:
+   - *Partition*: this is the divide phase.
 
-*** Radix Sort
 
-** Graph
+** Analysis of quicksort
+   
+*** Worst-case of quicksort
+    - One side of the partition always has no elements.
 
-*** Graph Traveral
 
-*** Max Flow Problem
 
-* Problem Set
+*** Best-case of quicksort
+    - when each partition always have equal size.
 
-** Problem Set 1
 
-*** Exercise 1-1
 
-*** Exercise 1-2
+*** Other cases of quicksort
 
-*** Exercise 1-3
+    Even for the Almost-best case:
+     T(n) = T(n/10) + T(9/10 * n) + Theta(n)
 
-*** Exercise 1-4
+    and for the lucky-unluck case:
+    L(n) = 2U(n/2) + Theta(n)
+    U(n) = L(1) + L(n -1) + Theta(n)
 
-*** Problem 1-1 Asymptotic Notation
 
-*** Problem 1-2 Recurrences
+    The complexity of the quicksort algorithm is also: O(nlgn)
 
-*** Problem 1-3 Unimodal Search
+
+** Randomized quicksort
+   
+   - Choose a random position element as the *pivot*.
+
+   Since there are n conditions for the sort, so we use the expectation to show the time complexity.
+   And the time complexity is also O(nlgn)
+
+ 
+** Quicksort in practice
+   - Quicksort is a great general-purpose sorting algorithm
+   - Quicksort is typically over twice as fast as merge sort
+   - Quicksort can benefit substantially from code tuning
+   - Quicksort behaves well even with caching and virtual memory
+
+   
+
+* Leture 5
+
+
+** The lower bound of sorting
+   
+   The Defination of *comparison sort*: only use comparisons to determine the relative order of elements.
+
+   The problem: Is O(nlogn) the best we can do? 
+   *Decision Tree*  could help us answer this question.
+
+
+
+
+** Decision Tree model
+   A decision tree can model the execution of any comparision sort:
+   - One Tree for each input size /n/
+   - View the algorithm as splitting whenever it compares two elements
+   - The tree contains the comparisons along all possible instruction traces
+   - The running time of t he algorithm = the length of the path taken
+   - Worst-case running time = height of tree
+   
+   *Theorem*: Any decision tree that can sort n elements must have height Omega(nlgn)
+
+
+
+** Sorting in Linear time 
+
+
+*** Counting sort
+    
+    - Init an array C with 0, the size of the array C is the range of the array element value range
+    - Count each value apperance time, and record it in C
+    - Replace each element in C with the accumulate value start from the first element.
+    - Init a new array B with the same size of A.
+    - From the end of A to the start, assign B[C[A[j]]] with A[j], and minus C[A[j]] by 1.
+
+    The final array B is the result.
+
+
+**** TODO The code of counting sort
+
+
+
+*** Radix Sorting
+    Radix sort is a digit-by-digit sort, sort on /least-significant digit first/ with auxiliary /stable/ sort.
+    
