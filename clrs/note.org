@@ -1,7 +1,7 @@
 #+title: CLRS Algorithm Learning
 
 
-* Leture 1
+* Lecture 1
 
 ** Analysis of Algorithm
 
@@ -12,7 +12,7 @@
 ** Merge Sort
 
 
-* Leture 2 
+* Lecture 2 
 
 ** Asymptotic Notation
 
@@ -210,7 +210,7 @@ General method:
 
    
 
-* Leture 5
+* Lecture 5
 
 
 ** The lower bound of sorting
@@ -256,3 +256,73 @@ General method:
 *** Radix Sorting
     Radix sort is a digit-by-digit sort, sort on /least-significant digit first/ with auxiliary /stable/ sort.
     
+
+
+
+
+* Lecture 6
+  
+  This lecture is mainly about *Order Statistics*.
+  
+  
+** How to find the /i/th smallest number of n elements in the list?
+
+   The /i/ can be:
+   - =i = 1=: minimum
+   - =i = n=: maximum
+   - =i = (n+1)/2=: median. (assum that (n+1) is odd )
+   - i: other value
+
+
+
+*** Naive algorithm
+
+    The naive algorithm:
+    - Sort the list. By using mergesort or heapsort, the worst-case run time is /Theta(nlgn)/
+    - find the element of index /i/
+    
+
+
+*** Randomized Divide-and-conquer Algorithm
+    
+    This algorithm derived from the randomized quicksort:
+    - Reuse the Random-partition: which pick a pivot, and partition the array
+    - Choose one partition to continue finding the final result.
+      Unlike quicksort which will conquer each partition.
+
+
+    For the expected time of ranomized select, we should also use the expection analysis method.     
+    The average case, lucky-unlucky case, best case is all O(nlgn). 
+    However, the worst case is O(n^2).
+
+
+    The randomized order-statistic selection:
+    - works fast: can be done lin linear expected time
+    - It is an excellent algorithm in practice
+    - The worst case is very bad, Theta(n^2)
+
+
+
+*** Worst-case linear-time order statistics
+    The main idea is to generate a good pivot recursively.
+
+    The select(i,n) steps:
+    - Divide  the n elements into groups of 5.
+      Find the median of each 5-element group by rote.
+    - Recursively SELECT the median x of the n/5 group medians to be the pivot
+    - Partition around the pivot x. Let =k = rank(x)=
+    - if =i = k= then return x
+      else
+        if =i < k=
+          then recursively select the ith smallest element in the lower part
+        else recursively select the (i-k)th smallest element in the upper part.
+
+
+   After the median partition of 5-element group, and among all median of all groups. 
+   It is sure that the pivot that have been selected can divide the list into a nearly middle partition,
+   so that no worst-case will happen.
+
+    
+
+
+     
