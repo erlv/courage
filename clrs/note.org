@@ -326,3 +326,134 @@ General method:
 
 
      
+
+
+
+* Lecture 7
+  
+  This lecture is about *Hashing Basic*.
+
+
+** The Symbol Table problem
+   
+   It is common for a program to maintain a table S that can:
+   - =INSERT(S,x)=
+   - =DELETE(S,x)=
+   - =SEARCH(S,k)=
+
+   The problem is:
+   - How to maintain such a table
+   - How to make the table efficiently support INSERT,DELETE, and SEARCH operations.
+
+
+   *Direct-Access Table* Solution
+   Allocate a table which uses the key directly as the index.
+   The table should keep space for all the key-range index.
+   If the key can be an arbitrary int value, the table should have 2^32 elements.
+   It is too big.
+
+** The Hashing Solutions
+   *Hash function*: it is used to map the universe /U/ of akk keys into ={0,1,...,m-1}=.
+
+   *Collision*: When a record to be inserted maps to an already occupied slot in the table,
+   The collision occurs.
+
+
+
+*** Hashing functions
+    The assumption of simple uniform hashing is hard to guarantee.
+
+    *Ideal Hashing function*
+    - Should distribute the keys uniformly into the slots of the table
+    - Regularity in the key distribution should not affect this uniformity.
+
+
+**** Division Method
+     
+     =h(k) = k mod m=.
+
+     
+
+     *Deficiency*: Choose an prime number as m, and not too close to a power of 2 or 10 and not otherwise used prominently used,
+     so that =h(k)='s result can associate with all the bits of /k/.
+     
+     *Annoyance*: Sometimes, making the table size a prime is iconvenient.
+
+     counterexamples: if =m = 2^6=, =k = 1011000111011010= in binary.  =h(k)= only depends on the last 6 bits.
+     other k with the same last 6 bits have the same hash result.
+
+
+**** Multiplication method
+     
+     Assume the computer has w-bit words.
+     =h(k) = (A*k mod 2^w) rsh (w -r)=
+
+     - =A=: is an odd int in the range =2^(w-1) < A < 2^w=, do not pick it to the lower or upper bound.
+     - =2^w=: Compare to div, it is very fast.
+     - =rsh=: is the "bitwise right-shift" operator, it is fast
+     
+
+
+***** TODO What is modular wheel in multiplication method
+
+
+*** Collision Resolution
+    
+**** Chaining
+     
+     Link records in the same slot into a list.
+
+     *Worst Case*:
+     Every key hashes to the same slot. 
+     The Access time = Theta(n)
+
+     *Average Case*:
+     We need to make assumptions to analysis the average case.
+     Here is the *simple uniform hashing*:
+     - Each key /k/ is equally likely to be hashed to any slot of table /T/,
+       independent of where other keys are hashed.
+
+
+     Then, define the *load factor* of /T/ to be =Alpha = n/m = average number of keys per slot=.
+     - /n/: the number of keys in the table
+     - /m/: hte number of slots
+       
+
+     *Search cost*: the expected time for an unsuccessful search for a record with a given key is  =Theta(1+Alpha)=.
+     =Alpha= is the cost of searching list.
+
+     
+
+**** Open Addressing
+     
+     It does not need storage outside of the hash table.
+     - Insertion systematically probes the table until an empty slot is found
+     - Hash function depends on both the key and probe number
+     - The probe sequence should be a permutation of {0,1,...m-1}
+     - The table may fill up, and deletion is difficult ( but not impossible)
+     
+
+       *Analysis of Open Addressing*
+       For an open-addressed hash table with load factor =Alpha = n/m < 1=, 
+       the expected number of probes in an unsuccessful search is at most =1/(1- Alpha)=.
+       - If =Alpha= is constant, then accessing an open-addressed hash table taks constant time
+       - If the table is half full, then the expected number of probes is =1/(1-0.5) = 2=.
+       - If the table is =90%= full,  then the expected number of probes is =1/(1-0.9) = 10=.
+       
+
+
+***** Probing strategies for open addressing
+      
+      When collision occurs, we need a probing strategy to solve it.
+
+      *Linear probing*:
+      =h(k,i) = (H(k)+i) mod m= , simply increase the index.
+
+
+      *Double Hashing*
+      Define a new hash function to generate the new index when collision.
+
+
+      
+      
+      
