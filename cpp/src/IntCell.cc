@@ -1,4 +1,7 @@
+#include <iostream>
 #include "IntCell.h"
+
+using namespace std;
 
 /**
  * Construct the IntCell with initialVale
@@ -24,4 +27,11 @@ int IntCell::read() const {
  */
 void IntCell::write( int x ) {
   storedValue = x;
+}
+
+
+IntCell::~IntCell() {
+  cout << "IntCell: Call Destructor. storedValue=" 
+       << storedValue << endl;
+  
 }
