@@ -5,6 +5,10 @@
   This is a note for C++ Learning Notes, and is based on the following two Standford Univ courses.
   - [[http://www.stanford.edu/class/cs106b/][CS 106B]]: Programming Abstractions in C++
   - [[http://www.stanford.edu/class/cs106x/][CS 106X]]: Advanced Programming Abstractions in C++
+  - C++ Primer 4ed
 
 
-    
+* C++ Basic
+
+
+     

@@ -22,15 +22,27 @@ Problem Links:
 *** Heap Sort
 
 *** Quick Sort
-
+    
 *** Radix Sort
+
+
+*** Bucket Sort
+
+*** kth largest/samllest
 
 
 ** Graph
 
 *** Graph Traveral
 
+
 *** Max Flow Problem
+
+
+
+
+** Hashing
+
 
 
 

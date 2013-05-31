@@ -1,6 +1,7 @@
 #+title: CLRS Algorithm Learning
 
 
+
 * Lecture 1
 
 ** Analysis of Algorithm
@@ -457,3 +458,48 @@ General method:
       
       
       
+
+* Lecture 7
+
+  This lecture is about *Advanced hashing technology* -- *Universal Hashing* and *Perfect Hashing*.
+  
+
+  *A weaknesss of hashing*:
+  For any hash function /h/, there is a set of keys that can cause the average access time of a hash table to skyrocket.
+  The keys make /h(k)/ point to the same slot /i/.
+  *Solution*: Choose the hash function at random, independently of the keys.
+  And this is *Universal hashing*.
+
+
+
+** Universal Hashing
+   
+   *Definition*: /U/ is a universe of keys, /H/ is a finite collection of hash functions, each mapping /U/ to ={0,1,...m-1}= ,
+   If the chance of a collision between /x/ and /y/ is /1\/m/ if we choose /h/ randomly from /H/.
+   /H/ is *universal*.
+   
+
+   *Theorem*: choosing /h/ randomly from a universal set of hash function /H/.
+   Suppose /h/ is used to hash /n/ arbitrary keys into the /m/ slots of a table /T/.
+   Then for a given key /x/, we have: /E[#collisions with x] < n\/m/
+
+
+   *How to construct a set of universal hash functions*:
+   Let /m/ be prime. Decompose key /k/ into /r+1/ digits, each with value in the set /{0,1,..., m-1}/.
+   That is =k = <k0,k1,...,kr>=, 0<=ki<m.  Randomly choose /r/ value from 0<= a < m.
+   Define /ha(k) = sum (ai*ki mod m),  0 <= i <= r/.
+   The set H={ha} is universal.
+
+
+
+** Perfect Hashing
+   
+   Perfect means Search takes /Theta(1)/ time in the worst case.
+
+   Two-level scheme with universal hashing at both levels. *There will be no collision at level 2!*
+
+   Although we use an extra level of Hashing, since the expection of the 2nd level is /Theta(n)/, 
+   the total storage of the 2-level hashing is also /Theta(n)/.
+
+*** TODO how Universal hashing is implemented in code?
+    
