@@ -31,7 +31,6 @@ public class SynchronizeTest {
 		  public Producer() {
 			  setName("Thread for producer");
 			  setDaemon(true);
-			  
 		  }
 	  }
 	  
