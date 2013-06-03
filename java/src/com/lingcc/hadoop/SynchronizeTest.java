@@ -16,23 +16,42 @@ import java.util.List;
  *
  */
 public class SynchronizeTest {
-	  public   List<String> readyMapSpillFiles 
-  		= Collections.synchronizedList(new ArrayList<String>());
-	  
-	  
-	  public boolean consumer() {
+	public   List<String> readyMapSpillFiles 
+	= Collections.synchronizedList(new ArrayList<String>());
+	public boolean exitProducerThread;
+
+
+	public boolean consumer() {
 		return false;
-		  
-	  }
-	  
-	  
-	  
-	  private class Producer extends Thread {
-		  public Producer() {
-			  setName("Thread for producer");
-			  setDaemon(true);
-		  }
-	  }
-	  
-	  
+
+	}
+
+	public static main() {
+		
+	}
+
+
+	private class Producer extends Thread {
+		public Producer() {
+			setName("Thread for producer");
+			setDaemon(true);
+		}
+
+		public void run() {
+			do {
+				int numNewMaps = getMapCompletionEvents();
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				System.out.println("numNewMaps=" + numNewMaps);
+			} while(!exitProducerThread);
+		}
+
+		private int getMapCompletionEvents() {
+			
+			return 0;
+		}
+	}
 }
