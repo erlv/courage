@@ -509,3 +509,21 @@ General method:
 * Lecture 9
 
   This Lecture is about *Randomly built binary search trees*.
+
+
+
+** Binary-Search-Tree Sort
+   
+   Binary search tree could be used for sort:
+   - insert all the elements into a BST /T/
+   - in-order tree walk of /T/
+
+   The output of the above algorithm is the sorted list.
+
+   
+   BST sort have the same complextity as quicksort, 
+   It is just a reorder of all the comparesions of quick sort.
+
+
+
+   /This lecture is mainly about Math.... a little boring./
