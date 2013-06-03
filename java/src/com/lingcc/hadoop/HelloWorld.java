@@ -1,3 +1,4 @@
+package com.lingcc.hadoop;
 
 public class HelloWorld {
   public static void main(String args[]) {

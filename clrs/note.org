@@ -459,7 +459,7 @@ General method:
       
       
 
-* Lecture 7
+* Lecture 8
 
   This lecture is about *Advanced hashing technology* -- *Universal Hashing* and *Perfect Hashing*.
   
@@ -503,3 +503,9 @@ General method:
 
 *** TODO how Universal hashing is implemented in code?
     
+
+
+
+* Lecture 9
+
+  This Lecture is about *Randomly built binary search trees*.
