@@ -643,3 +643,51 @@ General method:
   - With-high-probability bound
   - Analysis of its complexity
   - Coin Flipping for its dynamic operation support
+   
+
+** Introduction about Skip List
+   It is a simple randomized dynamic search structure
+   - Invented by William Pugh in 1989
+   - easy to implement
+   - It maintains a dynamic set of /n/ elements in /O(lgn)/
+     time per operation in expectation and /with high probability/
+     - "Almost always" /O(lg n)/
+       
+       
+   An Ideal skip list is an /lg n/ linked list structure, 
+   that contains /lg n/ lists. 
+   each list contain the subset item of the bottom sorted full
+   list.
+
+
+** PROBLEM: SEARCH of skip list
+   - start from the highest list, and compare the key value
+   - find the range of the current list, and go done to the next
+     list, using the links across the lists.
+   - repeat the above steps until it find the element,
+     or arrived to the bottom of the lists and does not find it.
+   
+
+   *Small Changes*:
+   Add special /negitive infinite value/ to every list,
+   makes searching could work the same algorithm.
+
+** PROBLEM: INSERT of skip list
+
+   To insert an element /x/ into a skip list:
+   - SEARCH(x) to see where x fits in bottom list
+   - Insert into the bottom list first.
+   - Insert into some of the lists above
+     - Flip a coin
+       - if HEADS, promote x to the next level up and flip again.
+
+** PROBLEM: DELECT of skip list
+
+   To delete an element /x/ from a skip list:
+   - remove /x/ from all lists containing it.
+
+** Analysis of skip list
+
+   How good are skip lists?
+   - How about the search speed?
+   - How about the balance maintance?
