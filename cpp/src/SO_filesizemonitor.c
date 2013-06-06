@@ -1,5 +1,3 @@
-/*This is the sample program to notify us for the file creation and file deletion takes place in “/tmp/test_inotify” file*/
-// reference: http://www.thegeekstuff.com/2010/04/inotify-c-program-example/
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -9,6 +7,15 @@
 
 #define EVENT_SIZE  ( sizeof (struct inotify_event) )
 #define EVENT_BUF_LEN     ( 1024 * ( EVENT_SIZE + 16 ) )
+
+
+/**
+ * This file is used to answer stackoverflow question
+ *   http://stackoverflow.com/questions/16725586/read-from-a-file-that-is-continuously-being-updated/16726035#16726035
+ *
+ * Thu Jun  6 16:21:19 CST 2013
+ * Kun Ling <lkun.erlv@gmail.com>
+ */
 
 int main( )
 {

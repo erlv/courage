@@ -1,6 +1,14 @@
 #include <iostream>
 #include <chrono>
 
+/**
+ * This file is used to answer stackoverflow question:
+ *   http://stackoverflow.com/questions/16708715/how-to-measure-execution-time-in-c11/16708979#16708979
+ * Thu Jun  6 16:24:32 CST 2013
+ * Kun Ling <lkun.erlv@gmail.com>
+ */
+
+
 using namespace std;
 
 int main(){
