@@ -633,3 +633,13 @@ General method:
    Maintain a dynamic set of intervals. 
    For a given query interval /i/, find an interval in the set
    that overlaps /i/.
+
+
+* Lecture 12
+  
+  This Lecture is about *Skip List*. Mainly about its:
+  - Data Structure
+  - Randomized Insertion
+  - With-high-probability bound
+  - Analysis of its complexity
+  - Coin Flipping for its dynamic operation support
