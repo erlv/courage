@@ -1,0 +1,678 @@
+#+title: Algorithm and Data Struct 
+
+* Data Structure
+** List
+
+*** Representation Format
+    - Array: It is a contiguous data structure. The items store in adjancent memory address in memory.
+    - Link list: The list is represented using pointers.
+      - Double link list
+
+*** Commonly used Operations
+    - Get: elemtype get(list l, int pos)
+    - Insert:  bool insert(list l, elemtype x, int pos)
+    - Delete:  bool delete(list l , elemtype x)
+    - Search: int search(list l, elemtype x)
+**** Operation implementation for Array representation
+***** Get
+#+begin_src c
+elemtype get( list l , int pos) {
+  return l.list[pos];
+}
+#+end_src
+
+***** Insert
+#+begin_src c
+bool insert(list l, elemtype x, int pos)
+{
+  int len= l.length;
+  if(len+1 >= MAXSIZE) {
+    ori_l = l.list;
+    l.list = (elemtype*) malloc( sizeof(elemtype) * MAXSIZE *2);
+
+    if(l.list == NULL)
+      return false;
+
+    memcpy( l.list, ori_l, sizeof(elemtype)*l.length);
+    free(ori_l);
+  }
+  
+  for( i = l.length-1; i > pos; i++) {
+    l.list[l] = l.list[l-1];
+  }
+  l.list[pos] = x;
+  l.length++;
+
+  return true;
+}
+#+end_src
+
+***** Search
+#+begin_src c
+int search(list l, elemtype x) {
+  int res_pos;
+  int len = l.length;
+  for(int i=0; i < len; i++) {
+    if(l.list[i] == x)
+      return i;
+  }
+  if( i == len)
+    return -1;
+}
+#+end_src
+
+***** Delete
+#+begin_src c
+bool delete(list l, elemtype x) {
+  int pos = search(l, x);
+  if(pos == -1 ) {
+    cout << "Can not find the element";
+    return false;
+  }
+  for(int i = pos; i < l.length-1; i++) {
+    l.list[i] == l.list[i+1];
+  }
+  l.length--;
+  return true;
+}
+#+end_src
+
+
+**** Operation implementation for Link list representation
+
+***** Get
+
+#+begin_src c
+elemtype get(list l, int pos) {
+  int i = 0;
+  node* p = l.list;
+  while( i < pos) {
+    p = p->next;
+    i++;
+  }
+  return p->val;
+}
+#+end_src
+
+***** Search
+
+#+begin_src c
+int search( list l, elemtype x) {
+  int res=0;
+  
+  p = l.list;
+  while(p!=NULL) {
+    if(p->val == x)
+      return res;
+    else {
+      p = p->next;
+      res++;
+    }
+  }
+  if(p == NULL)
+    return -1;
+}
+#+end_src
+
+***** Insert
+#+begin_src c
+bool insert( list l, elemtype x, int pos) {
+  node* p = (node*) malloc( sizeof(node));
+  if( p == NULL)
+    return false;
+   
+  p->val = x;
+  
+  if( l.length == 0) {
+    if(pos > 0 )
+      cout << "Position illeage, insert at the end of the list." << endl;
+    l.list = p;
+    p->next = NULL;
+    l.length++;
+    return true;
+  }
+    
+  int l_pos=0;
+  node* q = l.list;
+  node* r = q->next;
+  while(r|=NULL && l_pos < pos-1) {
+    q = r;
+    r = r->next;
+    l_pos++;
+  }
+
+  if( r == NULL && l_pos < pos) {
+    cout << "Position illeage, insert at the end of the list." << endl;
+    pos = l.length;
+    l_pos = l.length-1;
+  }
+
+  if(l_pos == (pos-1)) {
+    q->next = p;
+    p->next = r;
+    l.length++;
+  }
+  return true;
+  
+}
+#+end_src
+
+
+***** Delete
+
+#+begin_src c
+bool delete(list l, elemtype x) {
+  node* p,q;
+  p = l.list;
+  if(p == NULL) {
+     return false;
+  }
+  
+  q = p->next;
+  if(p->val == x) {
+    free(p);
+    l.list = q;
+    l.length--;
+    return true;
+  }
+  while( q->val != x && q !=NULL) {
+    p = q;
+    q = q->next;
+  }
+  if( q == NULL)
+    return false;
+
+  else if( q-> val == x) {
+    p->next = q->next;
+    free(q);
+    l.length --;
+    return true;
+  }
+}
+#+end_src
+
+*** Other data structures based on List
+
+**** Stack
+     Stack is FILO(Fisrt in, Last Out).
+     Key Operation including:
+     - Push: bool push( stack s, element x);
+     - Pop:  element pop(stack s);
+
+***** Push
+#+begin_src c
+  bool push(stack s, element x) {
+    if( insert(s, x, s.length) ) {
+      s.length++;
+      return true;
+    } else 
+      return false;
+  }
+#+end_src
+
+***** Pop
+
+#+begin_src c
+elemtype pop(stack s) {
+  int pos = s.length-1;
+  elemtype res = find(s, pos);
+  if(delete(s, res))
+    return elemtype;
+  else {
+    cout << "delete the last element error." << endl;
+  }
+}
+#+end_src
+
+
+**** Queue
+     Queue is FIFO(Fist in First Out).
+     Key Operation include:
+     - Enqueue: bool enqueue( queue q, elemtype x);
+     - Dequeue: elemtype dequeue( queue q);
+
+***** enqueue
+
+#+begin_src c
+bool enqueue(queue q, elemtype x) {
+  int len = q.length;
+  if(insert(q, x, len)) {
+    q.length++;
+    return true;
+  } else {
+    return false;
+  }
+}
+#+end_src
+
+***** dequeue
+
+#+begin_src c
+elemtype dequeue(queue q) {
+   elemtype res= find(q, 0);
+   if(delete(q, res)) {
+     q.length--;
+     return res;
+   } else {
+     return false;
+   }
+}
+#+end_src
+        
+
+**** Dictionary
+     Dictionary is mostly used for accessing data items by content.
+     Usually, Dictionary is required to be efficient for the following operations.
+     Commonly used  Operations:
+     - Search: int search( dict d, elemtype x);
+     - Insert: bool insert(dict d, elemtype x);
+     - Delete: bool delete(dict d, elemtype x);
+     - Maximize: elemtype max(dict d);
+     - Minimize: elemtype min(dict d);
+     - Predecessor:find the elem whose key immediately before k in sorted order. /int predecessor(dict d, keytype k);/
+     - Successor: find the elem whose key immediately after k in sorted order. /int successor(dict d, keytype k);/
+
+       Since it has two component: the key and the value. And the key can be sorted or unsorted.
+       The whole dictionary can be implmented using array and list.
+       How to implement dictionary:
+    - An unsorted array;
+    - An array sorted by key;
+    - a singly-linked unsorted list
+    - a doubly-linked unsorted list
+    - a singly-linked sorted list
+    - a doubly-linked sorted list
+    - Hash Table
+
+
+      The time complexity:
+| operations  | Unsorted array | Sorted Array | S-unsort list | D-unsort list | S-sort list | D-sort List |
+| Search      | O(n)           | O(logn)      | O(n)          | O(n)          | O(logn)     | O(logn)     |
+| Insert      | O(1)           | O(n)         | O(1)          | O(1)          | O(n)        | O(n)        |
+| Delete      | O(1)           | O(n)         | O(n)          | O(1)          | O(n)        | O(1)        |
+| Successor   | O(n)           | O(1)         | O(n)          | O(n)          | O(1)        | O(1)        |
+| Predecessor | O(n)           | O(1)         | O(n)          | O(n)          | O(n)        | O(1)        |
+| Minimum     | O(n)           | O(1)         | O(n)          | O(n)          | O(1)        | O(1)        |
+| Maximum     | O(n)           | O(1)         | O(n)          | O(n)          | O(1)        | O(1)        |
+
+
+**** Hash Table
+     Hash is a special form of dictionary. 
+     It is commonly used in practical.
+     When designing a hash table, several decision should be made:
+     - How do I deal with collisions?
+     - How big should the talbe be?
+     - What hash function should I use?
+
+     Collision Resolution is a key problem of hash.
+     That is because two distinct keys will occasionally hash to the same value.
+     There are several method to solve this issue:
+     - Chaining
+     - Open Addressing
+
+     For the implementation of Hash Table, the following may be used:
+     - Binary Search Tree
+       - Since keep the tree balance is very important, 
+	 random search tree, AVL tree, 2/3 tree, red-blk trees and splay tree are commonly used in practical.
+
+     - B- Tree: It is used for large data set, which the main memory can not hold the whole data set.
+       B- tree can collapse several levels of a binary search tree into a single large node, so that
+       we can make the equivalent of several search steps before another disk access is needed.
+
+     - Skip Lists: (TODO: need more reading about this data structure)
+
+**** Priority Queues
+     A container providing quick access to the smallest or largest key in the set.
+     It can provide items by the highest priority of retrieval while supporting insertion, deletions and queries.
+     The following data structure can be used for priority queue implementation:
+     - Sorted array or list
+     - Binary heaps
+     - Bounded height priority queue
+     - Binary Search Tree
+     - Fibonacci and pairing heaps
+
+** Tree
+   Tree,take binary tree for example. For N-way tree, it is most like a graph.
+   - Binary Search Tree
+   - B- Tree
+   - Trie Tree
+   - AVL Tree
+   - Red-Black Trees
+
+#+begin_src c
+// FIXME:Need to double check whether my defination is correct.
+// In C++, the struct, class and enum keywords are optional, except the type defination statement.
+typedef struct {
+  elemtype val;
+  node* parent;
+  node* l_child, r_child;
+}node;
+typedef node tree;
+#+end_src
+
+
+*** Tree Operations
+    - Search: node* search(tree* t, elemtype x)
+    - Traversal: void  traversal(tree* t);
+      - Pre-Order
+      - In-Order
+      - Post-Order
+    - Insert: void insert(tree* t, elemtype x)
+    - Delete: void delete(tree* t, elemtype x)
+
+*** Binary Search Tree
+    
+**** Search
+
+#+begin_src c
+node* search(node* t, elemtype x) {
+  if( t == NULL)
+    return NULL;
+  else if(t->val > x)
+    return search(t->l_child, x);
+  else if (t->val < x)
+    return search(t->r_child, x);
+  else if (t->val == x)
+    return t;
+}
+#+end_src
+
+**** Traversal
+
+#+begin_src c
+// PRE Order
+// In-Order and Post-Order is simlar to Pre-order, just change the statement order.
+void traversal_pre(tree* t ) {
+   if(t != NULL)
+     visit(t->val);   
+   if(t->l_child != NULL)
+     traversal_pre(t->l_child);   
+   if(t->r_child != NULL)
+     traversal_pre(t->r_child);
+}
+#+end_src
+
+**** Insert
+
+#+begin_src c
+// For simple BST, we just insert the node as leaf
+node* insert(tree* t, elemtype x) {
+  if(t == NULL) {
+    t = (node*)malloc(sizeof(node));
+    return t;
+  }
+  if(t->val < x) {
+    if(t->r_child != NULL)
+      return insert(t->r_child, x);
+    else {
+      node* new_r_child = (node*)malloc(sizeof(node));
+      t->r_child = new_r_child;
+      new_r_child->val = x;
+      new_l_child->l_child=NULL;
+      new_l_child->r_child = NULL;
+      new_l_child->parent = t;
+      t->l_child = new_l_child;
+      return new_r_child;
+    }
+  } else if(t->val > x) {
+    if(t->l_child != NULL)
+      return insert(t->l_child, x);
+    else {
+      node* new_l_child = (node*) malloc(sizeof(node));
+      new_l_child->val = x;
+      new_l_child->l_child=NULL;
+      new_l_child->r_child = NULL;
+      new_l_child->parent = t;
+      t->l_child = new_l_child;
+      return new_l_child;
+      }
+  }
+}
+#+end_src
+
+**** Delete
+
+#+begin_src c
+// Since the memory will be deleted, we can just copy the value from the node which
+// will replace the nodes place in tree, and move the values along the tree from the bottom
+// to up. And then delete the leaf node only.
+void delete(tree* t, node* tree_node) {
+  // The node is leaf,just delete it.
+  if(tree_node->l_child == NULL && tree_node->r_child == NULL) {
+    if(tree_node->parent->l_child == tree_node)
+        tree_node->parent->l_child = NULL;
+    else if(tree_node->parenet->r_child = tree_node)
+       tree_node->parent->r_child = NULL;
+    free(tree_node);
+  } else if(tree_node->r_child == NULL) {
+     tree_node->val = tree_node->l_child->val;
+     delete(t, tree_node->l_child);
+  } else {
+    tree_node->val = tree_node->r_child->val;
+    delete(t, tree_node->r_child);
+  } 
+}
+#+end_src
+
+*** Trie Tree
+    Trie tree is an implementation of the suffx tree.
+
+
+** Graph
+   A graph G=(V,E)
+   - V: a set of vertices
+   - E: a set of edges of ordered or unordered pairs of vertices from V.
+   
+   Planar Graph is a type of graph which can draw all the edges in the lane without two edges cross.
+   It is suitable for geometric information systems.
+
+*** Graph properties
+    - Undirected vs. Directed:
+    - Weighted vs. Unweighted:
+    - Simple vs. Non-simple: Non-simple graph may have self-loop edge, or two vertice may have multiple edges.
+    - Sparse vs. Dense:Graph with a lot of edges is dense, otherwise it is sparse.
+    - Cyclic vs. Acyclic: An acyclic graph does not have any cycle.
+    - Embedded vs. Topological: 
+    - Implicit vs. Explicit:
+    - Labeled vs. Unlabeled:
+
+*** Graph Operations
+
+**** Traversing
+
+***** Breadth-First Search
+
+ 
+
+***** Depth-First Search
+
+**** Spanning Tree
+
+***** Minimun Spanning Tree
+
+**** Shortest Path
+
+***** Single Source Shortest Path
+
+***** Multiple Source Shortest Path
+
+*** Data Representations
+
+**** Adjacency Matrix
+     - A Matrix whose item [i,j] records the existence or the weight of the edge Vi to Vj.
+
+**** Adjacency List
+     - For a graph with N vertix. There is an array with N entries indicate all the vertexes.
+       For each entry, a node indicates a new edge.
+
+
+** Other Specialized Data Structures
+   
+
+*** String Data Structure
+    - Array: character array for string representation
+    - Suffix tree
+    - Suffix array
+*** Geometric Data Structure
+
+*** Graph Data Structure
+
+*** Set Data Structure
+    Serval implementation of set data structure:
+    - Bit vector
+    - Containers or dictionaries
+    - Bloom filters: bit vector based on hash
+
+* Algorithm
+
+** Traveling Salesman Problem
+   - Input: A set S of n points
+   - Output: What is the shortest cycle tour which salesman can visit all the point
+   - Analysis:
+     - From one point, select the nearest unvisited adjacent point until all the points are visited.  This solution can solve a subset of the condition, but not all.
+     - Only select the shortest edge which connect at least one unvisited point, until all the points are connected using the edges. The solution can also solve a subset of the input.
+     - This is a NP-Complete problem ( How to prove it ?)
+
+** Independent Set Problem
+   - Input: A independent set S of intervals
+   - Output: What is the largest subset of mutually non-overlapping intervals which can be selected from S?
+   - Analysis:
+     - Select the one first start. Incorrect
+     - Select the one which takes the least time. Incorrect
+     - Select the one finish first. Correct.
+
+** String Pattern Matching
+   - Input: A text string t and a pattern string p.
+   - Output: Does t contain the pattern p as a substring, and if so where?
+   - Analysis:
+     - Brute force way:  worst case –O(nm). We should check each char of test, with each char of pattern. So it is time consuming.
+     - KMP's way
+
+** Matrix Multiplication
+   - Input: 2 matrix, A and B
+   - Output: an multrix C=AXB
+   - Analysis:
+     - This problem is a classic problem in HPC. The ordinary algorithm time complex is O(n^3).
+
+
+** Sorting
+   - Input:  A set of sortable 
+   - Output: A increase/decrease-ordered  list of element.
+*** Heap Sort
+    During the sorting phrase, only heap is allowed.
+
+    Analysis:There are two ways to implement Heap Sort, using binary search tree or using priority queue.
+
+*** Merge Sort
+    Sorting by Divide-and-Conquer
+
+    Analysis:
+    - It uses a DC way to sort, and vastly used in parallel sorting
+    - There is also in-place merge, Although the simplest merge sort need a extra buffer to finish the merge phrase
+
+*** Quick Sort
+    Sorting by Randomization
+    
+    Analysis:
+    - This algorithm uses a randomization framework to sort.
+
+*** External Sort
+    When there is a lot of number to sort,  and the memory size is not large enough to hold all these numbers, we need external sort.
+    Analysis:
+
+
+* My Weak Algorithm
+
+** Dynamic Programming
+
+*** Fibonacci
+Fibonacci is a recursive program original, but  the intermediate computing result can be cached, so that we do not need to compute the same value again and again.
+
+*** Binomial Coefficients
+
+*** Approximate String Matching
+**** The Problem
+     Search with archaic patterns in mind for string matching:”You should not murder” with Thou shalt not kill”. Mostly used to search for the substring closest to a given pattern to compensate for spelling errors, or evolutionary changes in genomic sequences.
+     We want to find the edit distance, using three kind of changes:
+     - Substitution
+     - Insertion
+     - Deletion
+
+**** Brute Force Solution:
+     Three option:
+     - match: if(P[i] == T[j]) D[i,j] == D[i-1, j-1] else D[i,j] = D[i-1][j-1] + 1
+     - insert: D[i,j] = D[i-1, j] +1
+     - delete: D[i,j] = D[i, j-1] +1
+
+This algorithm is very compilex. Since at each position, it always need to compute 3-ways. 
+
+*** TODO TOPCODER SRM 551-1-1000 SweetFruits
+    *This problem need more time to understand, it is too complex.* [fn::http://apps.topcoder.com/wiki/display/tc/SRM+551]
+
+**** My Analysis
+     key constraint:
+     - int[] sweetness array:
+       This array is used for sweetness of every fruit. the value -1 means it is bitter.
+     - N-1 strings: They can connect the fruits into any style of tree.
+     - TotalSweetness: sum sweetness of all the truely sweet fruit.  
+       The truely sweet fruit is the one which is sweet, and connect with at least one sweet fruit
+       using string.
+     
+     Input:
+     - The sweetness array
+     - The maxsweetness constraint
+     
+     Output:
+     - The number of possible trees which the sweetness <= maxsweetness.
+
+     Brute Force Method:
+     - We can calculate the sweetnesses of possible trees, and get the ones satisfy the TotalSweetness constraints.
+     
+     Try Dynamic Way:
+     - Although brute force is the simple way, some trees have the same substructure. 
+       So we can record the sweetness of the substructures, and by this way DP is comming.
+     - Cache what? How to cache? and How to make use of it? This is the biggest chanllenge of this problem.
+       - Cache the sweetness of the substructure: such as the sweetness of each tree provided by the first N fruits.
+       - There are n! trees, we should record all the result of them.
+       - When adding a new fruit, we needed to based on each of these trees, and connect the fruit with each of the fruit in the tree.
+	 And recompute the sweetness of the tree.
+
+**** Analysi from TopCoder
+     - Suppose we have decided the set X of the truly sweet fruits yet. 
+       The total sweetness of X less than or equal to MaxSweetness.
+     - Then we need to find the number of trees which every fruits in X connect to another sweet fruit, 
+       and sweet fruit not in X are not connected to sweet fruit.
+       - *The number of trees depends on the number of elements in X. Why?*
+     - The tree should be spanning trees of the following graph:
+       - every sweet fruit in X is connected to all fruits, and sweet fruits not in X are connected to only bitter fruits.
+     - spanning[k] denote the number of spanning trees of such a graph where |X|=k.
+       Using the matrix-tree theorem[fn::http://en.wikipedia.org/wiki/Kirchhoff%27s_theorem 。This is a thereom in Graph theory.],
+       we can find the number of spanning tree of any graph.
+     - So, our problems turns to how to find out the number of spanning tree, and decide the set X of the truly sweet fruits.
+
+
+* Programming
+** 2-1 Primary Arithmetic
+   This is a simple problem. Just some control code can solve it.
+
+   However, there is a ambiguous.If the input is "999" and "1", what should the program output.
+
+
+** 7-1 Little Bishops
+
+*** My Solution
+Brute Force Way. For each bishops, check whether each point is suitable. And if yes, put it there. This algorithm.
+Model:
+Main():
+
+
+
+
+
+*** Suggested Solution
+This problem looks much like the 8-queen problem. Once can solve it use DP or  roll-back framework, However it is hard to solve it using just brute force. DP is my weak point.
+
+** 15-Puzzle Problem
+
+** Tug of War
+   
+** Color Hash

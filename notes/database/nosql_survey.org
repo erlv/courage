@@ -1,0 +1,145 @@
+#+title:业界NoSQL解决方案调研报告
+
+* Why NoSQL？
+
+** 什么是NoSQL
+   NoSQL (Not only SQL)，也是一种数据库系统，但和传统的关系型数据库系统不同。 NoSQL系统更注重横向可扩展性，不会依赖表作为最基础的架构，且通常不会完整支持SQL语言。 NoSQL系统牺牲支持SQL语言的灵活性，换取可扩展性和性能提升，一般对外只提供key-value类型的接口。 在数据量非常大的应用场合，NoSQL更适用。 新兴的互联网公司，是NoSQL的主要应用场合。
+
+
+* 主流NoSQL解决方案
+
+** 重点关注的商用产品
+
+*** Greenplum
+
+      2003年创建，2010年被EMC收购。从事廉价并行存储解决方案。核心产品是GreenPlum Database。该产品构建在开源DB：PostgreSQL之上， 采用shared-nothing,massively parallel的MPP架构，也是将data分区，并存储到多个服务器上。每个服务器独立管理所有数据中的一小部分，没有硬盘级别的共享和数据竞争。 程序员还可以手工设置数据库表格的存储方式，是否主要面向读，是否采用列存储等等。
+
+      另外一个核心产品是Parallel Query Optimizer。 该Optimizer会将SQL语句或者MapReduce语义转换成一系列物理上的执行计划。 该过程通过一个基于代价模型的优化算法完成。 输出的操作可以是：scan，join，sort，aggregation等传统操作， 也可以是并行的motion操作(可以决定在query执行过程中数据应该何时以及如何在节点之间传递。 传递模式有三种：Broadcast Motion(N:N)，Redistribute Motion(N:N)， Gather Motion(1:N).)。 另外节点内部也会维护一个流水线，用来协助实现节点内多个任务之间的并行操作。
+
+      Greenplum MapReduce：Greenplum的存储产品可以直接在Greenplum的并行数据流引擎上，直接运行MapReduce和SQL， 通过使用他们的数据流引擎，这种运行可以更快。 Greenplum还把整个Hadoop相关的框架都移植到了他们的存储产品中。
+
+      Greenplum面向的客户主要是一些金融服务、电信、互联网、零售和物流等行业，其中有中国联通。 竞争产品有Oracle Exadata，Teradata，Netezza, SAP AG, Vertica。
+
+
+      GreenPlum采用的技术与HBase非常像，都是存储节点直接并行参与数据访问、控制节点只负责控制，数据库表自动分区。 比较大的区别是，GreenPlum每个存储节点上都存储一个或多个POSTGRESQL数据库，该数据库是表的一部分。HBase底层直接使用一些HStore文件，data versioning的思想去存储。
+
+      
+
+*** Teradata
+    1976年创办，也是类似的data warehouse系统，整个系统各个节点间采用share nothing architecture。 强项在文本分析，主要面向商业智能。 和微策略有合作，通过和很多公司合作推广自己的产品。
+    
+    Teradata的产品能自动的区分“冷”和“热”的数据，并将他们区别放置和对待。
+
+    （TODO）关于产品的技术报告不多。还需要深入分析。
+
+
+
+*** Netezza
+    关注高性能数据分析。产品亮点是用FPGA之类特殊设置的硬件来加速数据分析。也有类似于Greenplum的数据查询任务编译成一些查询执行流。主要产品包括：TwinFin。
+
+
+** Column Families（列存储）
+   受Google BigTable启发实现的数据库。
+
+   扩展性好，将大规模写操作序列化，具有高可用性，高性能，可以利用MapReduce。
+
+   - BigTable
+   - HyperTable
+   - Apache HBase
+
+   三者的思想完全相同，区别就是一个不开源，一个C++开源，一个Java开源。相比起来HBase的开源社区更大些。用户更多。
+
+   - Apache Cassandra
+     
+   Facebook一开始创建的开源数据库，后来转向了HBase。
+   
+     
+** Document Store(文档存储)
+   由一系列文档组成的数据库，这些文档中一般保存着key-value。这是一种最自然的数据模型，对程序员友好，开发更快速。
+
+
+   - CouchDB
+   - MongoDB
+
+     MongoDB支持MapReduce。
+     - 架构：
+       - shard server：存储数据
+       - configuration server：存储配置
+       - router server：接受并路由请求到shard server
+     - 支持MapReduce，但是server上只有一个线程能用于接受MR任务。
+
+     CouchDB，使用Erlang语言编写的文档数据库.Ubuntu One 曾使用该数据库直到Nov. 2011.后因可扩展性问题而放弃。
+     - 使用Json保存数据
+     - 使用JavaScript作为查询语言
+     - 有MapReduce和HTTP的API
+     - 方便部署
+     - 使用MVCC(Multi-Version Concurrency Control)避免在写数据的时候，锁定数据库。通过该机制实现了ACID(Atomicity, Consistency, Isolation, Durability).
+     - 面向Web应用设计开发
+     - 发起人后来加入了CouchBase公司，提供In-Mem DB产品
+
+
+** Key-Value Store
+   受Amazon DynamoDB或者Distributed Hash Table[fn::http://en.wikipedia.org/wiki/Distributed_hash_table]启发，实现的数据库。
+
+   扩展性好，间隔性的小的读写序列化，容易编程.适合易变的随机小读写应用。
+
+*** Amazon DynamoDB
+    Amazon直接卖服务的NoSQL数据库。
+ 
+    仅向用户提供非常简单的API供使用：
+    - 除了对Table和Item的一些简单操作外，还包括BatchGetItem，BatchWriteItem, Query,Scan 等操作
+    - API中可以提供一些一致性需求。如 "strong consistency" 或者 "eventual consistency".
+    - 数据索引支持和数据传输需要额外支付费用。    
+
+*** Memcached 
+    常驻内存的Key-value缓存数据库，通常与传统DBRMS数据库(如MySQL)结合，用于内容动态生成数据库驱动网站的数据缓存。
+    
+    key的长度不能超过250byte，value的大小可以达到1MB.
+
+    MemcacheDB(Memcached+Berkeley DB)，Couchbase Server(提供类似Memcached的编程接口，但有硬盘存储保证容量)
+
+*** Redis
+    常驻内存的key-value 数据库，目前版本额可以直接将其持久化到硬盘中。新浪微博使用它持久化微博数据。
+
+    持久化方式：
+    - snapshotting：使用RDB dump格式从memory写到内存中。
+    - append-only file：启动新的线程做，采用修改追加的形式。
+
+*** Oracle NoSQL DB
+    采用Key-Value的索引方式，有关内部架构的介绍较少[fn::http://www.oracle.com/technetwork/products/nosqldb/overview/index.html]。
+
+    - 存储上，也是存储表格的某个分区。
+
+    - Key是一个被hash过的值。value的长度没有大小限制。因此可以直接用于保存多媒体文件之类的。
+
+    - 有个NoSQL DB Driver负责将API转换成底层表格的存储。在Driver中维护一个Partition Table，Replication Group State Table.
+
+    - 附带有Cloudera CDH套件。提供Hive语言的支持。
+
+#+CAPTION: Oracle NoSQL DB 处理过程
+#+LABEL: fig:SED-HR4049
+[[./image/oracle_nosql_db_processing.jpg]]
+
+
+实际上，Hbase，Hypertable也都是以Key-Value为接口的数据库。但是因为存储上采用了更主流的列方式，而被单独归类了。
+
+
+** Graph Database
+
+   - Neo4J
+   - Dex
+     
+     主要针对社会网络图之类的应用.存储的时候，就采用图的方式存储，而非传统的表方式。图中的每个节点都直接指向其相邻节点，这样就能避免额外的一次索引查询操作。
+
+     Neo4J：是Neo公司开发的，提供GPL和商业版两个版本，基于Java语言。
+
+
+* 发展趋势
+  - 对NoSQL的实时性需求提升
+    - Facebook: realtime hbase
+  - 性能
+  - 扩展性
+  - 容错能力
+  - 一致性
+  - 底层的存储高效
+    - protobuf[fn::http://code.google.com/p/thrift-protobuf-compare/wiki/Benchmarking]: 可以使用Protobuf压缩文本形式的value，column。 "一条微博用json数据结构存(包括作者信息),需要2～5kB，用XML需要10KB，用protobuf序列化后需要500B" --新浪微博技术团队 TimYang。
