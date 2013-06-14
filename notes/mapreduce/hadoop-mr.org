@@ -32,7 +32,32 @@ $ $HADOOP_HOME/bin/hadoop -jar $HADOOP_HOME/hadoop-streaming.jar \
 * Hadoop MapReduce
 
 
+
+** Hadoop MR work flow
+
+
+*** Hadoop Job Submission
+
+
+**** JobClient 
+     This is the first step. 
+     - Client run =hadoop jar XXX.jar -input XXXX -output YYY=
+     - hadoop script will using =RunJar= class to process the jar file first
+     - =RunJar= will firstly extract the jar and set environment, and pass the parameter to MR program.
+       - Mapper class, Reduce Class, the number of Reduce Task, etc.
+     -
+     
+
+
+**** JobTracker
+
+
+
 ** Hadoop MapReduce IO related
+
+
+*** TODO Difference between FileSystem and FileContext
+    
 
 *** o.a.h.io
 
