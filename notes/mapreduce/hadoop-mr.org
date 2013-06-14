@@ -1,0 +1,148 @@
+#+title: MapReduce Related Tool Design and Implementation
+
+
+Except Hadoop MR streaming could be run on mutiple nodes, all the others can only run on a single shared-memory multicore node.
+
+
+* The Simplest MR
+  just like: 
+
+#+BEGIN_SRC sh
+$cat data | map | sort |reduce
+
+# For example
+$ cat data | tr " " "\n" | sort | uniq -c 
+
+# For Hadoop
+$ $HADOOP_HOME/bin/hadoop -jar $HADOOP_HOME/hadoop-streaming.jar \
+     -input README.txt \
+     -output wordcount \
+     -mapper `tr " " "\n" ` \
+     -reducer 'uniq -c'
+#+END_SRC
+
+  It works as:
+  1. Mapper reads input data from stdin
+  2. Mapper writes output to stdout
+  3. Reducer receives input, sorted by key, on stdin
+  4. Reducer writes output to stdout
+
+
+
+* Hadoop MapReduce
+
+
+** Hadoop MapReduce IO related
+
+*** o.a.h.io
+
+    The most important one is the writable interface, 
+
+    Classes that implements this interface includes:
+ - AbstractMapWritable
+ - AccessControlList: o.a.h.security.authorize
+ - ArrayWritable
+ - BalancerDatanode: o.a.h.hdfs.server.balancer
+ - Block: o.a.h.hdfs.protocol, A Block is a hadoop fs primitive, identified by a long.
+ - BlockLocalPathInfo: o.a.h.hdfs.protocol
+ - BlockLocation: o.a.h.fs
+ - BlockRecoveryInfo: o.a.h.hdfs.server.protocol
+ - BlocksWithLocations: o.a.h.hdfs.server.protocol,  a class to implement an array of BlockLocations. It provide efficient customized serialization/deserialization methods.
+ - BlockTwo: o.a.h.hdfs.server.namenode, a class to read in blocks stored in the old format.
+ - BlockWithLocations: A class to keep track of a block and its locations.
+ - ClusterMetrics: o.a.h.mapreduce, Status info on the current state of the MR cluster.
+ - ClusterStatus: o.a.h.mapred, Status info on the current state of the MR cluster
+ - CombineFileSplit: o.a.h.mapreduce.lib.input, A sub-collection of input files.
+ - CompressedWritable: o.a.h.io, A base-class for writables which store themselves compressed and lazily inflate on field access.
+ - Configuration: o.a.h.conf
+ - ConnectionHeader: o.a.h.ipc, IPC Connection header sent by the client to the server on connection establishment.
+ - ContentSummary: o.a.h.fs,  Store the summary of a content ( a directory or a file)
+ - Counters: o.a.h.mapreduce, a named counter that tracks the progress of a map/reduce job.
+ - CounterGroup: o.a.h.mapreduce, a group of Counters that logically belong together. Typically it is an Enum subclass and counters are teh values.
+ - GenericWritable:o.a.h.io, A wrapper for writable instance.
+ - NullDBWritable<T>: o.a.h.mapreduce.lib.db, a class that does nothing, implementing DBWritable
+ - ObjectWritable: o.a.h.io, A Polymorphic Writable that writes an instance with it's class name.
+ - RecordStatsWritable: o.a.h.mapred
+ - SimpleWritable: o.a.h.io, for test
+ - TupleWritable: o.a.h.mapred.join, writable type storing multiple Writables.
+ - TwoDArrayWritable: o.a.h.io, a Writable for 2D arrays containing a matrix of instances of a class.
+ - VersionedWritable: o.a.h.io, A base class for writables that provides version checking.
+ - BooleanWritable: o.a.h.io, A WritableComparable for booleans
+
+**** o.a.h.io.RawComparator<T>
+	 A Comparator that operates directly on byte representations of objects.
+
+**** o.a.h.io.compress
+     Here is the compress related classes:
+ - Input Stream
+   - CompressionInputStream
+	 - DecompressorStream: Use Decompressor interface to decompress data
+      - BlockDecompressorStream:works with block-based decompression algorithm, as opposed to stream-based decompression algorithm.
+ - OutputStream
+   - CompressionoutputStream
+	 - CompressorStream: Use Compressor interface to compress data
+      - BlockCompressorStream: works with block-based compression algorithm, as opposed to stream-based compression algorithm.
+ - CodecPool: A global compressor/decompressor pool used to save and reuse compression/decompression codecs.
+   
+   There is also three implementation of the compression:
+ - bzip2
+ - snappy
+ - zlib
+   
+**** o.a.h.io.file.tfile
+
+     TFile is a container of key-value pairs. Both keys and values are typeless bytes, and have the following features:
+ - Block compression
+ - Named meta data block
+ - Sorted or unsorted keys
+ - Seek by key or by file offset
+   
+***** TODO what is the difference between TFile and IFile in hadoop.
+      =IFile= is in package o.a.h.mapred, while =TFile= is in package o.a.h.io.file.tfile.
+
+      =IFile= is the simple =<key-len, value-len, key, value>= format for the intermediate map-outputs in MR. 
+      And there is a Writer to write out map-outputs in this format, and a Reader to read files of this format.
+
+      =TFile= is a container of key-value pairs. Both keys and values are type less bytes.
+      Keys are restricted to 64KB, value length is not restricted, and it further provides:
+      - block compression
+      - named meta data blocks
+      - sorted or unsorted keys
+      - seek by key or by file offset
+
+**** o.a.h.io.nativeio
+
+     JNI Wrapper for various native IO-related calls not available in Java.
+
+**** o.a.h.io.retry
+
+     Defines how the retry is worked when there is an error.
+
+**** o.a.h.io.serializer
+
+     There are 3 interfaces:
+- Serialization<T>: Encapsulates a Serializer/Deserializer pair.
+  - Serializer<T>: Provides a facility for serializing objects of type <T> to an OutputStream
+  - Deserializer<T>
+    
+    
+** Links
+   - [[http://hadoop.apache.org/docs/stable/streaming.html][Hadoop Streaming Introduction]]
+
+
+* Boost MapReduce 
+
+** Link
+   - [[https://github.com/cdmh/mapreduce][Project Home]]
+
+* Phoenix++
+
+** Link
+   - [[http://mapreduce.stanford.edu/][Project Home]]
+
+
+
+* MapReduce Lite
+
+** Link
+   - [[https://code.google.com/p/mapreduce-lite/][Project home page]]

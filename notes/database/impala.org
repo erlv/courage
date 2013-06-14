@@ -1,0 +1,90 @@
+#+title:Impala related notes
+
+* The Design of Impala
+
+
+* The Implementation of Impala
+
+
+
+* Impala Build on Debian Wheezy(7.0)
+
+
+
+  - [[https://github.com/cloudera/impala/blob/master/README.md][Official Impala Installation Guide]]
+
+
+** netdb.h: reference to 'addrinfo' is ambiguous
+
+   The full output of the problem:
+
+
+
+#+BEGIN_QUOTE
+[  2%] Building CXX object be/src/common/CMakeFiles/Common.dir/status.cc.o
+...
+In file included from impala-ir.cc:21:
+In file included from /home/erlv/projects/databases/impala/be/src/exec/aggregation-node-ir.cc:19:
+In file included from /home/erlv/projects/databases/impala/be/src/runtime/runtime-state.h:30:
+In file included from /home/erlv/projects/databases/impala/be/src/runtime/exec-env.h:25:
+In file included from /home/erlv/projects/databases/impala/be/src/runtime/client-cache.h:27:
+In file included from /home/erlv/projects/databases/impala/be/src/util/thrift-client.h:29:
+/home/erlv/projects/databases/impala/thirdparty/glog-0.3.2/src/glog/logging.h:472:9In file included from :impala-ir.cc: warning: 21:
+In file included from /home/erlv/projects/databases/impala/be/src/exec/aggregation-node-ir.cc:19:
+In file included from /home/erlv/projects/databases/impala/be/src/runtime/runtime-state.h:30:
+In file included from /home/erlv/projects/databases/impala/be/src/runtime/exec-env.h:25:
+In file included from /home/erlv/projects/databases/impala/be/src/runtime/client-cache.h:27:
+In file included from /home/erlv/projects/databases/impala/be/src/util/thrift-client.h:33:
+In file included from /home/erlv/projects/databases/impala/be/src/util/thrift-server.h:23:
+In file included from /home/erlv/projects/databases/impala/thirdparty/thrift-0.9.0/build/include/thrift/server/TNonblockingServer.h:40:
+In file included from /usr/include/event.h:57:
+In file included from /usr/include/evutil.h:37:
+In file included from /usr/include/event2/util.h:63:
+/usr/include/netdb.h:587:16: error: reference to 'addrinfo' is ambiguous
+  const struct addrinfo *ar_request; /* Additional request specification.  */
+               ^
+/usr/include/netdb.h:569:8: note: candidate found by name lookup is 'addrinfo'
+struct addrinfo
+       ^
+/home/erlv/projects/databases/impala/thirdparty/thrift-0.9.0/build/include/thrift/transport/TSocket.h:244:30: note: candidate found by name
+      lookup is 'apache::thrift::transport::addrinfo'
+  void openConnection(struct addrinfo *res);
+#+END_QUOTE
+
+   Download Package from [[http://packages.ubuntu.com/precise/libevent1-dev][Ubuntu Package site]]:
+   - libevent
+   - libevent-core
+   - libevent-extra
+   - libevent-dev
+
+   Use =dpkg -i= to install them. 
+   *Do not install the Debian default libevent-dev, it is v2.0, and does not support by thrift*
+
+
+   DONE!
+
+
+** bzlib.h: no such file or directory
+   
+#+BEGIN_QUOTE
+  sudo apt-get install libbz2-dev 
+#+END_QUOTE
+
+   After install libbz2-dev, the problem is solved.
+
+Done!
+
+
+
+* Impala Runing on Debian Wheezy(7.0)
+  
+  
+** start-impalad.sh throw 'unsupported file system' error
+
+   The error is as following:
+
+
+#+BEGIN_QUOTE
+E0605 21:59:23.665810   772 impala-server.cc:648] Unsupported file system. Impala only supports DistributedFileSystem but the LocalFileSystem was found. fs.defaultFS(file:///) might be set incorrectly
+E0605 21:59:23.666024   772 impala-server.cc:650] Impala is aborted due to improper configurations.
+#+END_QUOTE

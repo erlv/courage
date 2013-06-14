@@ -33,5 +33,11 @@ void IntCell::write( int x ) {
 IntCell::~IntCell() {
   cout << "IntCell: Call Destructor. storedValue=" 
        << storedValue << endl;
-  
+}
+
+const IntCell& IntCell::operator=( const IntCell& rhs) {
+  if( this != & rhs) // Standard alias test
+    storedValue = rhs.storedValue;
+
+  return *this;
 }

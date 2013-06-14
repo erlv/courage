@@ -1,0 +1,23 @@
+#+title: GNU Parallel Design and Implementation
+
+
+* Introduction
+  GNU Parallel is a magic tools to help running applications or command in parallel.
+ 
+  - Objectives:
+    - Replace =xargs=
+    - Run command in parallel.
+   
+* Remote Compute of Parallel
+
+  The remote computer should have:
+  - Support non-passwd ssh login
+  - rsync installed: to transfer files
+  - GNU Parallel installed: to figure out how many CPU cores each computer has
+
+  
+
+* Links
+  - GNU Parallel Home Page
+  - GNU Parallel Documents
+  - GNU Parallel Git Respository

@@ -13,6 +13,8 @@ public:
   int read() const;
   void write( int x );
   ~IntCell() ;
+  IntCell( const IntCell &rhs);
+  const IntCell& :operator=( const IntCell& rhs);
 
 private:
   int storedValue;
