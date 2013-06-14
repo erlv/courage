@@ -691,3 +691,99 @@ General method:
    How good are skip lists?
    - How about the search speed?
    - How about the balance maintance?
+
+
+
+* Lecture 13
+
+  This lecture is about *Amortized Analysis*, which will introduce
+  - *Dynamic table*
+  - *Aggregate method*
+  - *Accounting method*
+  - *Potential method*
+
+** PROBLEM: How large should a hash table be?
+   - The table should be as small as possible
+   - The table should be large enough so that it won't overflow.
+   - The proper size is unknown 
+
+   We should use *Dynamic table* here.
+   - When the table overflows, we grow its size by allocatting
+     and copy
+
+  
+*** Worst-case analysis of Dynamic table
+
+    For a sequence of /n/ insertion,
+    Although the worst-case time to execute one insertion is
+    \theta(n),  the worst-case time for all /n/ insertion is 
+    also \theta(n), NOT \theta(n^2).
+
+    Since, we could be sure that only a few insertion will
+    cause table reallocation.
+
+    
+** The Amortized analysis
+   An  *amortized analysis* is any strategy for analyzing a
+   sequence of operations to show that the average cost per
+   operation is small, even though a single operation within
+   the sequence might be expensive.
+
+   It could help guarantees the average performance of each 
+   operation in the /worst case/, and provide a clean abstraction
+   of data-structure performance.
+
+
+
+   Amortized analysis methods:
+   - Aggregate method: used in the above dynamic worst-case analysis
+   - accounting method：
+   - potential method
+   
+*** TODO Accounting method
+    Charge an amortized cost of $3 for the ith intersion, 
+    if it does not use up, store the rest in the bank.
+    When the amortized cost is not enough for insertion,
+    try to use the money in the bank account.
+
+    We could be sure that, the accont in the bank will never 
+    be negative.
+
+    
+*** Potential Method
+    
+    *Idea*: view the bank account as the potential energy of 
+    the dynamic set.
+
+    *Framework*:
+    - start with an initial data structure /D0/
+    - Operations /i/ transforms /Di-1/ to /Di/
+    - The cost of operation /i/ is /ci/
+    - Define a *potential function* \phi to map /{Di}/ to /R/.
+      such tat \phi(D0) = 0, and \phi(Di) >= 0 for all /i/.
+    - The *amortized cost* with respect to \phi is defined to
+      be ci+\phi(Di)-\phi(Di-1) .
+
+
+
+* Lecture 14
+
+
+* Lecture 15
+  This Lecture is about *Dynamic Programming*.
+  The whole lecture is trying to solve the LCS problem
+
+
+
+** PROBLEM: Longest Comon SubSequence
+   Given two sequences x[1..m] and y[1..n], find *a* longest subsequence common to them both.
+
+*** The Brute-force solution
+    Check each subsequence of x[1..m] to see if it is also a subsequence of y[1..n].
+
+*** The Dynamic Programming solution
+    - Optimal Substructure: An optimal solution to a problem (instance) contains optimal solutions to subproblems.
+      - we could try to solve the prefix of the Common sequence first.
+    - Overlapping subproblems: A recursive solution contains a "small" number of distinct subproblems repeated many times.
+      - Use /Memoization/: After computing a solution to a subproblem, store it in a table. 
+	Subsequent calls check the table to avoid redoing work.
