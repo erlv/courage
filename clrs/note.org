@@ -767,7 +767,44 @@ General method:
 
 
 * Lecture 14
+  This lecture is about *Competitive Analysis*.
+  It is used to analyse the *online-algorithms*, 
+  such as self-orgnized list, 
+  which should execute the operatin of a sequence /S/
+  of operations immediately without any knowledge of 
+  tuture operations. while *off-line* algorithm may see
+  the whole sequence /S/ in advance.
+  
+  *Goal*: Minimize the total cost of /S/ operations.
 
+  This lecture started by using the self-organizing list 
+  for example.
+
+
+** Analysis of self-organizing cost
+   
+*** Worst Case Analysis
+    an adversary always accesses the tail element of
+    L.
+    C_A (S) = \Omega(|S|*n)
+
+*** Average Case Analysis
+    we can suppose element /x/ is accessed 
+    with probability /p(x)/
+    
+
+    How to improve average-case analysis
+    Using the /move-to-front/(MTF) heuristic.
+
+    *\alpha-Competitive*: An online algorithm /A/
+    is \alpha-competitive if there exists a constant /k/
+    such that for any sequence /S/ of operations, the cost
+    of the sequence <= \alpha  * Copt(S) + k.
+    Where Copt is the optimal off-line algorithm.
+
+
+    Using Potential function and amortized cost to analysis.
+   
 
 * Lecture 15
   This Lecture is about *Dynamic Programming*.
