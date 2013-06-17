@@ -1,0 +1,26 @@
+#+title: Index of all notes
+
+* Algorithm
+  - [[file:./clrs/note.org][CLRS Lecture Notes]]: All the MIT 6.035 CLRS course 24 lecture notes
+  - [[./clrs/solutions.org][CLRS Solution]]: Try to solve CLRS course problem.
+  - [[./notes/algo_ds/algo_review.org][Algorithm && Data Structure Review]]: General review of Algorithms and Data Structures
+
+* CPP
+  - [[./cpp/notes/CPPLearningNotes.org][CPP Leanrning notes]]: Notes for learning C Plus Plus
+
+* Java
+
+
+* FileSystem
+  - [[./notes/fs/hadoop_fs.org][Hadoop FileSystem]]: The implementation of Hadoop-related File System
+
+* Distribute System
+  - [[./notes/mapreduce/gnu-parallel.org][GNU Parallel]]: Design and Implementation for GNU Parallel Tool
+  - [[./notes/hadoop-mr.org][Hadoop MapReduce]]: Design and Implementation of Apache Hadoop Mapreudce
+
+* DataBase
+  - [[./notes/impala.org][Cloudera Impala]]: Cloudera Design and Implementation
+  - [[./notes/nosql_survey.org][NoSql Related]]: NoSQL related issues.
+
+* Compiler
+  - [[./notes/compiler/Clang_LLVM_Design_implementation.org][Clang && LLVM]]: Clang and LLVM Design and Implementation

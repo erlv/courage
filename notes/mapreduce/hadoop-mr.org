@@ -3,6 +3,8 @@
 
 Except Hadoop MR streaming could be run on mutiple nodes, all the others can only run on a single shared-memory multicore node.
 
+* Distributed Data Processing
+  
 
 * The Simplest MR
   just like: 
@@ -45,7 +47,7 @@ $ $HADOOP_HOME/bin/hadoop -jar $HADOOP_HOME/hadoop-streaming.jar \
      - hadoop script will using =RunJar= class to process the jar file first
      - =RunJar= will firstly extract the jar and set environment, and pass the parameter to MR program.
        - Mapper class, Reduce Class, the number of Reduce Task, etc.
-     -
+     - 
      
 
 

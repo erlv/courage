@@ -8,6 +8,14 @@
 
 * 主流NoSQL解决方案
 
+
+** HBase 
+   - 1x master server
+   - Nx region server
+
+   
+
+
 ** 重点关注的商用产品
 
 *** Greenplum
