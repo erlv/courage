@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>MapReduce Related Tool Design and Implementation</title>
+<!-- 2013-07-03 Wed 22:19 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="author" content="erlv"/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">MapReduce Related Tool Design and Implementation</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Distributed Data Processing</a></li>
+<li><a href="#sec-2">2. The Simplest MR</a></li>
+<li><a href="#sec-3">3. Hadoop MapReduce</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Hadoop MR work flow</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1. Hadoop Job Submission</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-2">3.2. Hadoop MapReduce IO related</a>
+<ul>
+<li><a href="#sec-3-2-1">3.2.1. Difference between FileSystem and FileContext</a></li>
+<li><a href="#sec-3-2-2">3.2.2. o.a.h.io</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-3">3.3. Links</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Boost MapReduce</a>
+<ul>
+<li><a href="#sec-4-1">4.1. Link</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. Phoenix++</a>
+<ul>
+<li><a href="#sec-5-1">5.1. Link</a></li>
+</ul>
+</li>
+<li><a href="#sec-6">6. MapReduce Lite</a>
+<ul>
+<li><a href="#sec-6-1">6.1. Link</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<p>
+Except Hadoop MR streaming could be run on mutiple nodes, all the others can only run on a single shared-memory multicore node.
+</p>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Distributed Data Processing</h2>
+</div>
+
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> The Simplest MR</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+just like: 
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">$<span style="color: #b8860b;">cat</span> data | map | sort |reduce
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">For example</span>
+$ cat data | tr <span style="color: #bc8f8f;">" "</span> <span style="color: #bc8f8f;">"\n"</span> | sort | uniq -c 
+
+<span style="color: #b22222;"># </span><span style="color: #b22222;">For Hadoop</span>
+$ $<span style="color: #b8860b;">HADOOP_HOME</span>/bin/hadoop -jar $<span style="color: #b8860b;">HADOOP_HOME</span>/hadoop-streaming.jar <span style="color: #bc8f8f;">\</span>
+     -input README.txt <span style="color: #bc8f8f;">\</span>
+     -output wordcount <span style="color: #bc8f8f;">\</span>
+     -mapper <span style="color: #ff00ff;">`tr " " "\n" `</span> <span style="color: #bc8f8f;">\</span>
+     -reducer <span style="color: #bc8f8f;">'uniq -c'</span>
+</pre>
+</div>
+
+<p>
+It works as:
+</p>
+<ol class="org-ol">
+<li>Mapper reads input data from stdin
+</li>
+<li>Mapper writes output to stdout
+</li>
+<li>Reducer receives input, sorted by key, on stdin
+</li>
+<li>Reducer writes output to stdout
+</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Hadoop MapReduce</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Hadoop MR work flow</h3>
+<div class="outline-text-3" id="text-3-1">
+</div><div id="outline-container-sec-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> Hadoop Job Submission</h4>
+<div class="outline-text-4" id="text-3-1-1">
+</div><ol class="org-ol"><li>JobClient<br/><div class="outline-text-5" id="text-3-1-1-1">
+<p>
+This is the first step. 
+</p>
+<ul class="org-ul">
+<li>Client run <code>hadoop jar XXX.jar -input XXXX -output YYY</code>
+</li>
+<li>hadoop script will using <code>RunJar</code> class to process the jar file first
+</li>
+<li><code>RunJar</code> will firstly extract the jar and set environment, and pass the parameter to MR program.
+<ul class="org-ul">
+<li>Mapper class, Reduce Class, the number of Reduce Task, etc.
+</li>
+</ul>
+</li>
+<li></li>
+</ul>
+</div>
+</li>
+
+
+<li>JobTracker<br/></li></ol>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Hadoop MapReduce IO related</h3>
+<div class="outline-text-3" id="text-3-2">
+</div><div id="outline-container-sec-3-2-1" class="outline-4">
+<h4 id="sec-3-2-1"><span class="section-number-4">3.2.1</span> <span class="todo TODO">TODO</span> Difference between FileSystem and FileContext</h4>
+</div>
+
+
+<div id="outline-container-sec-3-2-2" class="outline-4">
+<h4 id="sec-3-2-2"><span class="section-number-4">3.2.2</span> o.a.h.io</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<p>
+The most important one is the writable interface, 
+</p>
+
+<p>
+Classes that implements this interface includes:
+</p>
+<ul class="org-ul">
+<li>AbstractMapWritable
+</li>
+<li>AccessControlList: o.a.h.security.authorize
+</li>
+<li>ArrayWritable
+</li>
+<li>BalancerDatanode: o.a.h.hdfs.server.balancer
+</li>
+<li>Block: o.a.h.hdfs.protocol, A Block is a hadoop fs primitive, identified by a long.
+</li>
+<li>BlockLocalPathInfo: o.a.h.hdfs.protocol
+</li>
+<li>BlockLocation: o.a.h.fs
+</li>
+<li>BlockRecoveryInfo: o.a.h.hdfs.server.protocol
+</li>
+<li>BlocksWithLocations: o.a.h.hdfs.server.protocol,  a class to implement an array of BlockLocations. It provide efficient customized serialization/deserialization methods.
+</li>
+<li>BlockTwo: o.a.h.hdfs.server.namenode, a class to read in blocks stored in the old format.
+</li>
+<li>BlockWithLocations: A class to keep track of a block and its locations.
+</li>
+<li>ClusterMetrics: o.a.h.mapreduce, Status info on the current state of the MR cluster.
+</li>
+<li>ClusterStatus: o.a.h.mapred, Status info on the current state of the MR cluster
+</li>
+<li>CombineFileSplit: o.a.h.mapreduce.lib.input, A sub-collection of input files.
+</li>
+<li>CompressedWritable: o.a.h.io, A base-class for writables which store themselves compressed and lazily inflate on field access.
+</li>
+<li>Configuration: o.a.h.conf
+</li>
+<li>ConnectionHeader: o.a.h.ipc, IPC Connection header sent by the client to the server on connection establishment.
+</li>
+<li>ContentSummary: o.a.h.fs,  Store the summary of a content ( a directory or a file)
+</li>
+<li>Counters: o.a.h.mapreduce, a named counter that tracks the progress of a map/reduce job.
+</li>
+<li>CounterGroup: o.a.h.mapreduce, a group of Counters that logically belong together. Typically it is an Enum subclass and counters are teh values.
+</li>
+<li>GenericWritable:o.a.h.io, A wrapper for writable instance.
+</li>
+<li>NullDBWritable&lt;T&gt;: o.a.h.mapreduce.lib.db, a class that does nothing, implementing DBWritable
+</li>
+<li>ObjectWritable: o.a.h.io, A Polymorphic Writable that writes an instance with it's class name.
+</li>
+<li>RecordStatsWritable: o.a.h.mapred
+</li>
+<li>SimpleWritable: o.a.h.io, for test
+</li>
+<li>TupleWritable: o.a.h.mapred.join, writable type storing multiple Writables.
+</li>
+<li>TwoDArrayWritable: o.a.h.io, a Writable for 2D arrays containing a matrix of instances of a class.
+</li>
+<li>VersionedWritable: o.a.h.io, A base class for writables that provides version checking.
+</li>
+<li>BooleanWritable: o.a.h.io, A WritableComparable for booleans
+</li>
+</ul>
+</div>
+
+<ol class="org-ol"><li>o.a.h.io.RawComparator&lt;T&gt;<br/><div class="outline-text-5" id="text-3-2-2-1">
+<p>
+A Comparator that operates directly on byte representations of objects.
+</p>
+</div>
+</li>
+<li>o.a.h.io.compress<br/><div class="outline-text-5" id="text-3-2-2-2">
+<p>
+Here is the compress related classes:
+</p>
+<ul class="org-ul">
+<li>Input Stream
+<ul class="org-ul">
+<li>CompressionInputStream
+<ul class="org-ul">
+<li>DecompressorStream: Use Decompressor interface to decompress data
+</li>
+<li>BlockDecompressorStream:works with block-based decompression algorithm, as opposed to stream-based decompression algorithm.
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>OutputStream
+<ul class="org-ul">
+<li>CompressionoutputStream
+<ul class="org-ul">
+<li>CompressorStream: Use Compressor interface to compress data
+</li>
+<li>BlockCompressorStream: works with block-based compression algorithm, as opposed to stream-based compression algorithm.
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CodecPool: A global compressor/decompressor pool used to save and reuse compression/decompression codecs.
+
+<p>
+There is also three implementation of the compression:
+</p>
+</li>
+<li>bzip2
+</li>
+<li>snappy
+</li>
+<li>zlib
+</li>
+</ul>
+</div>
+</li>
+<li>o.a.h.io.file.tfile<br/><div class="outline-text-5" id="text-3-2-2-3">
+<p>
+TFile is a container of key-value pairs. Both keys and values are typeless bytes, and have the following features:
+</p>
+<ul class="org-ul">
+<li>Block compression
+</li>
+<li>Named meta data block
+</li>
+<li>Sorted or unsorted keys
+</li>
+<li>Seek by key or by file offset
+</li>
+</ul>
+</div>
+
+<ol class="org-ol"><li><span class="todo TODO">TODO</span> what is the difference between TFile and IFile in hadoop.<br/><div class="outline-text-6" id="text-3-2-2-3-1">
+<p>
+<code>IFile</code> is in package o.a.h.mapred, while <code>TFile</code> is in package o.a.h.io.file.tfile.
+</p>
+
+<p>
+<code>IFile</code> is the simple <code>&lt;key-len, value-len, key, value&gt;</code> format for the intermediate map-outputs in MR. 
+And there is a Writer to write out map-outputs in this format, and a Reader to read files of this format.
+</p>
+
+<p>
+<code>TFile</code> is a container of key-value pairs. Both keys and values are type less bytes.
+Keys are restricted to 64KB, value length is not restricted, and it further provides:
+</p>
+<ul class="org-ul">
+<li>block compression
+</li>
+<li>named meta data blocks
+</li>
+<li>sorted or unsorted keys
+</li>
+<li>seek by key or by file offset
+</li>
+</ul>
+</div>
+</li></ol>
+</li>
+<li>o.a.h.io.nativeio<br/><div class="outline-text-5" id="text-3-2-2-4">
+<p>
+JNI Wrapper for various native IO-related calls not available in Java.
+</p>
+</div>
+</li>
+<li>o.a.h.io.retry<br/><div class="outline-text-5" id="text-3-2-2-5">
+<p>
+Defines how the retry is worked when there is an error.
+</p>
+</div>
+</li>
+<li>o.a.h.io.serializer<br/><div class="outline-text-5" id="text-3-2-2-6">
+<p>
+There are 3 interfaces:
+</p>
+<ul class="org-ul">
+<li>Serialization&lt;T&gt;: Encapsulates a Serializer/Deserializer pair.
+<ul class="org-ul">
+<li>Serializer&lt;T&gt;: Provides a facility for serializing objects of type &lt;T&gt; to an OutputStream
+</li>
+<li>Deserializer&lt;T&gt;
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</li></ol>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Links</h3>
+<div class="outline-text-3" id="text-3-3">
+<ul class="org-ul">
+<li><a href="http://hadoop.apache.org/docs/stable/streaming.html">Hadoop Streaming Introduction</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Boost MapReduce</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Link</h3>
+<div class="outline-text-3" id="text-4-1">
+<ul class="org-ul">
+<li><a href="https://github.com/cdmh/mapreduce">Project Home</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Phoenix++</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> Link</h3>
+<div class="outline-text-3" id="text-5-1">
+<ul class="org-ul">
+<li><a href="http://mapreduce.stanford.edu/">Project Home</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> MapReduce Lite</h2>
+<div class="outline-text-2" id="text-6">
+</div><div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> Link</h3>
+<div class="outline-text-3" id="text-6-1">
+<ul class="org-ul">
+<li><a href="https://code.google.com/p/mapreduce-lite/">Project home page</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: erlv</p>
+<p class="date">Created: 2013-07-03 Wed 22:19</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 23.4.1 (<a href="http://orgmode.org">Org</a> mode 8.0.3)</p>
+<p class="xhtml-validation"><a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a></p>
+</div>
+</body>
+</html>

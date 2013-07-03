@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>业界NoSQL解决方案调研报告</title>
+<!-- 2013-07-03 Wed 22:18 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="author" content="erlv"/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">业界NoSQL解决方案调研报告</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Why NoSQL？</a>
+<ul>
+<li><a href="#sec-1-1">1.1. 什么是NoSQL</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. 主流NoSQL解决方案</a>
+<ul>
+<li><a href="#sec-2-1">2.1. HBase</a></li>
+<li><a href="#sec-2-2">2.2. 重点关注的商用产品</a>
+<ul>
+<li><a href="#sec-2-2-1">2.2.1. Greenplum</a></li>
+<li><a href="#sec-2-2-2">2.2.2. Teradata</a></li>
+<li><a href="#sec-2-2-3">2.2.3. Netezza</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-3">2.3. Column Families（列存储）</a></li>
+<li><a href="#sec-2-4">2.4. Document Store(文档存储)</a></li>
+<li><a href="#sec-2-5">2.5. Key-Value Store</a>
+<ul>
+<li><a href="#sec-2-5-1">2.5.1. Amazon DynamoDB</a></li>
+<li><a href="#sec-2-5-2">2.5.2. Memcached</a></li>
+<li><a href="#sec-2-5-3">2.5.3. Redis</a></li>
+<li><a href="#sec-2-5-4">2.5.4. Oracle NoSQL DB</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-6">2.6. Graph Database</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. 发展趋势</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Why NoSQL？</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> 什么是NoSQL</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+NoSQL (Not only SQL)，也是一种数据库系统，但和传统的关系型数据库系统不同。 NoSQL系统更注重横向可扩展性，不会依赖表作为最基础的架构，且通常不会完整支持SQL语言。 NoSQL系统牺牲支持SQL语言的灵活性，换取可扩展性和性能提升，一般对外只提供key-value类型的接口。 在数据量非常大的应用场合，NoSQL更适用。 新兴的互联网公司，是NoSQL的主要应用场合。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> 主流NoSQL解决方案</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> HBase</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li>1x master server
+</li>
+<li>Nx region server
+</li>
+</ul>
+</div>
+</div>
+
+
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> 重点关注的商用产品</h3>
+<div class="outline-text-3" id="text-2-2">
+</div><div id="outline-container-sec-2-2-1" class="outline-4">
+<h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> Greenplum</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+2003年创建，2010年被EMC收购。从事廉价并行存储解决方案。核心产品是GreenPlum Database。该产品构建在开源DB：PostgreSQL之上， 采用shared-nothing,massively parallel的MPP架构，也是将data分区，并存储到多个服务器上。每个服务器独立管理所有数据中的一小部分，没有硬盘级别的共享和数据竞争。 程序员还可以手工设置数据库表格的存储方式，是否主要面向读，是否采用列存储等等。
+</p>
+
+<p>
+另外一个核心产品是Parallel Query Optimizer。 该Optimizer会将SQL语句或者MapReduce语义转换成一系列物理上的执行计划。 该过程通过一个基于代价模型的优化算法完成。 输出的操作可以是：scan，join，sort，aggregation等传统操作， 也可以是并行的motion操作(可以决定在query执行过程中数据应该何时以及如何在节点之间传递。 传递模式有三种：Broadcast Motion(N:N)，Redistribute Motion(N:N)， Gather Motion(1:N).)。 另外节点内部也会维护一个流水线，用来协助实现节点内多个任务之间的并行操作。
+</p>
+
+<p>
+Greenplum MapReduce：Greenplum的存储产品可以直接在Greenplum的并行数据流引擎上，直接运行MapReduce和SQL， 通过使用他们的数据流引擎，这种运行可以更快。 Greenplum还把整个Hadoop相关的框架都移植到了他们的存储产品中。
+</p>
+
+<p>
+Greenplum面向的客户主要是一些金融服务、电信、互联网、零售和物流等行业，其中有中国联通。 竞争产品有Oracle Exadata，Teradata，Netezza, SAP AG, Vertica。
+</p>
+
+
+<p>
+GreenPlum采用的技术与HBase非常像，都是存储节点直接并行参与数据访问、控制节点只负责控制，数据库表自动分区。 比较大的区别是，GreenPlum每个存储节点上都存储一个或多个POSTGRESQL数据库，该数据库是表的一部分。HBase底层直接使用一些HStore文件，data versioning的思想去存储。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-sec-2-2-2" class="outline-4">
+<h4 id="sec-2-2-2"><span class="section-number-4">2.2.2</span> Teradata</h4>
+<div class="outline-text-4" id="text-2-2-2">
+<p>
+1976年创办，也是类似的data warehouse系统，整个系统各个节点间采用share nothing architecture。 强项在文本分析，主要面向商业智能。 和微策略有合作，通过和很多公司合作推广自己的产品。
+</p>
+
+<p>
+Teradata的产品能自动的区分“冷”和“热”的数据，并将他们区别放置和对待。
+</p>
+
+<p>
+（TODO）关于产品的技术报告不多。还需要深入分析。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-sec-2-2-3" class="outline-4">
+<h4 id="sec-2-2-3"><span class="section-number-4">2.2.3</span> Netezza</h4>
+<div class="outline-text-4" id="text-2-2-3">
+<p>
+关注高性能数据分析。产品亮点是用FPGA之类特殊设置的硬件来加速数据分析。也有类似于Greenplum的数据查询任务编译成一些查询执行流。主要产品包括：TwinFin。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Column Families（列存储）</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+受Google BigTable启发实现的数据库。
+</p>
+
+<p>
+扩展性好，将大规模写操作序列化，具有高可用性，高性能，可以利用MapReduce。
+</p>
+
+<ul class="org-ul">
+<li>BigTable
+</li>
+<li>HyperTable
+</li>
+<li>Apache HBase
+</li>
+</ul>
+
+<p>
+三者的思想完全相同，区别就是一个不开源，一个C++开源，一个Java开源。相比起来HBase的开源社区更大些。用户更多。
+</p>
+
+<ul class="org-ul">
+<li>Apache Cassandra
+</li>
+</ul>
+
+<p>
+Facebook一开始创建的开源数据库，后来转向了HBase。
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Document Store(文档存储)</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+由一系列文档组成的数据库，这些文档中一般保存着key-value。这是一种最自然的数据模型，对程序员友好，开发更快速。
+</p>
+
+
+<ul class="org-ul">
+<li>CouchDB
+</li>
+<li>MongoDB
+
+<p>
+MongoDB支持MapReduce。
+</p>
+<ul class="org-ul">
+<li>架构：
+<ul class="org-ul">
+<li>shard server：存储数据
+</li>
+<li>configuration server：存储配置
+</li>
+<li>router server：接受并路由请求到shard server
+</li>
+</ul>
+</li>
+<li>支持MapReduce，但是server上只有一个线程能用于接受MR任务。
+</li>
+</ul>
+<p>
+CouchDB，使用Erlang语言编写的文档数据库.Ubuntu One 曾使用该数据库直到Nov. 2011.后因可扩展性问题而放弃。
+</p>
+<ul class="org-ul">
+<li>使用Json保存数据
+</li>
+<li>使用JavaScript作为查询语言
+</li>
+<li>有MapReduce和HTTP的API
+</li>
+<li>方便部署
+</li>
+<li>使用MVCC(Multi-Version Concurrency Control)避免在写数据的时候，锁定数据库。通过该机制实现了ACID(Atomicity, Consistency, Isolation, Durability).
+</li>
+<li>面向Web应用设计开发
+</li>
+<li>发起人后来加入了CouchBase公司，提供In-Mem DB产品
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Key-Value Store</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+受Amazon DynamoDB或者Distributed Hash Table<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>启发，实现的数据库。
+</p>
+
+<p>
+扩展性好，间隔性的小的读写序列化，容易编程.适合易变的随机小读写应用。
+</p>
+</div>
+
+<div id="outline-container-sec-2-5-1" class="outline-4">
+<h4 id="sec-2-5-1"><span class="section-number-4">2.5.1</span> Amazon DynamoDB</h4>
+<div class="outline-text-4" id="text-2-5-1">
+<p>
+Amazon直接卖服务的NoSQL数据库。
+</p>
+
+<p>
+仅向用户提供非常简单的API供使用：
+</p>
+<ul class="org-ul">
+<li>除了对Table和Item的一些简单操作外，还包括BatchGetItem，BatchWriteItem, Query,Scan 等操作
+</li>
+<li>API中可以提供一些一致性需求。如 "strong consistency" 或者 "eventual consistency".
+</li>
+<li>数据索引支持和数据传输需要额外支付费用。    
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-5-2" class="outline-4">
+<h4 id="sec-2-5-2"><span class="section-number-4">2.5.2</span> Memcached</h4>
+<div class="outline-text-4" id="text-2-5-2">
+<p>
+常驻内存的Key-value缓存数据库，通常与传统DBRMS数据库(如MySQL)结合，用于内容动态生成数据库驱动网站的数据缓存。
+</p>
+
+<p>
+key的长度不能超过250byte，value的大小可以达到1MB.
+</p>
+
+<p>
+MemcacheDB(Memcached+Berkeley DB)，Couchbase Server(提供类似Memcached的编程接口，但有硬盘存储保证容量)
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-5-3" class="outline-4">
+<h4 id="sec-2-5-3"><span class="section-number-4">2.5.3</span> Redis</h4>
+<div class="outline-text-4" id="text-2-5-3">
+<p>
+常驻内存的key-value 数据库，目前版本额可以直接将其持久化到硬盘中。新浪微博使用它持久化微博数据。
+</p>
+
+<p>
+持久化方式：
+</p>
+<ul class="org-ul">
+<li>snapshotting：使用RDB dump格式从memory写到内存中。
+</li>
+<li>append-only file：启动新的线程做，采用修改追加的形式。
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-5-4" class="outline-4">
+<h4 id="sec-2-5-4"><span class="section-number-4">2.5.4</span> Oracle NoSQL DB</h4>
+<div class="outline-text-4" id="text-2-5-4">
+<p>
+采用Key-Value的索引方式，有关内部架构的介绍较少<sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>。
+</p>
+
+<ul class="org-ul">
+<li>存储上，也是存储表格的某个分区。
+</li>
+
+<li>Key是一个被hash过的值。value的长度没有大小限制。因此可以直接用于保存多媒体文件之类的。
+</li>
+
+<li>有个NoSQL DB Driver负责将API转换成底层表格的存储。在Driver中维护一个Partition Table，Replication Group State Table.
+</li>
+
+<li>附带有Cloudera CDH套件。提供Hive语言的支持。
+</li>
+</ul>
+
+
+<div id="fig:SED-HR4049" class="figure">
+<p><img src="./image/oracle_nosql_db_processing.jpg"  alt="oracle_nosql_db_processing.jpg"/></p>
+<p>Oracle NoSQL DB 处理过程</p>
+</div>
+
+
+<p>
+实际上，Hbase，Hypertable也都是以Key-Value为接口的数据库。但是因为存储上采用了更主流的列方式，而被单独归类了。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Graph Database</h3>
+<div class="outline-text-3" id="text-2-6">
+<ul class="org-ul">
+<li>Neo4J
+</li>
+<li>Dex
+
+<p>
+主要针对社会网络图之类的应用.存储的时候，就采用图的方式存储，而非传统的表方式。图中的每个节点都直接指向其相邻节点，这样就能避免额外的一次索引查询操作。
+</p>
+
+<p>
+Neo4J：是Neo公司开发的，提供GPL和商业版两个版本，基于Java语言。
+</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> 发展趋势</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li>对NoSQL的实时性需求提升
+<ul class="org-ul">
+<li>Facebook: realtime hbase
+</li>
+</ul>
+</li>
+<li>性能
+</li>
+<li>扩展性
+</li>
+<li>容错能力
+</li>
+<li>一致性
+</li>
+<li>底层的存储高效
+<ul class="org-ul">
+<li>protobuf<sup><a id="fnr.3" name="fnr.3" class="footref" href="#fn.3">3</a></sup>: 可以使用Protobuf压缩文本形式的value，column。 "一条微博用json数据结构存(包括作者信息),需要2～5kB，用XML需要10KB，用protobuf序列化后需要500B" &#x2013;新浪微博技术团队 TimYang。
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p><a href="http://en.wikipedia.org/wiki/Distributed_hash_table">http://en.wikipedia.org/wiki/Distributed_hash_table</a></p></div>
+
+<div class="footdef"><sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup> <p><a href="http://www.oracle.com/technetwork/products/nosqldb/overview/index.html">http://www.oracle.com/technetwork/products/nosqldb/overview/index.html</a></p></div>
+
+<div class="footdef"><sup><a id="fn.3" name="fn.3" class="footnum" href="#fnr.3">3</a></sup> <p><a href="http://code.google.com/p/thrift-protobuf-compare/wiki/Benchmarking">http://code.google.com/p/thrift-protobuf-compare/wiki/Benchmarking</a></p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: erlv</p>
+<p class="date">Created: 2013-07-03 Wed 22:18</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 23.4.1 (<a href="http://orgmode.org">Org</a> mode 8.0.3)</p>
+<p class="xhtml-validation"><a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a></p>
+</div>
+</body>
+</html>

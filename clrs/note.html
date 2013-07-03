@@ -1,0 +1,1825 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>CLRS Algorithm Learning</title>
+<!-- 2013-06-15 Sat 07:24 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="author" content="erlv"/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">CLRS Algorithm Learning</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Lecture 1</a>
+<ul>
+<li><a href="#sec-1-1">1.1. Analysis of Algorithm</a></li>
+<li><a href="#sec-1-2">1.2. Insert Sort</a></li>
+<li><a href="#sec-1-3">1.3. Asymptotic Analysis</a></li>
+<li><a href="#sec-1-4">1.4. Merge Sort</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. Lecture 2</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Asymptotic Notation</a>
+<ul>
+<li><a href="#sec-2-1-1">2.1.1. Big O notation</a></li>
+<li><a href="#sec-2-1-2">2.1.2. Omega notation</a></li>
+<li><a href="#sec-2-1-3">2.1.3. Theta notation</a></li>
+<li><a href="#sec-2-1-4">2.1.4. little-o  and little-omega notation</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-2">2.2. Recurrences</a>
+<ul>
+<li><a href="#sec-2-2-1">2.2.1. Substitution method</a></li>
+<li><a href="#sec-2-2-2">2.2.2. Iterating the recurrence</a></li>
+<li><a href="#sec-2-2-3">2.2.3. Recursion tree</a></li>
+<li><a href="#sec-2-2-4">2.2.4. Master Method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Lecture 3</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Binary Search</a></li>
+<li><a href="#sec-3-2">3.2. Powering a number</a>
+<ul>
+<li><a href="#sec-3-2-1">3.2.1. The Naive Algorithm</a></li>
+<li><a href="#sec-3-2-2">3.2.2. The Divide-and-Conquer Algorithm</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-3">3.3. Fibonacci number</a>
+<ul>
+<li><a href="#sec-3-3-1">3.3.1. Fibonacci is everywhere in nature</a></li>
+<li><a href="#sec-3-3-2">3.3.2. The naive recursive algorithm</a></li>
+<li><a href="#sec-3-3-3">3.3.3. The bottom-up way</a></li>
+<li><a href="#sec-3-3-4">3.3.4. Naive directed way</a></li>
+<li><a href="#sec-3-3-5">3.3.5. Recursive squaring algorithm</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-4">3.4. Matrix multiplication</a>
+<ul>
+<li><a href="#sec-3-4-1">3.4.1. Standard Algorithm</a></li>
+<li><a href="#sec-3-4-2">3.4.2. The standard Divide-and-Conquer algorithm</a></li>
+<li><a href="#sec-3-4-3">3.4.3. Strassen's Divide-and-Conquer Algorithm</a></li>
+</ul>
+</li>
+<li><a href="#sec-3-5">3.5. VLSI tree layout</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Lecture 4</a>
+<ul>
+<li><a href="#sec-4-1">4.1. The Quick Sourt Algorithm</a></li>
+<li><a href="#sec-4-2">4.2. Analysis of quicksort</a>
+<ul>
+<li><a href="#sec-4-2-1">4.2.1. Worst-case of quicksort</a></li>
+<li><a href="#sec-4-2-2">4.2.2. Best-case of quicksort</a></li>
+<li><a href="#sec-4-2-3">4.2.3. Other cases of quicksort</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-3">4.3. Randomized quicksort</a></li>
+<li><a href="#sec-4-4">4.4. Quicksort in practice</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. Lecture 5</a>
+<ul>
+<li><a href="#sec-5-1">5.1. The lower bound of sorting</a></li>
+<li><a href="#sec-5-2">5.2. Decision Tree model</a></li>
+<li><a href="#sec-5-3">5.3. Sorting in Linear time</a>
+<ul>
+<li><a href="#sec-5-3-1">5.3.1. Counting sort</a></li>
+<li><a href="#sec-5-3-2">5.3.2. Radix Sorting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-6">6. Lecture 6</a>
+<ul>
+<li><a href="#sec-6-1">6.1. How to find the /i/th smallest number of n elements in the list?</a>
+<ul>
+<li><a href="#sec-6-1-1">6.1.1. Naive algorithm</a></li>
+<li><a href="#sec-6-1-2">6.1.2. Randomized Divide-and-conquer Algorithm</a></li>
+<li><a href="#sec-6-1-3">6.1.3. Worst-case linear-time order statistics</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-7">7. Lecture 7</a>
+<ul>
+<li><a href="#sec-7-1">7.1. The Symbol Table problem</a></li>
+<li><a href="#sec-7-2">7.2. The Hashing Solutions</a>
+<ul>
+<li><a href="#sec-7-2-1">7.2.1. Hashing functions</a></li>
+<li><a href="#sec-7-2-2">7.2.2. Collision Resolution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-8">8. Lecture 8</a>
+<ul>
+<li><a href="#sec-8-1">8.1. Universal Hashing</a></li>
+<li><a href="#sec-8-2">8.2. Perfect Hashing</a>
+<ul>
+<li><a href="#sec-8-2-1">8.2.1. how Universal hashing is implemented in code?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-9">9. Lecture 9</a>
+<ul>
+<li><a href="#sec-9-1">9.1. Binary-Search-Tree Sort</a></li>
+</ul>
+</li>
+<li><a href="#sec-10">10. Lecture 10</a>
+<ul>
+<li><a href="#sec-10-1">10.1. PROBLEM: Maintain a search-tree data  structure with always O(lg n) search time</a></li>
+<li><a href="#sec-10-2">10.2. Red-black tree</a>
+<ul>
+<li><a href="#sec-10-2-1">10.2.1. Query on Red-black tree</a></li>
+<li><a href="#sec-10-2-2">10.2.2. Modifying operation on RB-Tree</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-11">11. Lecture 11</a>
+<ul>
+<li><a href="#sec-11-1">11.1. PROBLEM:Dynamic order statics problem</a></li>
+<li><a href="#sec-11-2">11.2. PROBLEM:Interval Tree</a></li>
+</ul>
+</li>
+<li><a href="#sec-12">12. Lecture 12</a>
+<ul>
+<li><a href="#sec-12-1">12.1. Introduction about Skip List</a></li>
+<li><a href="#sec-12-2">12.2. PROBLEM: SEARCH of skip list</a></li>
+<li><a href="#sec-12-3">12.3. PROBLEM: INSERT of skip list</a></li>
+<li><a href="#sec-12-4">12.4. PROBLEM: DELECT of skip list</a></li>
+<li><a href="#sec-12-5">12.5. Analysis of skip list</a></li>
+</ul>
+</li>
+<li><a href="#sec-13">13. Lecture 13</a>
+<ul>
+<li><a href="#sec-13-1">13.1. PROBLEM: How large should a hash table be?</a>
+<ul>
+<li><a href="#sec-13-1-1">13.1.1. Worst-case analysis of Dynamic table</a></li>
+</ul>
+</li>
+<li><a href="#sec-13-2">13.2. The Amortized analysis</a>
+<ul>
+<li><a href="#sec-13-2-1">13.2.1. Accounting method</a></li>
+<li><a href="#sec-13-2-2">13.2.2. Potential Method</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-14">14. Lecture 14</a></li>
+<li><a href="#sec-15">15. Lecture 15</a>
+<ul>
+<li><a href="#sec-15-1">15.1. PROBLEM: Longest Comon SubSequence</a>
+<ul>
+<li><a href="#sec-15-1-1">15.1.1. The Brute-force solution</a></li>
+<li><a href="#sec-15-1-2">15.1.2. The Dynamic Programming solution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Lecture 1</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Analysis of Algorithm</h3>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Insert Sort</h3>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> Asymptotic Analysis</h3>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> Merge Sort</h3>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Lecture 2</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Asymptotic Notation</h3>
+<div class="outline-text-3" id="text-2-1">
+</div><div id="outline-container-sec-2-1-1" class="outline-4">
+<h4 id="sec-2-1-1"><span class="section-number-4">2.1.1</span> Big O notation</h4>
+<div class="outline-text-4" id="text-2-1-1">
+<p>
+The upper bound.  
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-1-2" class="outline-4">
+<h4 id="sec-2-1-2"><span class="section-number-4">2.1.2</span> Omega notation</h4>
+<div class="outline-text-4" id="text-2-1-2">
+<p>
+The Lower bound
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-1-3" class="outline-4">
+<h4 id="sec-2-1-3"><span class="section-number-4">2.1.3</span> Theta notation</h4>
+<div class="outline-text-4" id="text-2-1-3">
+<p>
+The tight bounds
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-1-4" class="outline-4">
+<h4 id="sec-2-1-4"><span class="section-number-4">2.1.4</span> little-o  and little-omega notation</h4>
+<div class="outline-text-4" id="text-2-1-4">
+<p>
+Unlike Big O and Big-omega notation which are  less or equal than and bigger or equal than,
+</p>
+
+<p>
+little-o and little-omega are just less than and bigger than.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Recurrences</h3>
+<div class="outline-text-3" id="text-2-2">
+</div><div id="outline-container-sec-2-2-1" class="outline-4">
+<h4 id="sec-2-2-1"><span class="section-number-4">2.2.1</span> Substitution method</h4>
+<div class="outline-text-4" id="text-2-2-1">
+<p>
+General method:
+</p>
+<ol class="org-ol">
+<li>Guss the form of the solution
+</li>
+<li>Verity by induction
+</li>
+<li>Solve for constants
+</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-sec-2-2-2" class="outline-4">
+<h4 id="sec-2-2-2"><span class="section-number-4">2.2.2</span> Iterating the recurrence</h4>
+</div>
+
+<div id="outline-container-sec-2-2-3" class="outline-4">
+<h4 id="sec-2-2-3"><span class="section-number-4">2.2.3</span> Recursion tree</h4>
+</div>
+
+<div id="outline-container-sec-2-2-4" class="outline-4">
+<h4 id="sec-2-2-4"><span class="section-number-4">2.2.4</span> Master Method</h4>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Lecture 3</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+This lecture is mainly about <b>Divide and Conquer</b>.
+</p>
+
+<p>
+DC is one of the several powerful techniques for algorithm design.
+DC could be analyzed using recurrences and the master method
+DC strategy often leads to efficient algos.
+</p>
+
+
+<p>
+The design paradigm:
+</p>
+<ul class="org-ul">
+<li><b>Divide</b> the problem(instance) into subproblem
+</li>
+<li><b>Conquer</b> the subproblems by solving them recursively
+</li>
+<li><b>Combine</b> subproblem solutions
+</li>
+</ul>
+</div>
+
+
+
+<div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Binary Search</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+The Algorithm:
+</p>
+<ul class="org-ul">
+<li><b>Divide</b>: check the middle element
+</li>
+<li><b>Conquer</b>: recursively search 1 subarray
+</li>
+<li><b>Combine</b>: Trivial
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Powering a number</h3>
+<div class="outline-text-3" id="text-3-2">
+</div><div id="outline-container-sec-3-2-1" class="outline-4">
+<h4 id="sec-3-2-1"><span class="section-number-4">3.2.1</span> The Naive Algorithm</h4>
+</div>
+
+<div id="outline-container-sec-3-2-2" class="outline-4">
+<h4 id="sec-3-2-2"><span class="section-number-4">3.2.2</span> The Divide-and-Conquer Algorithm</h4>
+</div>
+</div>
+
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Fibonacci number</h3>
+<div class="outline-text-3" id="text-3-3">
+</div><div id="outline-container-sec-3-3-1" class="outline-4">
+<h4 id="sec-3-3-1"><span class="section-number-4">3.3.1</span> <span class="todo TODO">TODO</span> Fibonacci is everywhere in nature</h4>
+<div class="outline-text-4" id="text-3-3-1">
+<p>
+Why is Fibonacci so important? Take a look at the wikipedia.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-2" class="outline-4">
+<h4 id="sec-3-3-2"><span class="section-number-4">3.3.2</span> The naive recursive algorithm</h4>
+<div class="outline-text-4" id="text-3-3-2">
+<p>
+Use the standard formula to recursively get the final value.
+</p>
+
+<p>
+Complexity: Omega(Phi<sup>n</sup>), Phi is the <span class="underline">golden ratio</span> ( (1+ 5<sup>(1/2)</sup>)/2 ).
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-3" class="outline-4">
+<h4 id="sec-3-3-3"><span class="section-number-4">3.3.3</span> The bottom-up way</h4>
+<div class="outline-text-4" id="text-3-3-3">
+<p>
+Compute F<sub>0</sub>, F<sub>1</sub>, F<sub>2</sub>,&#x2026; F<sub>n</sub> in order, so that the current F<sub>i</sub> can reuse the former result.
+</p>
+
+<p>
+Complexity: Theta(n)
+</p>
+</div>
+</div>
+<div id="outline-container-sec-3-3-4" class="outline-4">
+<h4 id="sec-3-3-4"><span class="section-number-4">3.3.4</span> Naive directed way</h4>
+<div class="outline-text-4" id="text-3-3-4">
+<p>
+There is also a direct computation method 
+which is not reliable on currenty hardware due to the floating-point arithmetic precision problem.
+</p>
+
+<p>
+F<sub>n</sub> = round( (Phi<sup>n</sup>) / (5<sup>(1/2)</sup>) ).
+</p>
+
+<p>
+round(): round the expression value to the nearest integer.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3-5" class="outline-4">
+<h4 id="sec-3-3-5"><span class="section-number-4">3.3.5</span> Recursive squaring algorithm</h4>
+<div class="outline-text-4" id="text-3-3-5">
+<p>
+We use the theoorem of matrix multiplication to get the final result of F<sub>n</sub>
+</p>
+
+<p>
+Complexity: Theta(lg n)
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Matrix multiplication</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+C=A*B
+</p>
+</div>
+
+<div id="outline-container-sec-3-4-1" class="outline-4">
+<h4 id="sec-3-4-1"><span class="section-number-4">3.4.1</span> Standard Algorithm</h4>
+<div class="outline-text-4" id="text-3-4-1">
+<p>
+The standard algorithm is a 3-level loops that could give a result c<sub>ij</sub>
+</p>
+
+<p>
+Complexity: Theta(n<sup>3</sup>)
+</p>
+</div>
+</div>
+<div id="outline-container-sec-3-4-2" class="outline-4">
+<h4 id="sec-3-4-2"><span class="section-number-4">3.4.2</span> The standard Divide-and-Conquer algorithm</h4>
+<div class="outline-text-4" id="text-3-4-2">
+<ul class="org-ul">
+<li><b>Divide</b>: split the matrix into submatrices
+</li>
+<li><b>Conquey</b>: get the result of the submatrice in C
+</li>
+<li><b>Combine</b>: reassembe the submatrices into C
+
+<p>
+T(n)=8*T(n/2) + Theta(n<sup>2</sup>)
+</p>
+
+<p>
+Complexity: Theta(n<sup>3</sup>)
+</p>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4-3" class="outline-4">
+<h4 id="sec-3-4-3"><span class="section-number-4">3.4.3</span> Strassen's Divide-and-Conquer Algorithm</h4>
+<div class="outline-text-4" id="text-3-4-3">
+<p>
+The above algorithm have 8 recursive multiplications. 
+Strassen provided a way to only use 7 recursive  mults.
+</p>
+
+<p>
+This is still a DC algorithm.
+T(n) = 7T(n/2) + Theta(n<sup>2</sup>)
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> VLSI tree layout</h3>
+<div class="outline-text-3" id="text-3-5">
+<p>
+<b>Problem</b>: Embed a complete binary tree with n leaves in a grid using minimal area
+</p>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Lecture 4</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+This lecture is mainly about <b>Quick Sort</b>.
+</p>
+</div>
+
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> The Quick Sourt Algorithm</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+QuickSort is also a DC.
+</p>
+
+<p>
+Algorithm Steps:
+</p>
+<ul class="org-ul">
+<li><b>Divide</b>: choose a pivot from the array, and use it to partition the array into 2 subarrays.
+such that, all elements of one  subarray is all  less than or equal to the <i>pivot</i>,
+and all elements in the other subarray is all greater than or equal to the <i>pivot</i>.
+</li>
+
+<li><b>Conquer</b>: Recursively sort the two subarrays.
+</li>
+
+<li><b>Combine</b>: Trivial.
+</li>
+</ul>
+
+<p>
+The implementation:
+</p>
+<ul class="org-ul">
+<li><b>Partition</b>: this is the divide phase.
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Analysis of quicksort</h3>
+<div class="outline-text-3" id="text-4-2">
+</div><div id="outline-container-sec-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1"><span class="section-number-4">4.2.1</span> Worst-case of quicksort</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<ul class="org-ul">
+<li>One side of the partition always has no elements.
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4-2-2" class="outline-4">
+<h4 id="sec-4-2-2"><span class="section-number-4">4.2.2</span> Best-case of quicksort</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<ul class="org-ul">
+<li>when each partition always have equal size.
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4-2-3" class="outline-4">
+<h4 id="sec-4-2-3"><span class="section-number-4">4.2.3</span> Other cases of quicksort</h4>
+<div class="outline-text-4" id="text-4-2-3">
+<p>
+Even for the Almost-best case:
+ T(n) = T(n/10) + T(9/10 * n) + Theta(n)
+</p>
+
+<p>
+and for the lucky-unluck case:
+L(n) = 2U(n/2) + Theta(n)
+U(n) = L(1) + L(n -1) + Theta(n)
+</p>
+
+
+<p>
+The complexity of the quicksort algorithm is also: O(nlgn)
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> Randomized quicksort</h3>
+<div class="outline-text-3" id="text-4-3">
+<ul class="org-ul">
+<li>Choose a random position element as the <b>pivot</b>.
+</li>
+</ul>
+
+<p>
+Since there are n conditions for the sort, so we use the expectation to show the time complexity.
+And the time complexity is also O(nlgn)
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> Quicksort in practice</h3>
+<div class="outline-text-3" id="text-4-4">
+<ul class="org-ul">
+<li>Quicksort is a great general-purpose sorting algorithm
+</li>
+<li>Quicksort is typically over twice as fast as merge sort
+</li>
+<li>Quicksort can benefit substantially from code tuning
+</li>
+<li>Quicksort behaves well even with caching and virtual memory
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Lecture 5</h2>
+<div class="outline-text-2" id="text-5">
+</div><div id="outline-container-sec-5-1" class="outline-3">
+<h3 id="sec-5-1"><span class="section-number-3">5.1</span> The lower bound of sorting</h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+The Defination of <b>comparison sort</b>: only use comparisons to determine the relative order of elements.
+</p>
+
+<p>
+The problem: Is O(nlogn) the best we can do? 
+<b>Decision Tree</b>  could help us answer this question.
+</p>
+</div>
+</div>
+
+
+
+<div id="outline-container-sec-5-2" class="outline-3">
+<h3 id="sec-5-2"><span class="section-number-3">5.2</span> Decision Tree model</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+A decision tree can model the execution of any comparision sort:
+</p>
+<ul class="org-ul">
+<li>One Tree for each input size <i>n</i>
+</li>
+<li>View the algorithm as splitting whenever it compares two elements
+</li>
+<li>The tree contains the comparisons along all possible instruction traces
+</li>
+<li>The running time of t he algorithm = the length of the path taken
+</li>
+<li>Worst-case running time = height of tree
+</li>
+</ul>
+
+<p>
+<b>Theorem</b>: Any decision tree that can sort n elements must have height Omega(nlgn)
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-sec-5-3" class="outline-3">
+<h3 id="sec-5-3"><span class="section-number-3">5.3</span> Sorting in Linear time</h3>
+<div class="outline-text-3" id="text-5-3">
+</div><div id="outline-container-sec-5-3-1" class="outline-4">
+<h4 id="sec-5-3-1"><span class="section-number-4">5.3.1</span> Counting sort</h4>
+<div class="outline-text-4" id="text-5-3-1">
+<ul class="org-ul">
+<li>Init an array C with 0, the size of the array C is the range of the array element value range
+</li>
+<li>Count each value apperance time, and record it in C
+</li>
+<li>Replace each element in C with the accumulate value start from the first element.
+</li>
+<li>Init a new array B with the same size of A.
+</li>
+<li>From the end of A to the start, assign B[C[A[j]]] with A[j], and minus C[A[j]] by 1.
+</li>
+</ul>
+
+<p>
+The final array B is the result.
+</p>
+</div>
+
+
+<ol class="org-ol"><li><span class="todo TODO">TODO</span> The code of counting sort<br/></li></ol>
+</div>
+
+
+<div id="outline-container-sec-5-3-2" class="outline-4">
+<h4 id="sec-5-3-2"><span class="section-number-4">5.3.2</span> Radix Sorting</h4>
+<div class="outline-text-4" id="text-5-3-2">
+<p>
+Radix sort is a digit-by-digit sort, sort on <i>least-significant digit first</i> with auxiliary <i>stable</i> sort.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Lecture 6</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+This lecture is mainly about <b>Order Statistics</b>.
+</p>
+</div>
+
+
+<div id="outline-container-sec-6-1" class="outline-3">
+<h3 id="sec-6-1"><span class="section-number-3">6.1</span> How to find the /i/th smallest number of n elements in the list?</h3>
+<div class="outline-text-3" id="text-6-1">
+<p>
+The <i>i</i> can be:
+</p>
+<ul class="org-ul">
+<li><code>i = 1</code>: minimum
+</li>
+<li><code>i = n</code>: maximum
+</li>
+<li><code>i = (n+1)/2</code>: median. (assum that (n+1) is odd )
+</li>
+<li>i: other value
+</li>
+</ul>
+</div>
+
+
+
+<div id="outline-container-sec-6-1-1" class="outline-4">
+<h4 id="sec-6-1-1"><span class="section-number-4">6.1.1</span> Naive algorithm</h4>
+<div class="outline-text-4" id="text-6-1-1">
+<p>
+The naive algorithm:
+</p>
+<ul class="org-ul">
+<li>Sort the list. By using mergesort or heapsort, the worst-case run time is <i>Theta(nlgn)</i>
+</li>
+<li>find the element of index <i>i</i>
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-sec-6-1-2" class="outline-4">
+<h4 id="sec-6-1-2"><span class="section-number-4">6.1.2</span> Randomized Divide-and-conquer Algorithm</h4>
+<div class="outline-text-4" id="text-6-1-2">
+<p>
+This algorithm derived from the randomized quicksort:
+</p>
+<ul class="org-ul">
+<li>Reuse the Random-partition: which pick a pivot, and partition the array
+</li>
+<li>Choose one partition to continue finding the final result.
+Unlike quicksort which will conquer each partition.
+</li>
+</ul>
+
+
+<p>
+For the expected time of ranomized select, we should also use the expection analysis method.     
+The average case, lucky-unlucky case, best case is all O(nlgn). 
+However, the worst case is O(n<sup>2</sup>).
+</p>
+
+
+<p>
+The randomized order-statistic selection:
+</p>
+<ul class="org-ul">
+<li>works fast: can be done lin linear expected time
+</li>
+<li>It is an excellent algorithm in practice
+</li>
+<li>The worst case is very bad, Theta(n<sup>2</sup>)
+</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-sec-6-1-3" class="outline-4">
+<h4 id="sec-6-1-3"><span class="section-number-4">6.1.3</span> Worst-case linear-time order statistics</h4>
+<div class="outline-text-4" id="text-6-1-3">
+<p>
+The main idea is to generate a good pivot recursively.
+</p>
+
+<p>
+The select(i,n) steps:
+</p>
+<ul class="org-ul">
+<li>Divide  the n elements into groups of 5.
+Find the median of each 5-element group by rote.
+</li>
+<li>Recursively SELECT the median x of the n/5 group medians to be the pivot
+</li>
+<li>Partition around the pivot x. Let <code>k = rank(x)</code>
+</li>
+<li>if <code>i = k</code> then return x
+else
+  if <code>i &lt; k</code>
+    then recursively select the ith smallest element in the lower part
+  else recursively select the (i-k)th smallest element in the upper part.
+</li>
+</ul>
+
+
+<p>
+After the median partition of 5-element group, and among all median of all groups. 
+It is sure that the pivot that have been selected can divide the list into a nearly middle partition,
+so that no worst-case will happen.
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Lecture 7</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+This lecture is about <b>Hashing Basic</b>.
+</p>
+</div>
+
+
+<div id="outline-container-sec-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> The Symbol Table problem</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+It is common for a program to maintain a table S that can:
+</p>
+<ul class="org-ul">
+<li><code>INSERT(S,x)</code>
+</li>
+<li><code>DELETE(S,x)</code>
+</li>
+<li><code>SEARCH(S,k)</code>
+</li>
+</ul>
+
+<p>
+The problem is:
+</p>
+<ul class="org-ul">
+<li>How to maintain such a table
+</li>
+<li>How to make the table efficiently support INSERT,DELETE, and SEARCH operations.
+</li>
+</ul>
+
+
+<p>
+<b>Direct-Access Table</b> Solution
+Allocate a table which uses the key directly as the index.
+The table should keep space for all the key-range index.
+If the key can be an arbitrary int value, the table should have 2<sup>32</sup> elements.
+It is too big.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-7-2" class="outline-3">
+<h3 id="sec-7-2"><span class="section-number-3">7.2</span> The Hashing Solutions</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+<b>Hash function</b>: it is used to map the universe <i>U</i> of akk keys into <code>{0,1,&#x2026;,m-1}</code>.
+</p>
+
+<p>
+<b>Collision</b>: When a record to be inserted maps to an already occupied slot in the table,
+The collision occurs.
+</p>
+</div>
+
+
+
+<div id="outline-container-sec-7-2-1" class="outline-4">
+<h4 id="sec-7-2-1"><span class="section-number-4">7.2.1</span> Hashing functions</h4>
+<div class="outline-text-4" id="text-7-2-1">
+<p>
+The assumption of simple uniform hashing is hard to guarantee.
+</p>
+
+<p>
+<b>Ideal Hashing function</b>
+</p>
+<ul class="org-ul">
+<li>Should distribute the keys uniformly into the slots of the table
+</li>
+<li>Regularity in the key distribution should not affect this uniformity.
+</li>
+</ul>
+</div>
+
+
+<ol class="org-ol"><li>Division Method<br/><div class="outline-text-5" id="text-7-2-1-1">
+<p>
+<code>h(k) = k mod m</code>.
+</p>
+
+
+
+<p>
+<b>Deficiency</b>: Choose an prime number as m, and not too close to a power of 2 or 10 and not otherwise used prominently used,
+so that <code>h(k)</code>'s result can associate with all the bits of <i>k</i>.
+</p>
+
+<p>
+<b>Annoyance</b>: Sometimes, making the table size a prime is iconvenient.
+</p>
+
+<p>
+counterexamples: if <code>m = 2^6</code>, <code>k = 1011000111011010</code> in binary.  <code>h(k)</code> only depends on the last 6 bits.
+other k with the same last 6 bits have the same hash result.
+</p>
+</div>
+</li>
+
+<li>Multiplication method<br/><div class="outline-text-5" id="text-7-2-1-2">
+<p>
+Assume the computer has w-bit words.
+<code>h(k) = (A*k mod 2^w) rsh (w -r)</code>
+</p>
+
+<ul class="org-ul">
+<li><code>A</code>: is an odd int in the range <code>2^(w-1) &lt; A &lt; 2^w</code>, do not pick it to the lower or upper bound.
+</li>
+<li><code>2^w</code>: Compare to div, it is very fast.
+</li>
+<li><code>rsh</code>: is the "bitwise right-shift" operator, it is fast
+</li>
+</ul>
+</div>
+
+
+
+<ol class="org-ol"><li><span class="todo TODO">TODO</span> What is modular wheel in multiplication method<br/></li></ol>
+</li></ol>
+</div>
+
+<div id="outline-container-sec-7-2-2" class="outline-4">
+<h4 id="sec-7-2-2"><span class="section-number-4">7.2.2</span> Collision Resolution</h4>
+<div class="outline-text-4" id="text-7-2-2">
+</div><ol class="org-ol"><li>Chaining<br/><div class="outline-text-5" id="text-7-2-2-1">
+<p>
+Link records in the same slot into a list.
+</p>
+
+<p>
+<b>Worst Case</b>:
+Every key hashes to the same slot. 
+The Access time = Theta(n)
+</p>
+
+<p>
+<b>Average Case</b>:
+We need to make assumptions to analysis the average case.
+Here is the <b>simple uniform hashing</b>:
+</p>
+<ul class="org-ul">
+<li>Each key <i>k</i> is equally likely to be hashed to any slot of table <i>T</i>,
+independent of where other keys are hashed.
+</li>
+</ul>
+
+
+<p>
+Then, define the <b>load factor</b> of <i>T</i> to be <code>Alpha = n/m = average number of keys per slot</code>.
+</p>
+<ul class="org-ul">
+<li><i>n</i>: the number of keys in the table
+</li>
+<li><i>m</i>: hte number of slots
+</li>
+</ul>
+
+
+<p>
+<b>Search cost</b>: the expected time for an unsuccessful search for a record with a given key is  <code>Theta(1+Alpha)</code>.
+<code>Alpha</code> is the cost of searching list.
+</p>
+</div>
+</li>
+
+
+<li>Open Addressing<br/><div class="outline-text-5" id="text-7-2-2-2">
+<p>
+It does not need storage outside of the hash table.
+</p>
+<ul class="org-ul">
+<li>Insertion systematically probes the table until an empty slot is found
+</li>
+<li>Hash function depends on both the key and probe number
+</li>
+<li>The probe sequence should be a permutation of {0,1,&#x2026;m-1}
+</li>
+<li>The table may fill up, and deletion is difficult ( but not impossible)
+</li>
+</ul>
+
+
+<p>
+<b>Analysis of Open Addressing</b>
+For an open-addressed hash table with load factor <code>Alpha = n/m &lt; 1</code>, 
+the expected number of probes in an unsuccessful search is at most <code>1/(1- Alpha)</code>.
+</p>
+<ul class="org-ul">
+<li>If <code>Alpha</code> is constant, then accessing an open-addressed hash table taks constant time
+</li>
+<li>If the table is half full, then the expected number of probes is <code>1/(1-0.5) = 2</code>.
+</li>
+<li>If the table is <code>90%</code> full,  then the expected number of probes is <code>1/(1-0.9) = 10</code>.
+</li>
+</ul>
+</div>
+
+
+
+<ol class="org-ol"><li>Probing strategies for open addressing<br/><div class="outline-text-6" id="text-7-2-2-2-1">
+<p>
+When collision occurs, we need a probing strategy to solve it.
+</p>
+
+<p>
+<b>Linear probing</b>:
+<code>h(k,i) = (H(k)+i) mod m</code> , simply increase the index.
+</p>
+
+
+<p>
+<b>Double Hashing</b>
+Define a new hash function to generate the new index when collision.
+</p>
+</div>
+</li></ol>
+</li></ol>
+</div>
+</div>
+</div>
+
+
+
+
+
+<div id="outline-container-sec-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Lecture 8</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+This lecture is about <b>Advanced hashing technology</b> &#x2013; <b>Universal Hashing</b> and <b>Perfect Hashing</b>.
+</p>
+
+
+<p>
+<b>A weaknesss of hashing</b>:
+For any hash function <i>h</i>, there is a set of keys that can cause the average access time of a hash table to skyrocket.
+The keys make <i>h(k)</i> point to the same slot <i>i</i>.
+<b>Solution</b>: Choose the hash function at random, independently of the keys.
+And this is <b>Universal hashing</b>.
+</p>
+</div>
+
+
+
+<div id="outline-container-sec-8-1" class="outline-3">
+<h3 id="sec-8-1"><span class="section-number-3">8.1</span> Universal Hashing</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+<b>Definition</b>: <i>U</i> is a universe of keys, <i>H</i> is a finite collection of hash functions, each mapping <i>U</i> to <code>{0,1,&#x2026;m-1}</code> ,
+If the chance of a collision between <i>x</i> and <i>y</i> is <i>1\/m</i> if we choose <i>h</i> randomly from <i>H</i>.
+<i>H</i> is <b>universal</b>.
+</p>
+
+
+<p>
+<b>Theorem</b>: choosing <i>h</i> randomly from a universal set of hash function <i>H</i>.
+Suppose <i>h</i> is used to hash <i>n</i> arbitrary keys into the <i>m</i> slots of a table <i>T</i>.
+Then for a given key <i>x</i>, we have: <i>E[#collisions with x] &lt; n\/m</i>
+</p>
+
+
+<p>
+<b>How to construct a set of universal hash functions</b>:
+Let <i>m</i> be prime. Decompose key <i>k</i> into <i>r+1</i> digits, each with value in the set <i>{0,1,&#x2026;, m-1}</i>.
+That is <code>k = &lt;k0,k1,&#x2026;,kr&gt;</code>, 0&lt;=ki&lt;m.  Randomly choose <i>r</i> value from 0&lt;= a &lt; m.
+Define <i>ha(k) = sum (ai*ki mod m),  0 &lt;= i &lt;= r</i>.
+The set H={ha} is universal.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-sec-8-2" class="outline-3">
+<h3 id="sec-8-2"><span class="section-number-3">8.2</span> Perfect Hashing</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+Perfect means Search takes <i>Theta(1)</i> time in the worst case.
+</p>
+
+<p>
+Two-level scheme with universal hashing at both levels. <b>There will be no collision at level 2!</b>
+</p>
+
+<p>
+Although we use an extra level of Hashing, since the expection of the 2nd level is <i>Theta(n)</i>, 
+the total storage of the 2-level hashing is also <i>Theta(n)</i>.
+</p>
+</div>
+
+<div id="outline-container-sec-8-2-1" class="outline-4">
+<h4 id="sec-8-2-1"><span class="section-number-4">8.2.1</span> <span class="todo TODO">TODO</span> how Universal hashing is implemented in code?</h4>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-sec-9" class="outline-2">
+<h2 id="sec-9"><span class="section-number-2">9</span> Lecture 9</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+This Lecture is about <b>Randomly built binary search trees</b>.
+</p>
+</div>
+
+
+
+<div id="outline-container-sec-9-1" class="outline-3">
+<h3 id="sec-9-1"><span class="section-number-3">9.1</span> Binary-Search-Tree Sort</h3>
+<div class="outline-text-3" id="text-9-1">
+<p>
+Binary search tree could be used for sort:
+</p>
+<ul class="org-ul">
+<li>insert all the elements into a BST <i>T</i>
+</li>
+<li>in-order tree walk of <i>T</i>
+</li>
+</ul>
+
+<p>
+The output of the above algorithm is the sorted list.
+</p>
+
+
+<p>
+BST sort have the same complextity as quicksort, 
+It is just a reorder of all the comparesions of quick sort.
+</p>
+
+
+
+<p>
+<i>This lecture is mainly about Math&#x2026;. a little boring.</i>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-10" class="outline-2">
+<h2 id="sec-10"><span class="section-number-2">10</span> Lecture 10</h2>
+<div class="outline-text-2" id="text-10">
+<p>
+This Lecture is about <b>Balanced Search Tree</b>.
+</p>
+</div>
+
+
+<div id="outline-container-sec-10-1" class="outline-3">
+<h3 id="sec-10-1"><span class="section-number-3">10.1</span> PROBLEM: Maintain a search-tree data  structure with always O(lg n) search time</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+This type of tree could guarantee the height to be Theta(logn).
+</p>
+<ul class="org-ul">
+<li>AVL Tree
+</li>
+<li>2-3 Tree
+</li>
+<li>2-3-4 Trees
+</li>
+<li>B-Trees
+</li>
+<li>Red-Black Tree
+</li>
+</ul>
+
+<p>
+And is mainly about <b>Red-Black tree</b>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-10-2" class="outline-3">
+<h3 id="sec-10-2"><span class="section-number-3">10.2</span> Red-black tree</h3>
+<div class="outline-text-3" id="text-10-2">
+<p>
+This data structure requires an extra one-bit <i>color</i> field in each node.
+</p>
+
+<p>
+It have the following 4 properties:
+</p>
+<ul class="org-ul">
+<li>Every node is either red or black
+</li>
+<li>The root and leaves (<i>NIL</i>'s) are black
+</li>
+<li>If a node is red, then its parent is black.
+</li>
+<li>All simple paths from any node <i>x</i> to a descendant leaf have the same number of black nodes <b>= black-height(x)</b>
+</li>
+</ul>
+
+
+<p>
+<b>Height</b> ：
+A Red-black tree with <i>n</i> keys has height  <i>h&lt;=2lg(n+1)</i>.
+</p>
+
+
+<p>
+<b>All Queries ops run in <i>O(lgn)</i> time on a red-black tree with <i>n</i> nodes</b>:
+The queries <i>SEARCH</i>,/MIN/, <i>MAX</i>, <i>SUCCESSOR</i>, <i>PREDECESSOR</i> all run in O(lgn) time on a red-black tree.
+</p>
+</div>
+
+
+<div id="outline-container-sec-10-2-1" class="outline-4">
+<h4 id="sec-10-2-1"><span class="section-number-4">10.2.1</span> Query on Red-black tree</h4>
+<div class="outline-text-4" id="text-10-2-1">
+<p>
+Query on RB Tree is just like query on other BSTs.
+</p>
+<ul class="org-ul">
+<li>SEARCH
+</li>
+<li>MIN
+</li>
+<li>MAX
+</li>
+<li>SUCCESSOR
+</li>
+<li>PREDECESSOR
+</li>
+</ul>
+
+<p>
+RB-Tree can always run the above ops in <i>O(lgn)</i> time.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-10-2-2" class="outline-4">
+<h4 id="sec-10-2-2"><span class="section-number-4">10.2.2</span> Modifying operation on RB-Tree</h4>
+<div class="outline-text-4" id="text-10-2-2">
+<p>
+For the INSERT and DELETE operations, 
+it may cause modification:
+</p>
+<ul class="org-ul">
+<li>the operation itself
+</li>
+<li>color changes
+</li>
+<li>restructuring the links of the tree via <b>rotation</b>.
+</li>
+</ul>
+</div>
+
+
+
+<ol class="org-ol"><li>INSERTION<br/><div class="outline-text-5" id="text-10-2-2-1">
+<p>
+<b>IDEA</b>: insert <i>x</i> in tree. 
+</p>
+<ul class="org-ul">
+<li>Color <i>x</i> red firstly
+</li>
+<li>Insert <i>x</i> into the tree, just like other BSTs
+</li>
+<li>Adjust the tree to satisfy the 4 properties.
+</li>
+</ul>
+
+<p>
+INSERTION may calls:
+</p>
+<ul class="org-ul">
+<li>LEFT-ROTATE
+</li>
+<li>RIGHT-ROTATE
+</li>
+<li>recolor
+</li>
+</ul>
+</div>
+</li></ol>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-11" class="outline-2">
+<h2 id="sec-11"><span class="section-number-2">11</span> Lecture 11</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+This Lecture is about <b>Augmenting Data Structures</b>.
+It is introduced by solving two problems:
+</p>
+<ul class="org-ul">
+<li>Dynamic Order statistics
+</li>
+<li>Interval trees
+</li>
+</ul>
+
+
+<p>
+This Lecture also give a 4-step methodology 
+on how to augment a data structure.
+</p>
+<ul class="org-ul">
+<li><b>Underlying data structure</b>: choosing an underlying data structure
+</li>
+<li><b>Additional information</b>: determining additional information to be maintained 
+in the underlying data structure
+</li>
+<li><b>Maintaining the information</b>: verifying that the additional information can be maintained
+fpr the basic modifying operations on the underlying
+data structure
+</li>
+<li><b>developing new operations</b>
+</li>
+</ul>
+</div>
+
+
+
+
+<div id="outline-container-sec-11-1" class="outline-3">
+<h3 id="sec-11-1"><span class="section-number-3">11.1</span> PROBLEM:Dynamic order statics problem</h3>
+<div class="outline-text-3" id="text-11-1">
+<p>
+Set <i>S</i> is dynamic, The whole algorithm should support S-INSERTION, and S-DELETION.
+</p>
+
+<ul class="org-ul">
+<li><code>OS-SELECT(i,S)</code>: returns the <i>i/th smallest element in the dynamic set /S</i>.
+</li>
+<li><code>OS-RANK(x,S)</code>: returns the rank of x in the sorted order of <i>S</i>'s elements.
+</li>
+</ul>
+
+<p>
+<b>IDEA</b>: Use a red-black tree for the set <i>S</i>, but keep subtree sizes in the nodes.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-sec-11-2" class="outline-3">
+<h3 id="sec-11-2"><span class="section-number-3">11.2</span> PROBLEM:Interval Tree</h3>
+<div class="outline-text-3" id="text-11-2">
+<p>
+Maintain a dynamic set of intervals. 
+For a given query interval <i>i</i>, find an interval in the set
+that overlaps <i>i</i>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-12" class="outline-2">
+<h2 id="sec-12"><span class="section-number-2">12</span> Lecture 12</h2>
+<div class="outline-text-2" id="text-12">
+<p>
+This Lecture is about <b>Skip List</b>. Mainly about its:
+</p>
+<ul class="org-ul">
+<li>Data Structure
+</li>
+<li>Randomized Insertion
+</li>
+<li>With-high-probability bound
+</li>
+<li>Analysis of its complexity
+</li>
+<li>Coin Flipping for its dynamic operation support
+</li>
+</ul>
+</div>
+
+
+<div id="outline-container-sec-12-1" class="outline-3">
+<h3 id="sec-12-1"><span class="section-number-3">12.1</span> Introduction about Skip List</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+It is a simple randomized dynamic search structure
+</p>
+<ul class="org-ul">
+<li>Invented by William Pugh in 1989
+</li>
+<li>easy to implement
+</li>
+<li>It maintains a dynamic set of <i>n</i> elements in <i>O(lgn)</i>
+time per operation in expectation and <i>with high probability</i>
+<ul class="org-ul">
+<li>"Almost always" <i>O(lg n)</i>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<p>
+An Ideal skip list is an <i>lg n</i> linked list structure, 
+that contains <i>lg n</i> lists. 
+each list contain the subset item of the bottom sorted full
+list.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-12-2" class="outline-3">
+<h3 id="sec-12-2"><span class="section-number-3">12.2</span> PROBLEM: SEARCH of skip list</h3>
+<div class="outline-text-3" id="text-12-2">
+<ul class="org-ul">
+<li>start from the highest list, and compare the key value
+</li>
+<li>find the range of the current list, and go done to the next
+list, using the links across the lists.
+</li>
+<li>repeat the above steps until it find the element,
+or arrived to the bottom of the lists and does not find it.
+</li>
+</ul>
+
+
+<p>
+<b>Small Changes</b>:
+Add special <i>negitive infinite value</i> to every list,
+makes searching could work the same algorithm.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-12-3" class="outline-3">
+<h3 id="sec-12-3"><span class="section-number-3">12.3</span> PROBLEM: INSERT of skip list</h3>
+<div class="outline-text-3" id="text-12-3">
+<p>
+To insert an element <i>x</i> into a skip list:
+</p>
+<ul class="org-ul">
+<li>SEARCH(x) to see where x fits in bottom list
+</li>
+<li>Insert into the bottom list first.
+</li>
+<li>Insert into some of the lists above
+<ul class="org-ul">
+<li>Flip a coin
+<ul class="org-ul">
+<li>if HEADS, promote x to the next level up and flip again.
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-12-4" class="outline-3">
+<h3 id="sec-12-4"><span class="section-number-3">12.4</span> PROBLEM: DELECT of skip list</h3>
+<div class="outline-text-3" id="text-12-4">
+<p>
+To delete an element <i>x</i> from a skip list:
+</p>
+<ul class="org-ul">
+<li>remove <i>x</i> from all lists containing it.
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-12-5" class="outline-3">
+<h3 id="sec-12-5"><span class="section-number-3">12.5</span> Analysis of skip list</h3>
+<div class="outline-text-3" id="text-12-5">
+<p>
+How good are skip lists?
+</p>
+<ul class="org-ul">
+<li>How about the search speed?
+</li>
+<li>How about the balance maintance?
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-13" class="outline-2">
+<h2 id="sec-13"><span class="section-number-2">13</span> Lecture 13</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+This lecture is about <b>Amortized Analysis</b>, which will introduce
+</p>
+<ul class="org-ul">
+<li><b>Dynamic table</b>
+</li>
+<li><b>Aggregate method</b>
+</li>
+<li><b>Accounting method</b>
+</li>
+<li><b>Potential method</b>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-13-1" class="outline-3">
+<h3 id="sec-13-1"><span class="section-number-3">13.1</span> PROBLEM: How large should a hash table be?</h3>
+<div class="outline-text-3" id="text-13-1">
+<ul class="org-ul">
+<li>The table should be as small as possible
+</li>
+<li>The table should be large enough so that it won't overflow.
+</li>
+<li>The proper size is unknown 
+</li>
+</ul>
+
+<p>
+We should use <b>Dynamic table</b> here.
+</p>
+<ul class="org-ul">
+<li>When the table overflows, we grow its size by allocatting
+and copy
+</li>
+</ul>
+</div>
+
+
+<div id="outline-container-sec-13-1-1" class="outline-4">
+<h4 id="sec-13-1-1"><span class="section-number-4">13.1.1</span> Worst-case analysis of Dynamic table</h4>
+<div class="outline-text-4" id="text-13-1-1">
+<p>
+For a sequence of <i>n</i> insertion,
+Although the worst-case time to execute one insertion is
+&theta;(n),  the worst-case time for all <i>n</i> insertion is 
+also &theta;(n), NOT &theta;(n<sup>2</sup>).
+</p>
+
+<p>
+Since, we could be sure that only a few insertion will
+cause table reallocation.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-13-2" class="outline-3">
+<h3 id="sec-13-2"><span class="section-number-3">13.2</span> The Amortized analysis</h3>
+<div class="outline-text-3" id="text-13-2">
+<p>
+An  <b>amortized analysis</b> is any strategy for analyzing a
+sequence of operations to show that the average cost per
+operation is small, even though a single operation within
+the sequence might be expensive.
+</p>
+
+<p>
+It could help guarantees the average performance of each 
+operation in the <i>worst case</i>.
+</p>
+
+<p>
+Amortized analysis methods:
+</p>
+<ul class="org-ul">
+<li>Aggregate method: used in the above dynamic worst-case analysis
+</li>
+<li>accounting method：
+</li>
+<li>potential method
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-13-2-1" class="outline-4">
+<h4 id="sec-13-2-1"><span class="section-number-4">13.2.1</span> <span class="todo TODO">TODO</span> Accounting method</h4>
+<div class="outline-text-4" id="text-13-2-1">
+<p>
+Charge an amortized cost of $3 for the ith intersion, 
+if it does not use up, store the rest in the bank.
+When the amortized cost is not enough for insertion,
+try to use the money in the bank account.
+</p>
+
+<p>
+We could be sure that, the accont in the bank will never 
+be negative.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-13-2-2" class="outline-4">
+<h4 id="sec-13-2-2"><span class="section-number-4">13.2.2</span> Potential Method</h4>
+<div class="outline-text-4" id="text-13-2-2">
+<p>
+<b>Idea</b>: view the bank account as the potential energy of 
+the dynamic set.
+</p>
+
+<p>
+<b>Framework</b>:
+</p>
+<ul class="org-ul">
+<li>start with an initial data structure <i>D0</i>
+</li>
+<li>Operations <i>i</i> transforms <i>Di-1</i> to <i>Di</i>
+</li>
+<li>The cost of operation <i>i</i> is <i>ci</i>
+</li>
+<li>Define a <b>potential function</b> &phi; to map <i>{Di}</i> to <i>R</i>.
+such tat &phi;(D0) = 0, and &phi;(Di) &gt;= 0 for all <i>i</i>.
+</li>
+<li>The <b>amortized cost</b> with respect to &phi; is defined to
+be ci+&phi;(Di)-&phi;(Di-1) .
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-14" class="outline-2">
+<h2 id="sec-14"><span class="section-number-2">14</span> Lecture 14</h2>
+</div>
+
+
+<div id="outline-container-sec-15" class="outline-2">
+<h2 id="sec-15"><span class="section-number-2">15</span> Lecture 15</h2>
+<div class="outline-text-2" id="text-15">
+<p>
+This Lecture is about <b>Dynamic Programming</b>.
+The whole lecture is trying to solve the LCS problem
+</p>
+</div>
+
+
+
+<div id="outline-container-sec-15-1" class="outline-3">
+<h3 id="sec-15-1"><span class="section-number-3">15.1</span> PROBLEM: Longest Comon SubSequence</h3>
+<div class="outline-text-3" id="text-15-1">
+<p>
+Given two sequences x[1..m] and y[1..n], find <b>a</b> longest subsequence common to them both.
+</p>
+</div>
+
+<div id="outline-container-sec-15-1-1" class="outline-4">
+<h4 id="sec-15-1-1"><span class="section-number-4">15.1.1</span> The Brute-force solution</h4>
+<div class="outline-text-4" id="text-15-1-1">
+<p>
+Check each subsequence of x[1..m] to see if it is also a subsequence of y[1..n].
+</p>
+</div>
+</div>
+<div id="outline-container-sec-15-1-2" class="outline-4">
+<h4 id="sec-15-1-2"><span class="section-number-4">15.1.2</span> The Dynamic Programming solution</h4>
+<div class="outline-text-4" id="text-15-1-2">
+<ul class="org-ul">
+<li>Optimal Substructure: An optimal solution to a problem (instance) contains optimal solutions to subproblems.
+<ul class="org-ul">
+<li>we could try to solve the prefix of the Common sequence first.
+</li>
+</ul>
+</li>
+<li>Overlapping subproblems: A recursive solution contains a "small" number of distinct subproblems repeated many times.
+<ul class="org-ul">
+<li>Use <i>Memoization</i>: After computing a solution to a subproblem, store it in a table. 
+Subsequent calls check the table to avoid redoing work.
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: erlv</p>
+<p class="date">Created: 2013-06-15 Sat 07:24</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 23.4.1 (<a href="http://orgmode.org">Org</a> mode 8.0.3)</p>
+<p class="xhtml-validation"><a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a></p>
+</div>
+</body>
+</html>

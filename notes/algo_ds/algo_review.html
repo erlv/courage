@@ -1,0 +1,1443 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Algorithm and Data Struct</title>
+<!-- 2013-07-03 Wed 22:18 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="author" content="erlv"/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Algorithm and Data Struct</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Data Structure</a>
+<ul>
+<li><a href="#sec-1-1">1.1. List</a>
+<ul>
+<li><a href="#sec-1-1-1">1.1.1. Representation Format</a></li>
+<li><a href="#sec-1-1-2">1.1.2. Commonly used Operations</a></li>
+<li><a href="#sec-1-1-3">1.1.3. Other data structures based on List</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-2">1.2. Tree</a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1. Tree Operations</a></li>
+<li><a href="#sec-1-2-2">1.2.2. Binary Search Tree</a></li>
+<li><a href="#sec-1-2-3">1.2.3. Trie Tree</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-3">1.3. Graph</a>
+<ul>
+<li><a href="#sec-1-3-1">1.3.1. Graph properties</a></li>
+<li><a href="#sec-1-3-2">1.3.2. Graph Operations</a></li>
+<li><a href="#sec-1-3-3">1.3.3. Data Representations</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-4">1.4. Other Specialized Data Structures</a>
+<ul>
+<li><a href="#sec-1-4-1">1.4.1. String Data Structure</a></li>
+<li><a href="#sec-1-4-2">1.4.2. Geometric Data Structure</a></li>
+<li><a href="#sec-1-4-3">1.4.3. Graph Data Structure</a></li>
+<li><a href="#sec-1-4-4">1.4.4. Set Data Structure</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-2">2. Algorithm</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Traveling Salesman Problem</a></li>
+<li><a href="#sec-2-2">2.2. Independent Set Problem</a></li>
+<li><a href="#sec-2-3">2.3. String Pattern Matching</a></li>
+<li><a href="#sec-2-4">2.4. Matrix Multiplication</a></li>
+<li><a href="#sec-2-5">2.5. Sorting</a>
+<ul>
+<li><a href="#sec-2-5-1">2.5.1. Heap Sort</a></li>
+<li><a href="#sec-2-5-2">2.5.2. Merge Sort</a></li>
+<li><a href="#sec-2-5-3">2.5.3. Quick Sort</a></li>
+<li><a href="#sec-2-5-4">2.5.4. External Sort</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-3">3. My Weak Algorithm</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Dynamic Programming</a>
+<ul>
+<li><a href="#sec-3-1-1">3.1.1. Fibonacci</a></li>
+<li><a href="#sec-3-1-2">3.1.2. Binomial Coefficients</a></li>
+<li><a href="#sec-3-1-3">3.1.3. Approximate String Matching</a></li>
+<li><a href="#sec-3-1-4">3.1.4. TOPCODER SRM 551-1-1000 SweetFruits</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Programming</a>
+<ul>
+<li><a href="#sec-4-1">4.1. 2-1 Primary Arithmetic</a></li>
+<li><a href="#sec-4-2">4.2. 7-1 Little Bishops</a>
+<ul>
+<li><a href="#sec-4-2-1">4.2.1. My Solution</a></li>
+<li><a href="#sec-4-2-2">4.2.2. Suggested Solution</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-3">4.3. 15-Puzzle Problem</a></li>
+<li><a href="#sec-4-4">4.4. Tug of War</a></li>
+<li><a href="#sec-4-5">4.5. Color Hash</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Data Structure</h2>
+<div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> List</h3>
+<div class="outline-text-3" id="text-1-1">
+</div><div id="outline-container-sec-1-1-1" class="outline-4">
+<h4 id="sec-1-1-1"><span class="section-number-4">1.1.1</span> Representation Format</h4>
+<div class="outline-text-4" id="text-1-1-1">
+<ul class="org-ul">
+<li>Array: It is a contiguous data structure. The items store in adjancent memory address in memory.
+</li>
+<li>Link list: The list is represented using pointers.
+<ul class="org-ul">
+<li>Double link list
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-1-1-2" class="outline-4">
+<h4 id="sec-1-1-2"><span class="section-number-4">1.1.2</span> Commonly used Operations</h4>
+<div class="outline-text-4" id="text-1-1-2">
+<ul class="org-ul">
+<li>Get: elemtype get(list l, int pos)
+</li>
+<li>Insert:  bool insert(list l, elemtype x, int pos)
+</li>
+<li>Delete:  bool delete(list l , elemtype x)
+</li>
+<li>Search: int search(list l, elemtype x)
+</li>
+</ul>
+</div>
+<ol class="org-ol"><li>Operation implementation for Array representation<br/><ol class="org-ol"><li>Get<br/><div class="outline-text-6" id="text-1-1-2-1-1">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">elemtype</span> <span style="color: #0000ff;">get</span>( <span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span> , <span style="color: #228b22;">int</span> <span style="color: #b8860b;">pos</span>) {
+  <span style="color: #a020f0;">return</span> l.list[pos];
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Insert<br/><div class="outline-text-6" id="text-1-1-2-1-2">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">bool</span> <span style="color: #0000ff;">insert</span>(<span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>, <span style="color: #228b22;">int</span> <span style="color: #b8860b;">pos</span>)
+{
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">len</span>= l.length;
+  <span style="color: #a020f0;">if</span>(len+1 &gt;= MAXSIZE) {
+    ori_l = l.list;
+    l.list = (<span style="color: #228b22;">elemtype</span>*) malloc( <span style="color: #a020f0;">sizeof</span>(elemtype) * MAXSIZE *2);
+
+    <span style="color: #a020f0;">if</span>(l.list == <span style="color: #5f9ea0;">NULL</span>)
+      <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+
+    memcpy( l.list, ori_l, <span style="color: #a020f0;">sizeof</span>(elemtype)*l.length);
+    free(ori_l);
+  }
+
+  <span style="color: #a020f0;">for</span>( i = l.length-1; i &gt; pos; i++) {
+    l.list[l] = l.list[l-1];
+  }
+  l.list[pos] = x;
+  l.length++;
+
+  <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Search<br/><div class="outline-text-6" id="text-1-1-2-1-3">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">search</span>(<span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">res_pos</span>;
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">len</span> = l.length;
+  <span style="color: #a020f0;">for</span>(<span style="color: #228b22;">int</span> <span style="color: #b8860b;">i</span>=0; i &lt; len; i++) {
+    <span style="color: #a020f0;">if</span>(l.list[i] == x)
+      <span style="color: #a020f0;">return</span> i;
+  }
+  <span style="color: #a020f0;">if</span>( i == len)
+    <span style="color: #a020f0;">return</span> -1;
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Delete<br/><div class="outline-text-6" id="text-1-1-2-1-4">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">bool</span> <span style="color: #0000ff;">delete</span>(<span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">pos</span> = search(l, x);
+  <span style="color: #a020f0;">if</span>(pos == -1 ) {
+    cout &lt;&lt; <span style="color: #bc8f8f;">"Can not find the element"</span>;
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+  }
+  <span style="color: #a020f0;">for</span>(<span style="color: #228b22;">int</span> <span style="color: #b8860b;">i</span> = pos; i &lt; l.length-1; i++) {
+    l.list[i] == l.list[i+1];
+  }
+  l.length--;
+  <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+}
+</pre>
+</div>
+</div>
+</li></ol>
+</li>
+
+<li>Operation implementation for Link list representation<br/><ol class="org-ol"><li>Get<br/><div class="outline-text-6" id="text-1-1-2-2-1">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">elemtype</span> <span style="color: #0000ff;">get</span>(<span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">int</span> <span style="color: #b8860b;">pos</span>) {
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">i</span> = 0;
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">p</span> = l.list;
+  <span style="color: #a020f0;">while</span>( i &lt; pos) {
+    p = p-&gt;next;
+    i++;
+  }
+  <span style="color: #a020f0;">return</span> p-&gt;val;
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Search<br/><div class="outline-text-6" id="text-1-1-2-2-2">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">int</span> <span style="color: #0000ff;">search</span>( <span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">res</span>=0;
+
+  p = l.list;
+  <span style="color: #a020f0;">while</span>(p!=<span style="color: #5f9ea0;">NULL</span>) {
+    <span style="color: #a020f0;">if</span>(p-&gt;val == x)
+      <span style="color: #a020f0;">return</span> res;
+    <span style="color: #a020f0;">else</span> {
+      p = p-&gt;next;
+      res++;
+    }
+  }
+  <span style="color: #a020f0;">if</span>(p == <span style="color: #5f9ea0;">NULL</span>)
+    <span style="color: #a020f0;">return</span> -1;
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Insert<br/><div class="outline-text-6" id="text-1-1-2-2-3">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">bool</span> <span style="color: #0000ff;">insert</span>( <span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>, <span style="color: #228b22;">int</span> <span style="color: #b8860b;">pos</span>) {
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">p</span> = (<span style="color: #228b22;">node</span>*) malloc( <span style="color: #a020f0;">sizeof</span>(node));
+  <span style="color: #a020f0;">if</span>( p == <span style="color: #5f9ea0;">NULL</span>)
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+
+  p-&gt;val = x;
+
+  <span style="color: #a020f0;">if</span>( l.length == 0) {
+    <span style="color: #a020f0;">if</span>(pos &gt; 0 )
+      cout &lt;&lt; <span style="color: #bc8f8f;">"Position illeage, insert at the end of the list."</span> &lt;&lt; endl;
+    l.list = p;
+    p-&gt;next = <span style="color: #5f9ea0;">NULL</span>;
+    l.length++;
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+  }
+
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">l_pos</span>=0;
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">q</span> = l.list;
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">r</span> = q-&gt;next;
+  <span style="color: #a020f0;">while</span>(r|=<span style="color: #5f9ea0;">NULL</span> &amp;&amp; l_pos &lt; pos-1) {
+    q = r;
+    r = r-&gt;next;
+    l_pos++;
+  }
+
+  <span style="color: #a020f0;">if</span>( r == <span style="color: #5f9ea0;">NULL</span> &amp;&amp; l_pos &lt; pos) {
+    cout &lt;&lt; <span style="color: #bc8f8f;">"Position illeage, insert at the end of the list."</span> &lt;&lt; endl;
+    pos = l.length;
+    l_pos = l.length-1;
+  }
+
+  <span style="color: #a020f0;">if</span>(l_pos == (pos-1)) {
+    q-&gt;next = p;
+    p-&gt;next = r;
+    l.length++;
+  }
+  <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+
+}
+</pre>
+</div>
+</div>
+</li>
+
+<li>Delete<br/><div class="outline-text-6" id="text-1-1-2-2-4">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">bool</span> <span style="color: #0000ff;">delete</span>(<span style="color: #228b22;">list</span> <span style="color: #b8860b;">l</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">p</span>,<span style="color: #b8860b;">q</span>;
+  p = l.list;
+  <span style="color: #a020f0;">if</span>(p == <span style="color: #5f9ea0;">NULL</span>) {
+     <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+  }
+
+  q = p-&gt;next;
+  <span style="color: #a020f0;">if</span>(p-&gt;val == x) {
+    free(p);
+    l.list = q;
+    l.length--;
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+  }
+  <span style="color: #a020f0;">while</span>( q-&gt;val != x &amp;&amp; q !=<span style="color: #5f9ea0;">NULL</span>) {
+    p = q;
+    q = q-&gt;next;
+  }
+  <span style="color: #a020f0;">if</span>( q == <span style="color: #5f9ea0;">NULL</span>)
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+
+  <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span>( q-&gt; val == x) {
+    p-&gt;next = q-&gt;next;
+    free(q);
+    l.length --;
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+  }
+}
+</pre>
+</div>
+</div>
+</li></ol>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-1-3" class="outline-4">
+<h4 id="sec-1-1-3"><span class="section-number-4">1.1.3</span> Other data structures based on List</h4>
+<div class="outline-text-4" id="text-1-1-3">
+</div><ol class="org-ol"><li>Stack<br/><div class="outline-text-5" id="text-1-1-3-1">
+<p>
+Stack is FILO(Fisrt in, Last Out).
+Key Operation including:
+</p>
+<ul class="org-ul">
+<li>Push: bool push( stack s, element x);
+</li>
+<li>Pop:  element pop(stack s);
+</li>
+</ul>
+</div>
+
+<ol class="org-ol"><li>Push<br/><div class="outline-text-6" id="text-1-1-3-1-1">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">bool</span> <span style="color: #0000ff;">push</span>(<span style="color: #228b22;">stack</span> <span style="color: #b8860b;">s</span>, <span style="color: #228b22;">element</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #a020f0;">if</span>( insert(s, x, s.length) ) {
+    s.length++;
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+  } <span style="color: #a020f0;">else</span> 
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Pop<br/><div class="outline-text-6" id="text-1-1-3-1-2">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">elemtype</span> <span style="color: #0000ff;">pop</span>(<span style="color: #228b22;">stack</span> <span style="color: #b8860b;">s</span>) {
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">pos</span> = s.length-1;
+  <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">res</span> = find(s, pos);
+  <span style="color: #a020f0;">if</span>(delete(s, res))
+    <span style="color: #a020f0;">return</span> elemtype;
+  <span style="color: #a020f0;">else</span> {
+    cout &lt;&lt; <span style="color: #bc8f8f;">"delete the last element error."</span> &lt;&lt; endl;
+  }
+}
+</pre>
+</div>
+</div>
+</li></ol>
+</li>
+
+<li>Queue<br/><div class="outline-text-5" id="text-1-1-3-2">
+<p>
+Queue is FIFO(Fist in First Out).
+Key Operation include:
+</p>
+<ul class="org-ul">
+<li>Enqueue: bool enqueue( queue q, elemtype x);
+</li>
+<li>Dequeue: elemtype dequeue( queue q);
+</li>
+</ul>
+</div>
+
+<ol class="org-ol"><li>enqueue<br/><div class="outline-text-6" id="text-1-1-3-2-1">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">bool</span> <span style="color: #0000ff;">enqueue</span>(<span style="color: #228b22;">queue</span> <span style="color: #b8860b;">q</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #228b22;">int</span> <span style="color: #b8860b;">len</span> = q.length;
+  <span style="color: #a020f0;">if</span>(insert(q, x, len)) {
+    q.length++;
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">true</span>;
+  } <span style="color: #a020f0;">else</span> {
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+  }
+}
+</pre>
+</div>
+</div>
+</li>
+<li>dequeue<br/><div class="outline-text-6" id="text-1-1-3-2-2">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">elemtype</span> <span style="color: #0000ff;">dequeue</span>(<span style="color: #228b22;">queue</span> <span style="color: #b8860b;">q</span>) {
+   <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">res</span>= find(q, 0);
+   <span style="color: #a020f0;">if</span>(delete(q, res)) {
+     q.length--;
+     <span style="color: #a020f0;">return</span> res;
+   } <span style="color: #a020f0;">else</span> {
+     <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">false</span>;
+   }
+}
+</pre>
+</div>
+</div>
+</li></ol>
+</li>
+
+<li>Dictionary<br/><div class="outline-text-5" id="text-1-1-3-3">
+<p>
+Dictionary is mostly used for accessing data items by content.
+Usually, Dictionary is required to be efficient for the following operations.
+Commonly used  Operations:
+</p>
+<ul class="org-ul">
+<li>Search: int search( dict d, elemtype x);
+</li>
+<li>Insert: bool insert(dict d, elemtype x);
+</li>
+<li>Delete: bool delete(dict d, elemtype x);
+</li>
+<li>Maximize: elemtype max(dict d);
+</li>
+<li>Minimize: elemtype min(dict d);
+</li>
+<li>Predecessor:find the elem whose key immediately before k in sorted order. <i>int predecessor(dict d, keytype k);</i>
+</li>
+<li>Successor: find the elem whose key immediately after k in sorted order. <i>int successor(dict d, keytype k);</i>
+
+<p>
+Since it has two component: the key and the value. And the key can be sorted or unsorted.
+The whole dictionary can be implmented using array and list.
+How to implement dictionary:
+</p>
+</li>
+<li>An unsorted array;
+</li>
+<li>An array sorted by key;
+</li>
+<li>a singly-linked unsorted list
+</li>
+<li>a doubly-linked unsorted list
+</li>
+<li>a singly-linked sorted list
+</li>
+<li>a doubly-linked sorted list
+</li>
+<li>Hash Table
+</li>
+</ul>
+
+
+<p>
+The time complexity:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col class="left"/>
+
+<col class="left"/>
+
+<col class="left"/>
+
+<col class="left"/>
+
+<col class="left"/>
+
+<col class="left"/>
+
+<col class="left"/>
+</colgroup>
+<tbody>
+<tr>
+<td class="left">operations</td>
+<td class="left">Unsorted array</td>
+<td class="left">Sorted Array</td>
+<td class="left">S-unsort list</td>
+<td class="left">D-unsort list</td>
+<td class="left">S-sort list</td>
+<td class="left">D-sort List</td>
+</tr>
+
+<tr>
+<td class="left">Search</td>
+<td class="left">O(n)</td>
+<td class="left">O(logn)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(logn)</td>
+<td class="left">O(logn)</td>
+</tr>
+
+<tr>
+<td class="left">Insert</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+</tr>
+
+<tr>
+<td class="left">Delete</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+</tr>
+
+<tr>
+<td class="left">Successor</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(1)</td>
+</tr>
+
+<tr>
+<td class="left">Predecessor</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+</tr>
+
+<tr>
+<td class="left">Minimum</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(1)</td>
+</tr>
+
+<tr>
+<td class="left">Maximum</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(n)</td>
+<td class="left">O(n)</td>
+<td class="left">O(1)</td>
+<td class="left">O(1)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+
+<li>Hash Table<br/><div class="outline-text-5" id="text-1-1-3-4">
+<p>
+Hash is a special form of dictionary. 
+It is commonly used in practical.
+When designing a hash table, several decision should be made:
+</p>
+<ul class="org-ul">
+<li>How do I deal with collisions?
+</li>
+<li>How big should the talbe be?
+</li>
+<li>What hash function should I use?
+</li>
+</ul>
+
+<p>
+Collision Resolution is a key problem of hash.
+That is because two distinct keys will occasionally hash to the same value.
+There are several method to solve this issue:
+</p>
+<ul class="org-ul">
+<li>Chaining
+</li>
+<li>Open Addressing
+</li>
+</ul>
+
+<p>
+For the implementation of Hash Table, the following may be used:
+</p>
+<ul class="org-ul">
+<li>Binary Search Tree
+<ul class="org-ul">
+<li>Since keep the tree balance is very important, 
+random search tree, AVL tree, 2/3 tree, red-blk trees and splay tree are commonly used in practical.
+</li>
+</ul>
+</li>
+
+<li>B- Tree: It is used for large data set, which the main memory can not hold the whole data set.
+B- tree can collapse several levels of a binary search tree into a single large node, so that
+we can make the equivalent of several search steps before another disk access is needed.
+</li>
+
+<li>Skip Lists: (TODO: need more reading about this data structure)
+</li>
+</ul>
+</div>
+</li>
+<li>Priority Queues<br/><div class="outline-text-5" id="text-1-1-3-5">
+<p>
+A container providing quick access to the smallest or largest key in the set.
+It can provide items by the highest priority of retrieval while supporting insertion, deletions and queries.
+The following data structure can be used for priority queue implementation:
+</p>
+<ul class="org-ul">
+<li>Sorted array or list
+</li>
+<li>Binary heaps
+</li>
+<li>Bounded height priority queue
+</li>
+<li>Binary Search Tree
+</li>
+<li>Fibonacci and pairing heaps
+</li>
+</ul>
+</div>
+</li></ol>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Tree</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Tree,take binary tree for example. For N-way tree, it is most like a graph.
+</p>
+<ul class="org-ul">
+<li>Binary Search Tree
+</li>
+<li>B- Tree
+</li>
+<li>Trie Tree
+</li>
+<li>AVL Tree
+</li>
+<li>Red-Black Trees
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #b22222;">// </span><span style="color: #ff0000; font-weight: bold;">FIXME</span><span style="color: #b22222;">:Need to double check whether my defination is correct.</span>
+<span style="color: #b22222;">// </span><span style="color: #b22222;">In C++, the struct, class and enum keywords are optional, except the type defination statement.</span>
+<span style="color: #a020f0;">typedef</span> <span style="color: #a020f0;">struct</span> {
+  <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">val</span>;
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">parent</span>;
+  <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">l_child</span>, <span style="color: #b8860b;">r_child</span>;
+}<span style="color: #b8860b;">node</span>;
+<span style="color: #a020f0;">typedef</span> <span style="color: #228b22;">node</span> <span style="color: #228b22;">tree</span>;
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-sec-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> Tree Operations</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<ul class="org-ul">
+<li>Search: node* search(tree* t, elemtype x)
+</li>
+<li>Traversal: void  traversal(tree* t);
+<ul class="org-ul">
+<li>Pre-Order
+</li>
+<li>In-Order
+</li>
+<li>Post-Order
+</li>
+</ul>
+</li>
+<li>Insert: void insert(tree* t, elemtype x)
+</li>
+<li>Delete: void delete(tree* t, elemtype x)
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-1-2-2" class="outline-4">
+<h4 id="sec-1-2-2"><span class="section-number-4">1.2.2</span> Binary Search Tree</h4>
+<div class="outline-text-4" id="text-1-2-2">
+</div><ol class="org-ol"><li>Search<br/><div class="outline-text-5" id="text-1-2-2-1">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #228b22;">node</span>* <span style="color: #0000ff;">search</span>(<span style="color: #228b22;">node</span>* <span style="color: #b8860b;">t</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #a020f0;">if</span>( t == <span style="color: #5f9ea0;">NULL</span>)
+    <span style="color: #a020f0;">return</span> <span style="color: #5f9ea0;">NULL</span>;
+  <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span>(t-&gt;val &gt; x)
+    <span style="color: #a020f0;">return</span> search(t-&gt;l_child, x);
+  <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (t-&gt;val &lt; x)
+    <span style="color: #a020f0;">return</span> search(t-&gt;r_child, x);
+  <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span> (t-&gt;val == x)
+    <span style="color: #a020f0;">return</span> t;
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Traversal<br/><div class="outline-text-5" id="text-1-2-2-2">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #b22222;">// </span><span style="color: #b22222;">PRE Order</span>
+<span style="color: #b22222;">// </span><span style="color: #b22222;">In-Order and Post-Order is simlar to Pre-order, just change the statement order.</span>
+<span style="color: #228b22;">void</span> <span style="color: #0000ff;">traversal_pre</span>(<span style="color: #228b22;">tree</span>* <span style="color: #b8860b;">t</span> ) {
+   <span style="color: #a020f0;">if</span>(t != <span style="color: #5f9ea0;">NULL</span>)
+     visit(t-&gt;val);   
+   <span style="color: #a020f0;">if</span>(t-&gt;l_child != <span style="color: #5f9ea0;">NULL</span>)
+     traversal_pre(t-&gt;l_child);   
+   <span style="color: #a020f0;">if</span>(t-&gt;r_child != <span style="color: #5f9ea0;">NULL</span>)
+     traversal_pre(t-&gt;r_child);
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Insert<br/><div class="outline-text-5" id="text-1-2-2-3">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #b22222;">// </span><span style="color: #b22222;">For simple BST, we just insert the node as leaf</span>
+<span style="color: #228b22;">node</span>* <span style="color: #0000ff;">insert</span>(<span style="color: #228b22;">tree</span>* <span style="color: #b8860b;">t</span>, <span style="color: #228b22;">elemtype</span> <span style="color: #b8860b;">x</span>) {
+  <span style="color: #a020f0;">if</span>(t == <span style="color: #5f9ea0;">NULL</span>) {
+    t = (<span style="color: #228b22;">node</span>*)malloc(<span style="color: #a020f0;">sizeof</span>(node));
+    <span style="color: #a020f0;">return</span> t;
+  }
+  <span style="color: #a020f0;">if</span>(t-&gt;val &lt; x) {
+    <span style="color: #a020f0;">if</span>(t-&gt;r_child != <span style="color: #5f9ea0;">NULL</span>)
+      <span style="color: #a020f0;">return</span> insert(t-&gt;r_child, x);
+    <span style="color: #a020f0;">else</span> {
+      <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">new_r_child</span> = (<span style="color: #228b22;">node</span>*)malloc(<span style="color: #a020f0;">sizeof</span>(node));
+      t-&gt;r_child = new_r_child;
+      new_r_child-&gt;val = x;
+      new_l_child-&gt;l_child=<span style="color: #5f9ea0;">NULL</span>;
+      new_l_child-&gt;r_child = <span style="color: #5f9ea0;">NULL</span>;
+      new_l_child-&gt;parent = t;
+      t-&gt;l_child = new_l_child;
+      <span style="color: #a020f0;">return</span> new_r_child;
+    }
+  } <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span>(t-&gt;val &gt; x) {
+    <span style="color: #a020f0;">if</span>(t-&gt;l_child != <span style="color: #5f9ea0;">NULL</span>)
+      <span style="color: #a020f0;">return</span> insert(t-&gt;l_child, x);
+    <span style="color: #a020f0;">else</span> {
+      <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">new_l_child</span> = (<span style="color: #228b22;">node</span>*) malloc(<span style="color: #a020f0;">sizeof</span>(node));
+      new_l_child-&gt;val = x;
+      new_l_child-&gt;l_child=<span style="color: #5f9ea0;">NULL</span>;
+      new_l_child-&gt;r_child = <span style="color: #5f9ea0;">NULL</span>;
+      new_l_child-&gt;parent = t;
+      t-&gt;l_child = new_l_child;
+      <span style="color: #a020f0;">return</span> new_l_child;
+      }
+  }
+}
+</pre>
+</div>
+</div>
+</li>
+<li>Delete<br/><div class="outline-text-5" id="text-1-2-2-4">
+<div class="org-src-container">
+
+<pre class="src src-c"><span style="color: #b22222;">// </span><span style="color: #b22222;">Since the memory will be deleted, we can just copy the value from the node which</span>
+<span style="color: #b22222;">// </span><span style="color: #b22222;">will replace the nodes place in tree, and move the values along the tree from the bottom</span>
+<span style="color: #b22222;">// </span><span style="color: #b22222;">to up. And then delete the leaf node only.</span>
+<span style="color: #228b22;">void</span> <span style="color: #0000ff;">delete</span>(<span style="color: #228b22;">tree</span>* <span style="color: #b8860b;">t</span>, <span style="color: #228b22;">node</span>* <span style="color: #b8860b;">tree_node</span>) {
+  <span style="color: #b22222;">// </span><span style="color: #b22222;">The node is leaf,just delete it.</span>
+  <span style="color: #a020f0;">if</span>(tree_node-&gt;l_child == <span style="color: #5f9ea0;">NULL</span> &amp;&amp; tree_node-&gt;r_child == <span style="color: #5f9ea0;">NULL</span>) {
+    <span style="color: #a020f0;">if</span>(tree_node-&gt;parent-&gt;l_child == tree_node)
+        tree_node-&gt;parent-&gt;l_child = <span style="color: #5f9ea0;">NULL</span>;
+    <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span>(tree_node-&gt;parenet-&gt;r_child = tree_node)
+       tree_node-&gt;parent-&gt;r_child = <span style="color: #5f9ea0;">NULL</span>;
+    free(tree_node);
+  } <span style="color: #a020f0;">else</span> <span style="color: #a020f0;">if</span>(tree_node-&gt;r_child == <span style="color: #5f9ea0;">NULL</span>) {
+     tree_node-&gt;val = tree_node-&gt;l_child-&gt;val;
+     delete(t, tree_node-&gt;l_child);
+  } <span style="color: #a020f0;">else</span> {
+    tree_node-&gt;val = tree_node-&gt;r_child-&gt;val;
+    delete(t, tree_node-&gt;r_child);
+  } 
+}
+</pre>
+</div>
+</div>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-2-3" class="outline-4">
+<h4 id="sec-1-2-3"><span class="section-number-4">1.2.3</span> Trie Tree</h4>
+<div class="outline-text-4" id="text-1-2-3">
+<p>
+Trie tree is an implementation of the suffx tree.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-3" class="outline-3">
+<h3 id="sec-1-3"><span class="section-number-3">1.3</span> Graph</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+A graph G=(V,E)
+</p>
+<ul class="org-ul">
+<li>V: a set of vertices
+</li>
+<li>E: a set of edges of ordered or unordered pairs of vertices from V.
+</li>
+</ul>
+
+<p>
+Planar Graph is a type of graph which can draw all the edges in the lane without two edges cross.
+It is suitable for geometric information systems.
+</p>
+</div>
+
+<div id="outline-container-sec-1-3-1" class="outline-4">
+<h4 id="sec-1-3-1"><span class="section-number-4">1.3.1</span> Graph properties</h4>
+<div class="outline-text-4" id="text-1-3-1">
+<ul class="org-ul">
+<li>Undirected vs. Directed:
+</li>
+<li>Weighted vs. Unweighted:
+</li>
+<li>Simple vs. Non-simple: Non-simple graph may have self-loop edge, or two vertice may have multiple edges.
+</li>
+<li>Sparse vs. Dense:Graph with a lot of edges is dense, otherwise it is sparse.
+</li>
+<li>Cyclic vs. Acyclic: An acyclic graph does not have any cycle.
+</li>
+<li>Embedded vs. Topological: 
+</li>
+<li>Implicit vs. Explicit:
+</li>
+<li>Labeled vs. Unlabeled:
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-1-3-2" class="outline-4">
+<h4 id="sec-1-3-2"><span class="section-number-4">1.3.2</span> Graph Operations</h4>
+<div class="outline-text-4" id="text-1-3-2">
+</div><ol class="org-ol"><li>Traversing<br/><ol class="org-ol"><li>Breadth-First Search<br/></li>
+
+
+
+<li>Depth-First Search<br/></li></ol>
+</li>
+<li>Spanning Tree<br/><ol class="org-ol"><li>Minimun Spanning Tree<br/></li></ol>
+</li>
+<li>Shortest Path<br/><ol class="org-ol"><li>Single Source Shortest Path<br/></li>
+
+<li>Multiple Source Shortest Path<br/></li></ol>
+</li></ol>
+</div>
+<div id="outline-container-sec-1-3-3" class="outline-4">
+<h4 id="sec-1-3-3"><span class="section-number-4">1.3.3</span> Data Representations</h4>
+<div class="outline-text-4" id="text-1-3-3">
+</div><ol class="org-ol"><li>Adjacency Matrix<br/><div class="outline-text-5" id="text-1-3-3-1">
+<ul class="org-ul">
+<li>A Matrix whose item [i,j] records the existence or the weight of the edge Vi to Vj.
+</li>
+</ul>
+</div>
+</li>
+<li>Adjacency List<br/><div class="outline-text-5" id="text-1-3-3-2">
+<ul class="org-ul">
+<li>For a graph with N vertix. There is an array with N entries indicate all the vertexes.
+For each entry, a node indicates a new edge.
+</li>
+</ul>
+</div>
+</li></ol>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4" class="outline-3">
+<h3 id="sec-1-4"><span class="section-number-3">1.4</span> Other Specialized Data Structures</h3>
+<div class="outline-text-3" id="text-1-4">
+</div><div id="outline-container-sec-1-4-1" class="outline-4">
+<h4 id="sec-1-4-1"><span class="section-number-4">1.4.1</span> String Data Structure</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<ul class="org-ul">
+<li>Array: character array for string representation
+</li>
+<li>Suffix tree
+</li>
+<li>Suffix array
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-1-4-2" class="outline-4">
+<h4 id="sec-1-4-2"><span class="section-number-4">1.4.2</span> Geometric Data Structure</h4>
+</div>
+
+<div id="outline-container-sec-1-4-3" class="outline-4">
+<h4 id="sec-1-4-3"><span class="section-number-4">1.4.3</span> Graph Data Structure</h4>
+</div>
+
+<div id="outline-container-sec-1-4-4" class="outline-4">
+<h4 id="sec-1-4-4"><span class="section-number-4">1.4.4</span> Set Data Structure</h4>
+<div class="outline-text-4" id="text-1-4-4">
+<p>
+Serval implementation of set data structure:
+</p>
+<ul class="org-ul">
+<li>Bit vector
+</li>
+<li>Containers or dictionaries
+</li>
+<li>Bloom filters: bit vector based on hash
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Algorithm</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Traveling Salesman Problem</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li>Input: A set S of n points
+</li>
+<li>Output: What is the shortest cycle tour which salesman can visit all the point
+</li>
+<li>Analysis:
+<ul class="org-ul">
+<li>From one point, select the nearest unvisited adjacent point until all the points are visited.  This solution can solve a subset of the condition, but not all.
+</li>
+<li>Only select the shortest edge which connect at least one unvisited point, until all the points are connected using the edges. The solution can also solve a subset of the input.
+</li>
+<li>This is a NP-Complete problem ( How to prove it ?)
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Independent Set Problem</h3>
+<div class="outline-text-3" id="text-2-2">
+<ul class="org-ul">
+<li>Input: A independent set S of intervals
+</li>
+<li>Output: What is the largest subset of mutually non-overlapping intervals which can be selected from S?
+</li>
+<li>Analysis:
+<ul class="org-ul">
+<li>Select the one first start. Incorrect
+</li>
+<li>Select the one which takes the least time. Incorrect
+</li>
+<li>Select the one finish first. Correct.
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> String Pattern Matching</h3>
+<div class="outline-text-3" id="text-2-3">
+<ul class="org-ul">
+<li>Input: A text string t and a pattern string p.
+</li>
+<li>Output: Does t contain the pattern p as a substring, and if so where?
+</li>
+<li>Analysis:
+<ul class="org-ul">
+<li>Brute force way:  worst case –O(nm). We should check each char of test, with each char of pattern. So it is time consuming.
+</li>
+<li>KMP's way
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Matrix Multiplication</h3>
+<div class="outline-text-3" id="text-2-4">
+<ul class="org-ul">
+<li>Input: 2 matrix, A and B
+</li>
+<li>Output: an multrix C=AXB
+</li>
+<li>Analysis:
+<ul class="org-ul">
+<li>This problem is a classic problem in HPC. The ordinary algorithm time complex is O(n<sup>3</sup>).
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Sorting</h3>
+<div class="outline-text-3" id="text-2-5">
+<ul class="org-ul">
+<li>Input:  A set of sortable 
+</li>
+<li>Output: A increase/decrease-ordered  list of element.
+</li>
+</ul>
+</div>
+<div id="outline-container-sec-2-5-1" class="outline-4">
+<h4 id="sec-2-5-1"><span class="section-number-4">2.5.1</span> Heap Sort</h4>
+<div class="outline-text-4" id="text-2-5-1">
+<p>
+During the sorting phrase, only heap is allowed.
+</p>
+
+<p>
+Analysis:There are two ways to implement Heap Sort, using binary search tree or using priority queue.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-2-5-2" class="outline-4">
+<h4 id="sec-2-5-2"><span class="section-number-4">2.5.2</span> Merge Sort</h4>
+<div class="outline-text-4" id="text-2-5-2">
+<p>
+Sorting by Divide-and-Conquer
+</p>
+
+<p>
+Analysis:
+</p>
+<ul class="org-ul">
+<li>It uses a DC way to sort, and vastly used in parallel sorting
+</li>
+<li>There is also in-place merge, Although the simplest merge sort need a extra buffer to finish the merge phrase
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-5-3" class="outline-4">
+<h4 id="sec-2-5-3"><span class="section-number-4">2.5.3</span> Quick Sort</h4>
+<div class="outline-text-4" id="text-2-5-3">
+<p>
+Sorting by Randomization
+</p>
+
+<p>
+Analysis:
+</p>
+<ul class="org-ul">
+<li>This algorithm uses a randomization framework to sort.
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-2-5-4" class="outline-4">
+<h4 id="sec-2-5-4"><span class="section-number-4">2.5.4</span> External Sort</h4>
+<div class="outline-text-4" id="text-2-5-4">
+<p>
+When there is a lot of number to sort,  and the memory size is not large enough to hold all these numbers, we need external sort.
+Analysis:
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> My Weak Algorithm</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Dynamic Programming</h3>
+<div class="outline-text-3" id="text-3-1">
+</div><div id="outline-container-sec-3-1-1" class="outline-4">
+<h4 id="sec-3-1-1"><span class="section-number-4">3.1.1</span> Fibonacci</h4>
+<div class="outline-text-4" id="text-3-1-1">
+<p>
+Fibonacci is a recursive program original, but  the intermediate computing result can be cached, so that we do not need to compute the same value again and again.
+</p>
+</div>
+</div>
+<div id="outline-container-sec-3-1-2" class="outline-4">
+<h4 id="sec-3-1-2"><span class="section-number-4">3.1.2</span> Binomial Coefficients</h4>
+</div>
+
+<div id="outline-container-sec-3-1-3" class="outline-4">
+<h4 id="sec-3-1-3"><span class="section-number-4">3.1.3</span> Approximate String Matching</h4>
+<div class="outline-text-4" id="text-3-1-3">
+</div><ol class="org-ol"><li>The Problem<br/><div class="outline-text-5" id="text-3-1-3-1">
+<p>
+Search with archaic patterns in mind for string matching:”You should not murder” with Thou shalt not kill”. Mostly used to search for the substring closest to a given pattern to compensate for spelling errors, or evolutionary changes in genomic sequences.
+We want to find the edit distance, using three kind of changes:
+</p>
+<ul class="org-ul">
+<li>Substitution
+</li>
+<li>Insertion
+</li>
+<li>Deletion
+</li>
+</ul>
+</div>
+</li>
+<li>Brute Force Solution:<br/><div class="outline-text-5" id="text-3-1-3-2">
+<p>
+Three option:
+</p>
+<ul class="org-ul">
+<li>match: if(P[i] <code>= T[j]) D[i,j] =</code> D[i-1, j-1] else D[i,j] = D[i-1][j-1] + 1
+</li>
+<li>insert: D[i,j] = D[i-1, j] +1
+</li>
+<li>delete: D[i,j] = D[i, j-1] +1
+</li>
+</ul>
+
+<p>
+This algorithm is very compilex. Since at each position, it always need to compute 3-ways. 
+</p>
+</div>
+</li></ol>
+</div>
+<div id="outline-container-sec-3-1-4" class="outline-4">
+<h4 id="sec-3-1-4"><span class="section-number-4">3.1.4</span> <span class="todo TODO">TODO</span> TOPCODER SRM 551-1-1000 SweetFruits</h4>
+<div class="outline-text-4" id="text-3-1-4">
+<p>
+<b>This problem need more time to understand, it is too complex.</b> <sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup>
+</p>
+</div>
+
+<ol class="org-ol"><li>My Analysis<br/><div class="outline-text-5" id="text-3-1-4-1">
+<p>
+key constraint:
+</p>
+<ul class="org-ul">
+<li>int[] sweetness array:
+This array is used for sweetness of every fruit. the value -1 means it is bitter.
+</li>
+<li>N-1 strings: They can connect the fruits into any style of tree.
+</li>
+<li>TotalSweetness: sum sweetness of all the truely sweet fruit.  
+The truely sweet fruit is the one which is sweet, and connect with at least one sweet fruit
+using string.
+</li>
+</ul>
+
+<p>
+Input:
+</p>
+<ul class="org-ul">
+<li>The sweetness array
+</li>
+<li>The maxsweetness constraint
+</li>
+</ul>
+
+<p>
+Output:
+</p>
+<ul class="org-ul">
+<li>The number of possible trees which the sweetness &lt;= maxsweetness.
+</li>
+</ul>
+
+<p>
+Brute Force Method:
+</p>
+<ul class="org-ul">
+<li>We can calculate the sweetnesses of possible trees, and get the ones satisfy the TotalSweetness constraints.
+</li>
+</ul>
+
+<p>
+Try Dynamic Way:
+</p>
+<ul class="org-ul">
+<li>Although brute force is the simple way, some trees have the same substructure. 
+So we can record the sweetness of the substructures, and by this way DP is comming.
+</li>
+<li>Cache what? How to cache? and How to make use of it? This is the biggest chanllenge of this problem.
+<ul class="org-ul">
+<li>Cache the sweetness of the substructure: such as the sweetness of each tree provided by the first N fruits.
+</li>
+<li>There are n! trees, we should record all the result of them.
+</li>
+<li>When adding a new fruit, we needed to based on each of these trees, and connect the fruit with each of the fruit in the tree.
+And recompute the sweetness of the tree.
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</li>
+<li>Analysi from TopCoder<br/><div class="outline-text-5" id="text-3-1-4-2">
+<ul class="org-ul">
+<li>Suppose we have decided the set X of the truly sweet fruits yet. 
+The total sweetness of X less than or equal to MaxSweetness.
+</li>
+<li>Then we need to find the number of trees which every fruits in X connect to another sweet fruit, 
+and sweet fruit not in X are not connected to sweet fruit.
+<ul class="org-ul">
+<li><b>The number of trees depends on the number of elements in X. Why?</b>
+</li>
+</ul>
+</li>
+<li>The tree should be spanning trees of the following graph:
+<ul class="org-ul">
+<li>every sweet fruit in X is connected to all fruits, and sweet fruits not in X are connected to only bitter fruits.
+</li>
+</ul>
+</li>
+<li>spanning[k] denote the number of spanning trees of such a graph where |X|=k.
+Using the matrix-tree theorem<sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>,
+we can find the number of spanning tree of any graph.
+</li>
+<li>So, our problems turns to how to find out the number of spanning tree, and decide the set X of the truly sweet fruits.
+</li>
+</ul>
+</div>
+</li></ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Programming</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> 2-1 Primary Arithmetic</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+This is a simple problem. Just some control code can solve it.
+</p>
+
+<p>
+However, there is a ambiguous.If the input is "999" and "1", what should the program output.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> 7-1 Little Bishops</h3>
+<div class="outline-text-3" id="text-4-2">
+</div><div id="outline-container-sec-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1"><span class="section-number-4">4.2.1</span> My Solution</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<p>
+Brute Force Way. For each bishops, check whether each point is suitable. And if yes, put it there. This algorithm.
+Model:
+Main():
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-sec-4-2-2" class="outline-4">
+<h4 id="sec-4-2-2"><span class="section-number-4">4.2.2</span> Suggested Solution</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<p>
+This problem looks much like the 8-queen problem. Once can solve it use DP or  roll-back framework, However it is hard to solve it using just brute force. DP is my weak point.
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> 15-Puzzle Problem</h3>
+</div>
+
+<div id="outline-container-sec-4-4" class="outline-3">
+<h3 id="sec-4-4"><span class="section-number-3">4.4</span> Tug of War</h3>
+</div>
+
+<div id="outline-container-sec-4-5" class="outline-3">
+<h3 id="sec-4-5"><span class="section-number-3">4.5</span> Color Hash</h3>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p><a href="http://apps.topcoder.com/wiki/display/tc/SRM+551">http://apps.topcoder.com/wiki/display/tc/SRM+551</a></p></div>
+
+<div class="footdef"><sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup> <p><a href="http://en.wikipedia.org/wiki/Kirchhoff%27s_theorem">http://en.wikipedia.org/wiki/Kirchhoff%27s_theorem</a> 。This is a thereom in Graph theory.</p></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<p class="author">Author: erlv</p>
+<p class="date">Created: 2013-07-03 Wed 22:18</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 23.4.1 (<a href="http://orgmode.org">Org</a> mode 8.0.3)</p>
+<p class="xhtml-validation"><a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a></p>
+</div>
+</body>
+</html>
