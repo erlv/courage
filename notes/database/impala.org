@@ -1,10 +1,431 @@
 #+title:Impala related notes
+#+AUTHOR:Ling Kun
+#+EMAIL:lkun.erlv@gmail.com
+
+
+* TODO List
+Get to know all the source code files, and why they are there.
+Sort out all the TODOs in the source code file, and get a deep understand of what the authors plan to do for the next step
+Get a better understand of the issues in the JIRA, so that I can know how they communicate with each other.
+Solve the TODOs in this doc.
+
 
 * The Design of Impala
+  Impala is an HDFS SQL execution engine. It provide support for interacting with very large data set.
 
+** Query Execution Overview
+
+   - Queries are submitted using Impala shell
+   - Impala distributed query engine builds and distributes the query plan across the cluster
+   - Every node reads data from HDFS or HBase locally. (Impalad - daemon which runs on data nodes and responds to impala shell)
+
+** Drawbacks
+
+   - Do not have fault tolerance within a query. If a node fails during the running of a query, the query have to be re-run
+   - Does not write the intermediate result to disk
+   - Does not support the following features/syntax which Hive supports:
+     - DDLs
+     - XML
+     - JSON
+   - No support for Serialization Deserialization. Can only read text files not custom binary files as of now.
+   - Does not support UDFs( User Defined functions)
 
 * The Implementation of Impala
+  Here is about Source Code Layout
 
+** FE
+
+   - =Src/main/jflex/sql-scanner.flex=
+   - =Src/main/cup/sql-parser.y=
+
+*** Src/main/java/com/cloudera/impala/analysis
+
+    - =AggregateExpr.java=:Extended from Expr. Class for Aggregate Expressions
+    - AggregateInfo.java: A Class Encapsulates all the information needed to compute the aggregate functions of a single Select block.
+    - AggregateParamsList.java: A Class of the Return value of the grammar production that parses aggregate function parameters.
+    - ParseNode.java: A interface for Node parse.
+    - ParseNodeBase.java: abstract class that implement the ParseNode interface, 
+      but for this base class, all the functions is implemented as null.
+    - AlterTableStmt.java: Abstract base Class for ALTER TABLE statements.
+    - AlterTableAddPartitionStmt.java: Abstract base for ALTER TABLE statements that work against Partition specs
+    - AlterTableAddReplaceColsStmt.java: Represents an ALTER TABLE ADD|REPLACE COLUMNS (colDef1, colDef2, …) statement.
+    - AlterTableChangeColStmt.java:Represents an ALTER TABLE CHANGE COLUMN colName newColDef statement. (have TODO in code)
+    - AlterTableDropColStmt.java: Represents an ALTER TABLE DROP COLUMN statement. Hive does not support, but supported by mysql
+    - AlterTablePartitionSpecStmt.java: Abstract base class for ALTER TABLE statements that work against Partition
+    - AlterTableDropPartitionStmt.java: Represents an ALTER TABLE DROP PARTITION statement.
+    - AlterTableRenameStmt.java: Represents an ALTER TABLE RENAME <table> statement.
+    - AlterTableSetFileFormatStmt.java: Represents an ALTER TABLE [PARTITION partitionSpec] SET FILEFORMAT statement.
+    - AlterTableSetLocationStmt.java:Represents an ALTER TABLE [PARTITION partitionSpec] SET LOCATION statement
+    - TableRef.java: An Abstract representation of a table reference. 
+      The actual table reference could be an inline view, or a base table, such as Hive table or HBase table.
+    - BaseTableRef.java: An actual table, such as HBase Table or a Hive Table.
+    - InlineViewRef.java: Inline view is a query statement with an alias.
+    - CreateDbStmt.java:Represent a CREATE DATABASE statement.
+    - CreateTableLikeStmt.java: Represent a CREATE TABLE LIKE statement which create 
+      a new table based on a copy of an existing table defination.
+    - CreateTableStmt.java: Represent a CREATE TABLE statement.
+    - DescribeStmt.java: Represent a DESCRIBE table statement.
+    - DropDbStmt.java: Represent a DROP [ IF EXISTS] DATABASE statement.
+    - DropTableStmt.java: Represent a DROP [IF EXISTS] TABLE statement.
+    - InsertStmt.java: Represent a single insert statement, include the select statement whose results are to be inserted.
+    - QueryStmt.java: Abstract base class of any statement that return results via a list of result expression.
+    - SelectStmt.java: Representation of a single select block, including GROUP BY, ORDER BY, and HIVING clause.
+    - UnionStmt.java: Representation of a union with its list of operands, and optional order by and limit.
+    - ShowDbStmt.java: Representation of a SHOW DATABASE [pattern] statement.
+    - ShowTableStmt.java: Representation of a SHOW TABLES [pattern] statement.
+    - UseStmt.java: Representation of a USE db statement.
+    - AnalysisContext.java: Wrapper class for parser and analyzer
+    - Analyzer.java: Repository of analysis state for single select block
+    - Expr.java: root of the expr node hierarchy, extened from TreeNode, ParseNode.
+    - ArithmeticExpr.java:
+    - Predicate.java:
+    - BetweenPredicate.java: Class describing between predicate.
+    - BinaryPredicate.java: Most predicates with two operands.
+    - CompoundPredicate.java: &&, ||, | predicate
+    - InPredicate.java:
+    - IsNullPredicate.java
+    - LikePredicate.java
+    - TupleIsNullPredicate.java: Internal expr that returns true if all of the given tuples are NULL, otherwise false
+    - LiteralExpr.java:
+    - BoolLiteral.java:
+    - DateLiteral.java:
+    - FloatLiteral.java:
+    - IntLiteral.java
+    - NullLiteral.java
+    - StringLiteral.java
+    - CaseExpr.java: represents the SQL expression CASE [expr] WHEN expr THEN expr [WHEN expr THEN expr …] [ELSE expr] END
+    - SlotRef.java:
+    - CastExpr.java:
+    - FunctionCallExpr.java:
+    - TimestampArithmeticExpr.java:Describe the addition and subtraction of time units from time stamps.
+    - CaseWhenClause.java: captures info of a single WHEN expr THEN expr clause.
+    - ColumnDef.java: Represents a column definition in a CREAT/ALTER TABLE statement(column name + data type) and optional comment.
+    - DescriptorTable.java: Repository for tuple ( and slot) descriptors.
+    - JoinOperator.java
+    - OpcodeRegistry.java: It provides a mapping between function signatures and opcodes.
+      The supported functions are code-gen'ed and added to the registry with an assigned opcode.
+    - OrderByElement.java: Combination of expr and ASC/DESC.
+    - PartitionKeyValue.java: Representation of a single column:value element in the PARTITION (…) clause of 
+      an insert or alter table statement.
+    - PartitionListItem.java: Representation of a single column:value element in the PARTITION (…) clause of 
+      an insert statement.
+    - SelectList.java: Select list items plus distinct clause.
+    - SelectListItem.java:
+    - SlotDescriptor.java:
+    - SlotId.java: Extended from com.cloudera.impala.common.Id
+    - ExprId.java: Extended from com.cloudera.impala.common.Id.
+    - TupleId.java
+    - SortInfo.java: Encapsulates all the information needed to compute ORDER BY.
+    - TableName.java
+    - TupleDescriptor.java
+
+*** Src/main/java/com/cloudera/impala/catalog
+
+    - Catalog.java
+    - Column.java
+    - ColumnStats.java
+    - Db.java
+    - FileFormat.java
+    - HBaseColumn.java
+    - HBaseTable.java
+    - HdfsCompression.java
+    - HdfsFileFormat.java
+    - HdfsPartition.java
+    - HdfsStorageDescriptor.java
+    - HdfsTable.java
+    - HiveStorageDescriptorFactory.java
+    - InlineView.java
+    - PrimitiveType.java
+    - RowFormat.java
+    - Table.java
+    - TableId.java
+
+
+*** Src/main/java/com/cloudera/impala/common
+
+    - AnalysisException.java
+    - Id.java
+    - IdGenerator.java
+    - ImpalaException.java
+    - ImpalaRuntimeException.java
+    - InternalException.java
+    - JniUtil.java
+    - MetaStoreClientPool.java
+    - NotImplementedException.java
+    - Pair.java
+    - Reference.java
+    - TreeNode.java
+
+*** Src/main/java/com/cloudera/impala/hive
+
+    - Serde
+    - ParquetInputFormat.java
+    - ParquetOutputFormat.java
+
+   
+*** Src/main/java/com/cloudera/impala/planner
+
+    - AggregationNode.java
+    - DataPartition.java
+    - DataSink.java
+    - DataStreamSink.java
+    - ExchangeNode.java
+    - HashJoinNode.java
+    - HBaseScanNode.java
+    - HBaseTableSink.java
+    - HdfsScanNode.java
+    - HdfsTableSink.java
+    - MergeNode.java
+    - PlanFragment.java
+    - PlanFragmentId.java
+    - Planner.java
+    - PlanNode.java
+    - PlanNodeId.java
+    - ScanNode.java
+    - SelectNode.java
+    - SingleColumnFilter.java
+    - SortNode.java
+    - TableSink.java
+    - ValueRange.java
+
+*** Src/main/java/com/cloudera/impala/service
+    - FeSupport.java
+    - Frontend.java
+    - JniFrontend.java
+    - MetadataOp.java
+
+** BE
+
+*** Src/codegen
+
+    Use LLVM IR for CodeGen
+     
+    - llvm-codegen.cc/h: LLVM Code Generator. It is the top level object to generate jitted code.
+    - subexpr-elimination.cc/h: Optimization pass to remove redundant exprs.
+    - impala-ir.cc/h:Used to cross compile SQL to LLVM IR.
+    
+*** Src/common:
+    - daemon.cc/h: an implementation of InitDaemon function.
+    - Global-flags.cc: Define some global flag strings,like hostname, be_port, memory_limit, etc.
+    - Global-types.h: introduce 4 id types: TupleId, SlotId, TableId, PlanNodeId.
+    - Hdfs.h:whether to include the hdfs.h, depends on whether the code is compiled to IR
+    - Logging.h: If already compiled to IR, we only use it, and not compile again.
+    - Object-pool.h: An objectPool maintains a list of C++ objects which are deallocated by destroying the pool.
+    - Status.cc/h:
+    - Compiler-util.h: Including some hint to compiler for branch likely optimization.
+
+*** Src/exec
+    - aggregation-node.cc/h/-ir.cc：In-Memory Hash Aggregation(TODO:What is it), will aggregate output tuples and strings.
+    - base-sequence-scanner.cc/h: Super Class for all sequence container based file format, like SequenceFile, RCFile, Avro(TODO: what is these).
+    - hdfs-avro-scanner.cc/h: this scanner reads Avro object container files(ie, Avro data files) located in HDFS and writes the content as tuples in the Impala in-memory representation of data
+    - hdfs-rcfile-scanner.cc/h: a scanner to read RCFiles into tuples. (TODO: RCFile has a pseudo-BNF grammer)
+    - hdfs-sequence-scanner.cc/h: This scanner parses Sequence file located in HDFS, and writes the content as tuples in the Impala in-memory representation of data.
+    - data-sink.cc/h: Super Class for all data sinks, include Setup, Send, Close, CreateDataSink functions for DataSink usage.
+    - hbase-table-sink.cc/h: Class to take row batches and send them to the HBaseTableWriter to eventually be written into an HBase table.
+    - hdfs-table-sink.cc/h: The sink consumes all row batches of its child execution tree, and writes the evaluated output_exprs into temporary Hdfs files. The query coordinator moves the temporary files into their final locations after the sinks have finished executing.
+    - ddl-executor.cc/h: Responsible for executing statements that modify or query table metadata explicitely.currently include SHOW and DESCRIBE statements, HiveServer2 metadata operations. Each query statement will typically have one DdlExecutor.
+    - delimited-text-parser.cc/h/.inline.h/-test.cc:The Delimited Text Parses text rows taht are delimited by specific chars. The main method is ParseData.
+    - exchange-node.cc/h: Receiver node for data stream. It simply feeds row batches received from the data stream into the execution tree.
+    - exec-node.cc/h: SupperClass of all executor nodes.
+    - merge-node.cc/h: Nodes that merges the results of its children by materializing their evaluated expressions into row batches. it pulls row batches sequentially from its children.
+    - scan-node.cc/h: Abstract base class of all scan node.
+    - hbase-scan-node.cc/h
+    - hdfs-scan-node.cc/h: A ScanNode implementation that is used for all tables read directly from HDFS-serialised data.
+    - select-node.cc/h: Node that evaluates conjuncts and enforces a limit but otherwise passes along the rows pulled from its child unchanged.
+    - topn-node.cc/h: Node for in-memory TopN (ORDER BY … LIMIT). This handles the case where the result fits in memory.
+    - hash-join-node.cc/h/-ir.cc: Node for in-memory hash joins.
+    - hash-table.cc/h/.inline.h/-test.cc: Hash table implementation designed for hash aggregation and hash joins. It store TupleRows and allows for different exprs for insertions and finds.
+    - hbase-table-scanner.cc/h: JNI wrapper class implementing minimal functionality for scanning an HBase table.
+    - hbase-table-writer.cc/h: Class to write RowBatches to an HBase table using the Java HTable Client.
+    - hdfs-lzo-text-scanner.cc/h: A wrapper for calling the external HdfsLzoTextScanner. The LZO scanner class is implemented in a dynamically linked library so that Impala does not include GPL code.
+    - hdfs-scanner.cc/h/-ir.cc: A superclass for different hdfs file format parsers. Each split has an instance of the scanner object, and each instance driven by a different thread created by the scan node.
+    - hdfs-parquet-scanner.cc/h: This scanner parses Parquet files located in HDFS, and writes the content as tuples in the Impala in-memory representation of data.( i.e. tuples, rows, row batches)
+    - hdfs-text-scanner.cc/h: HDFSScanner implementation that understands text-formatted records. (TODO: have SSE)
+    - hdfs-table-writer.cc/h: Pure virtual class for writing to HDFS table partition files. Subclasses implement the code needed to write to a specific file type.
+    - hdfs-parquet-table-writer.cc/h: the writter consumes all rows passed to it, and writes the evaluated output_exprs as a parquet file in HDFS.
+    - hdfs-text-table-writer.cc/h: the writer consumes all rows passed to it and writes the evaluated output_exprs as delimited text into Hdfs files.
+    - parquet-common.h: this file contains common elements between the parquet Writer and Scanner.
+    - read-write-util.cc/h: class for reading and writing various data types.
+    - scanner-context.cc/h/.inline.h: it encapsulates everything needed for hdfs scanners, and provides two main abstractions: a) abstraction of RowBatches and memory management. b) abstraction over getting buffers from the disk io mgr.
+    - sequence-file-recovery-test.cc: test file for sequence file??
+    - text-converter.cc/h/.inline.h: helper class for dealing with text data. e.g, converting text data to numeric types,etc.
+    - zigzag-test.cc: test file
+
+
+*** Src/exprs/
+    How the exprs in SQL is handled by Impala.
+
+    - expr.cc/h/-ir.cc/-test.cc: superclass of all expr evaluation nodes
+    - agg-expr.cc/h: Aggregate Expr
+    - arithmetic-expr.cc/h
+    - case-expr.cc/h
+    - cast-expr.cc/h
+    - bool-literal.cc/h
+    - date-literal.cc/h
+    - float-literal.cc/h
+    - int-literal.cc/h
+    - null-literal.cc/h
+    - string-literal.cc/h
+    - timestamp-literal.cc/h
+    - function-call.cc/h
+    - predicate.h
+    - binary-predicate.cc/h
+    - compound-predicate.cc/h
+    - in-predicate.cc/h
+    - like-predicate.cc/h: The LIKE will be convered into the corresponding regular expression pattern.
+    - tuple-is-null-predicate.cc/h
+    - is-null-predicate.cc/h
+    - conditional-functions.cc/h
+    - math-functions.cc/h
+    - utility-functions.cc/h
+    - string-functions.cc/h
+    - timestamp-functions.cc/h
+    - opcode-registry.cc/h
+    - timezone_db.cc: Time zone Database
+    - slot-ref.cc: Reference to a single slot of a tuple. the class is defined in expr.h
+    - expr-benchmark.cc: utility class to take (ascii) sql and return the plan.
+
+
+*** Src/runtime/
+    - client-cache.h/cc: Generic cache of Thrift clients for a given service type.
+    - coordinator.h/cc: Query coordinator is used to handle execution of plan fragments on remote nodes, given a TQueryExecRequest.
+    - data-stream-mgr.cc/h: Singleton class which manages all incoming data streams at a backend node. It provieds both producer and consumer functionality for each data steam.
+    - data-stream-recvr.h: Single receiver of an m:n data stream.
+    - data-stream-sender.cc/h: Single sender of an m:n data stream.
+    - data-stream-test.cc: Data Stream test code.
+    - descriptors.cc/h: Base class for table descriptors. Also defines HdfsTableDescriptor, HBaseTableDescriptor
+    - disk-io-mgr.cc/h/-test.cc: Manager object that schedules IO for all queires on all disks. Just like a multiple-producer-multiple-consumer problem.
+    - disk-io-mgr-stress.cc/h/-test.cc: Test utility to stress the disk io mgr
+    - exec-env.cc/h: Execution environment for queries/plan fragments. Contains all required global structures, and handles to singleton services.
+    - free-list.h/-test.cc: a free list made up of nodes which contain a pointer to the next node, and the size of the block.
+    - hbase-table.cc/h: Class to wrap JNI calls into HTable.
+    - hbase-table-factory.cc/h: A (process-wide) factory of HTable java objects. This object keeps java objects around to ease creation of HTables that share a pool of threads and connections.
+    - hdfs-fs-cache.cc/h: a (process-wide) cache of HdfsFS objects. These connections are shared across all threads and kept open until the process terminates.
+    - mem-limit.h: A MemLimit tracks memory consumption against a particular limit.
+    - mem-pool.cc/h/-test.cc: A MemPool maintains a list of memory chunks from which it allocates memory in response to Allocate() calls.
+    - parallel-executor.cc/h/-test.cc: A class that executes multiple functions in parallel with different arguments using a thread pool.
+    - plan-fragment-executor.cc/h: It handles all aspects of the execution of a single plan fragment, including setup and tear-down, both in the success and error case.
+    - primitive-type.cc/h
+    - raw-value.cc/h/-test.cc: Useful utility functions for runtime values( which are passed around as void*)
+    - row-batch.cc/h: a RowBatch encapsulates a batch of rows, each composed of a number of tuples.
+    - runtime-state.cc/h: A collection of items that are part of the global state of a query and shared across all execution nodes of that query.
+    - string-buffer.h/-test.cc: Implement a subset of std::string which support dynamic-sizable string, without as many copies and allocations.
+    - string-search.h: From Python, use boyer-moore-horspool algorithm to do substring search.
+    - string-value.cc/h/inline.h/-ir.cc/-test.cc: The returned StringValue of all functions that return StringValue shares its buffer the parent. (TODO: has SSE for strings compare)
+    - thread-resource-mgr.cc/h/-test.cc: Singleton(TODO: what is Singleton) object to manage CPU(aka (TODO what is aka) thread) resources for the process. Conceptually, there is a fixed pool of threads that are shared between query fragments.
+    - timestamp-value.cc/h/-test.cc: The format of a timestamp-typed slot.
+    - tuple.cc/h: a tuple is stored as a contiguous sequence of bytes containing a fixed number of fixed-size slots.
+    - tuple-row.cc/h: A TupleRow encapsulates a contiguous sequence of Tuple pointers which together make up a row.
+
+
+*** Src/service/
+    - fe-support.cc/h: The InitFeSupport() registers native functions with JNI, so that when Java function FeSupport.EvalPredicate is called within Impalad, the native implementation FeSupport_EvalPredicateImpl already exists in Impalad binary.
+    - impala-server.cc/h: An ImpalaServer contains both frontend and backend functionality: it implements ImpalaService(Beeswax), ImpalaHiveServer2Service(HiveServer2) and ImpalaInternalService APIs.
+    - impala-beeswax-server.cc
+    - impala-hs2-server.cc
+    - impalad-main.cc: The main start point of Impalad. it will:
+      - InitDaemon()
+      - LlvmCodeGen::InitializeLlvm()
+      - JniUtil::InitLibhdfs()
+      - JniUtil::Init()
+      - HBaseTableScanner::Init()
+      - HBaseTableFactory::Init()
+      - HBaseTableWriter::InitJNI()
+      - InitFeSupport()
+      - CreateImpalaServer()
+      - be_server→Start();
+      - exec_env.StartServices();
+      - beeswax_server→Start();
+      - hs2_server→Start()
+      - ImpaladMetrics::IMPALA_SERVER_READY→Update(true)
+      - beeswax_server→Join() (TODO: what is this used for)
+      - hs2_server→Join()(TODO: what is this used for)
+
+
+*** Src/statestore
+    - failure-detector.cc/h: A failure detector tracks the liveness of a set of peers which is computed as a function of received ‘heartbeat’ signals. There are four stattes for a peer: FAILED, SUSPECTED, OK, UNKNOWN.
+    - scheduler.h: Abstract scheduler and nameservice class. Given a list of resources and locations returns a list of hosts on which to execute plan fragments requiring those resources.
+    - simple-scheduler.cc/.h/-test.cc: Performs simple scheduling by matching between a list of hosts configured either from the state-store, or from a static list of addresses, and a list of target data locations.
+    - state-store.cc/h: It is a soft-state key-value store that maintains a set of Topics, which are maps from string keys to byte array value
+    - state-store-subscriber.cc/h: It communicates with a state-store periodically through the exchange of heartbeat messages. These messages contain updates from the state-store to a list of ‘topics’ that the subscriber is interested in ; in response the subscriber sends a list of changes that it wishes to make to a topic.
+    - statestored-main.cc: contains the main() function for a state store process which exports the Thrift service StateStoreService.
+
+*** Src/testutil/
+    - impalad-query-executor.cc/.h: Query execution against running impalad process.
+    - in-process-servers.cc/h: A single impala service, with a backend server, two client servers, a webserver and optionally a connection to a state-store.
+    - mini-impala-cluster.cc: A standalone test utility that starts multiple Impala backends and a state store within a single process.
+
+
+*** Src/transport/
+    all the TSasl* file is used for Thrift, and plan to submitted to the upstream Thrift library.
+    - config.h: Generted from configure.ac by autoheader
+    - TSasl.cpp/h:
+    - TSaslClientTransport.cpp/h
+    - TSaslServerTransport.cpp/h
+    - TSaslTransport.cpp/h
+    - undef.cpp
+
+*** Src/util/
+    - authorization.cc/h: Routines to support Kerberos authentication through the thrift-sasl transport
+    - benchmark.cc/h/-test.cc: Utility class for microbenchmarks
+    - bit-stream-utils.h/.inline.h: Utility class to write bit/byte streams. It can write data to either be bit packed or byte aligned.
+    - bit-util.h/-test.cc: Utility class to do standard bit tricks
+    - buffer-builder.h: Utility class to build an in-memory buffer
+    - codec.cc/h: Create a compression object, and it is the base class for all compression algorithm.
+    - compress.cc/h: Another Compression class.
+    - container-util.h
+    - cpu-info.cc/h: An interface to query for CPU information at runtime.
+    - debug-counters.h: Runtime Counters have a two-phase life cycle: creation and update.
+    - debug-util.cc/.h/-test.cc: Contains some debug helpper function sand classes.
+    - decompress.cc/.h/-test.cc:
+    - default-path-handlers.cc/h Add a set of default path handlers to the webserver to display logs and configuration flags.
+    - disk-info.cc/h: An interface to query for the disk information at runtime, the information is pulled from /proc/partitions
+    - dynamic-util.cc/h: Dynamically linked library interfaces, which help lookup smybols.
+    - hash-util.cc/h/-ir.cc: the “ir” file defined the hashing functions for llvm
+    - hdfs-util.cc/h
+    - impalad-metrics.cc/h: Contains the keys for impala metrics.
+    - integer-array.cc/h/-test.cc: Helper class to extract integers of a fixed number of bits from an array.The ints are packed into sequential words in memroy.
+    - jni-util.cc/h: Utility class for JNI-related functionality.
+    - logging.cc/h: Utility for Google logging usage.
+    - mem-info.cc/h: Provides the amount of physical memory available, populated from /proc/meminfo.
+    - metrics.h/cc/-test.cc: : publishes execution metrics to a webserver pages
+    - TODO: reconsider naming here; metrics is too general.
+    - network-perf-benchmark.cc: A simple c/S network speed benchmakr utility. It can support send and broadcast benchmarks.
+    - network-util.cc/h: hostname related functions
+    - non-primitive-metrics.h: The metrics values whose value have more structure than simple primitive types.
+    - parquet-reader.cc
+    - parse-util.cc/h: Utility class for parsing information from strings.
+    - path-builder.cc/h: Utility class to construct full paths relative to the impala_home path.
+    - perf-counters.cc/h/-test.cc: Utility class that aggregates counters from the kernel. like io, syscall, status
+    - progress-updater.cc/h: Utility class to update progress.
+    - refresh-catalog.cc: Simple utility to force planservice or impalad frontend to reload its catalog.
+    - rle-encoding.h: utility classes to do run length encoding(RLE) for fixed bit width values.
+    - rle-test.cc
+    - runtime-profile.cc/h/-test.cc: it is a group of profiling counters, it supports adding named counters and being able to serialize and deserialize them.
+    - sse-util.h: Contains constants useful for text procesing with SSE4.2 intrinsics.
+    - stat-util.h
+    - static-asserts.cc: Unused now.
+    - stopwatch.h: Utility class to measure time.
+    - string-parser.h: Utility functions for doing atoi/atof on non-null terminated strings.
+    - thrift-client.cc/h: Super class for templatized thrift clients.
+    - thrift-server.cc/h: Utility class for all thrift servers.
+    - thrift-util.cc/h/-test.cc: Utility class to serialize thrift objects to a binary format.
+    - uid-util.h
+    - url-coding.cc/h/-test.cc: Utility methods to URL-encoding, decoding.
+    - url-parser.cc/h
+    - webserver.cc/h:Wrapper class for the Mongoose web server library.
+
+*** thirdparty
+    - avro-1.7.1: a data serialization system(TODO: what is data serialization)
+    - cyrus-sasl-2.1.23: the Simple Authentication and Security Layer
+    - gflags-2.0: Command line flags module for C++.
+    - glog-0.3.2:Google log library, implement application-level logging.
+    - gperftools-2.0: Useful for developing multi-threaded applications in C++ with templates. It have TCMalloc, heap-checker, heap-profiler, and cpu-profiler.
+    - gtest-1.6.0: Google’s framework for writing C++ tests on a variety of platforms. Supports automatic test discovery, a rich set of assertions, user-defined assertions, death tests, fatal and non-fatal failures,…..
+    - hadoop-2.0.0
+    - mongoose: Easy to use web server.
+    - snappy-1.0.5: A compression/decompression library. Aiming for very high speeds and reasonable compression.
+    - thrift-0.9.0
 
 
 * Impala Build on Debian Wheezy(7.0)
@@ -88,3 +509,20 @@ Done!
 E0605 21:59:23.665810   772 impala-server.cc:648] Unsupported file system. Impala only supports DistributedFileSystem but the LocalFileSystem was found. fs.defaultFS(file:///) might be set incorrectly
 E0605 21:59:23.666024   772 impala-server.cc:650] Impala is aborted due to improper configurations.
 #+END_QUOTE
+
+
+
+* Impala Links
+  - Impala JIRA: https://issues.cloudera.org/browse/IMPALA
+  - Marcel Kornacker: http://www.linkedin.com/pub/marcel-kornacker/0/21/684
+  - Alexander Behm: http://www.ics.uci.edu/~abehm/
+  - Skye Wanderman-Milne: http://www.linkedin.com/pub/skye-wanderman-milne/29/87b/738
+  - Lenni Kuff: http://www.linkedin.com/in/lskuff
+  - Nong Li: http://www.linkedin.com/pub/nong-li/38/905/a1a
+  - Henry Robinson: http://www.linkedin.com/in/henrynrobinson
+  - Uri Laserson: http://www.linkedin.com/in/urilaserson
+  - Alan Choi: http://www.linkedin.com/pub/alan-choi/0/213/9a0
+  - Hari Sekhon: http://www.linkedin.com/in/harisekhon
+  - Justin Erickson: http://www.linkedin.com/in/ericksonjustin
+  - Romain Rigaux: http://www.linkedin.com/in/romainrigaux
+
