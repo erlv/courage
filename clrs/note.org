@@ -824,3 +824,7 @@ General method:
     - Overlapping subproblems: A recursive solution contains a "small" number of distinct subproblems repeated many times.
       - Use /Memoization/: After computing a solution to a subproblem, store it in a table. 
 	Subsequent calls check the table to avoid redoing work.
+
+
+
+* Lecture 16
