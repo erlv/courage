@@ -512,6 +512,114 @@ E0605 21:59:23.666024   772 impala-server.cc:650] Impala is aborted due to impro
 
 
 
+* Impala Lecture Notes
+
+** Cloudera Impala Overview ( via Scott Leberknight )
+   Link:http://www.slideshare.net/cloudera/impala-v1update130709222849phpapp01
+
+*** Architecture of Impala
+
+    Impala have 2 daemons:
+    - Impalad: runs on each HDFS DN and/or HBase RegionServer
+    - Statestored: Contains cluster metadata
+
+
+    
+**** Impalad
+
+     It has:
+      - Query Planning
+      - Query Coordination
+      - Query execution: performed in-memory
+	
+
+	The execution enginee:
+	  - in C++
+	  - runtime code generation
+	  - intrinsics for optimizaton
+
+      The Intermediate data never hits disk, and the data will
+      be streamd to client.
+
+
+
+**** Statestored
+     
+     It maintains cluster membership, and acts as a cluster monitor.
+     
+     Impala uses Hive metastore, and the daemons will cache
+     metadata. So you can create tables use either Hive or
+     Impala, but REFRESH is needed when table defination/data
+     changes.
+
+
+*** How SQL query runs in Impala?
+    1. Client submit SQL query to one of the impalad node
+    2. Impalad will run Query Planner and then pass the query
+       to query coordinator
+    3. Query coordinator will dispatch the subpartition of the 
+       query to a subset of all the  impalad daemons.
+    4. Impalad will use the query executor to run the actual
+       subpartition of the query.
+
+    During the running, Statesotre will do cluster monitoring,
+    while Hive Metastore will be used for table/database metadata
+    storing.
+    
+
+
+*** Current Limitations
+    - No join order optimization ('put larger table on left')
+    - Joins limited by aggregate memory of cluster
+    - No custom file formats, SerDes or UDFs
+    - Limit required when using ORDER BY
+    - No advanced data structures(arrays, maps, json, etc)
+    - Limited file formats and compression (though probably fine
+      for most people)
+    - Only basic DDL ( otherwise do in Hive)
+    
+
+
+*** Future works
+    - Structure types(structs, arrays, maps, json, etc)
+    - DDL Support
+    - YARN integration
+    - Join Optimization (cost-based)
+    - UDFs
+    - Additional file formats & compression support
+    - Fault-tolerance
+    - Performance
+    
+
+
+*** Related tools
+    - Google Dremel
+    - HortonWorks Stringer Initiative: Improve Hive performance
+    - Apache Drill: Open Source Google Dremel
+    - Apache Hive:SQL support in MR
+    - Apache Tez
+   
+
+
+** Apache Tez:Accelerating Hadoop Query Processing
+   Link: http://www.slideshare.net/Hadoop_Summit/murhty-saha-june26255pmroom212
+
+   Tez is an distributed execution framework targeted towards
+   data-processing applications. It Based on expressing a 
+   computation as a dataflow graph.
+   It build on top of YARN.
+
+   
+
+** Impala Unlocks interactive BI on Hadoop
+   Link: http://www.slideshare.net/cloudera/2013-0523-impala-and-mstr-webinar-1
+
+   Cloudera trying to use an integrated part of the Hadoop System:
+   - One pool of data
+   - One metadata model
+   - One security framework
+   - One set of system resources
+
 * Impala Links
   - Impala JIRA: https://issues.cloudera.org/browse/IMPALA
   - Marcel Kornacker: http://www.linkedin.com/pub/marcel-kornacker/0/21/684
