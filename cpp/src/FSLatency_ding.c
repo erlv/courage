@@ -65,7 +65,8 @@ void print_start_information( const int fileCount, const int fileSize,
     const int blockSize, const bool needclose, const enum test_mode mode) {
   printf("Start test......\n");
   printf(">>> Total File to write: %d\n", fileCount);
-  printf(">>> Each File Write Size: %d B\n", fileSize);
+  printf(">>> Total File to read: %dx5=%d\n", fileCount, 5*fileCount);
+  printf(">>> Each File Read/Write Size: %d B\n", fileSize);
   printf(">>> Block Size per write: %d B\n", blockSize);
   printf(">>> File descriptor maintainance mode:");
   if(needclose) {
@@ -119,14 +120,35 @@ void do_append_write_test(int* fd, const int fileCount, const int fileSize,
   int i=0;
   int j=0;
   for(; (blockSize * j) < fileSize; j++) {
-
+	  
+	// Each file only read/write a single blocksize of data
     for(i=0; i < fileCount; i++) {
-      char filename[MAX_FILENAME_LEN];
-      snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, path, filename_w_prefix, i);
+      
       struct timeval tv_begin, tv_end;    
       gettimeofday(&tv_begin, NULL);
 
-      // TODO:Read 5-file, write 1-file
+      
+      // Read 5-file
+      int j=0;
+      for(; j < 5; j++) {
+		  char filename[MAX_FILENAME_LEN];
+		  
+		  //Generate a random int between [0:5*fileCount]
+		  int rand_i = rand() % (5*fileCount);
+		  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, path, filename_r_prefix, rand_i);
+		  
+		  int read_fd = open(filename, O_RDONLY, 0);
+		  if( read_fd <= 0 ) {
+			  printf("Open file for read error: %s\n", filename);
+		  }
+		  read(read_fd, buf, blockSize);
+		  close(read_fd);
+	  }
+      
+      
+      // Write 1-file
+      char filename[MAX_FILENAME_LEN];
+      snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, path, filename_w_prefix, i);
       int cur_fd;
       if(needclose) {
         cur_fd = open(filename, AW_FILE_MODE, 0666);
@@ -145,14 +167,14 @@ void do_append_write_test(int* fd, const int fileCount, const int fileSize,
 
       long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
           - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
-#ifdef TIME
+//#ifdef TIME
       if(needclose) {
         printf("Need Close: ");
       } else {
         printf("Do not need Close: ");
       }
       printf("%ld us\n", elapsed);
-#endif
+//#endif
     }
   }  
   if(!needclose) {
@@ -165,6 +187,7 @@ void do_append_write_test(int* fd, const int fileCount, const int fileSize,
  *
  */
 void prepare_env(int read_fcnt, int file_size) {
+	
   printf("prepare env, read_fcnt:%d.\n", read_fcnt);
 
   char buf[MAX_BLOCK_SIZE] = {0};
@@ -174,6 +197,7 @@ void prepare_env(int read_fcnt, int file_size) {
   for( ; i < read_fcnt; i++) {
       char filename[MAX_FILENAME_LEN];
       snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, path, filename_r_prefix, i);
+      //printf("prepare file:%s.\n", filename);
       int* cur_fd = open(filename, AW_FILE_MODE, 0666);
       if(cur_fd <= 0 ) {
         printf("Open file error: %s\n", filename);
