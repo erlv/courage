@@ -15,15 +15,6 @@
  *
  */
 
-/** 
- * TODO:
- *   1. Implement the hw write latency test
- *   2. Implement the ar read latency test
- *   3. Implement the hr read latency test
- *   4. Make the program automatically generate a log file whitch record all latency
- */
-
-
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -135,7 +126,7 @@ void do_append_write_test(int* fd, const int fileCount, const int fileSize,
       struct timeval tv_begin, tv_end;    
       gettimeofday(&tv_begin, NULL);
 
-      // Read 5-file, write 1-file
+      // TODO:Read 5-file, write 1-file
       int cur_fd;
       if(needclose) {
         cur_fd = open(filename, AW_FILE_MODE, 0666);
