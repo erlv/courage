@@ -50,7 +50,6 @@
 #define AR_FILE_MODE ( O_CREAT|O_RDWR )
 #define HR_FILE_MODE ( O_CREAT|O_RDWR )
 
-typedef int bool;
 
 enum  test_mode {
   MODE_AW,
@@ -63,8 +62,10 @@ char G_path[MAX_PATH_LEN] = {0};
 char* G_filename_r_prefix = "1MB_R_";
 char* G_filename_w_prefix = "1MB_W_";
 
+
+
 void print_usage() {
-  printf("Usage: test path testcount filesize(Byte) blocksize(Byte) close(1|0) \n");
+  printf("Usage: test path testcount filesize(Byte) blocksize(Byte) close(1|0) distribued(0|1)\n");
   printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of files that need to be read/written\n");
   printf(" >>> filesize: Each file size in Byte that will be write\n");
@@ -72,11 +73,14 @@ void print_usage() {
   printf(" >>> close: \n");
   printf(" >>> \t 0: Use open-write/read-close steps for each block.\n");
   printf(" >>> \t 1: use  write-sync per block for each block.\n\n");
-  printf(" Example: test  data/ 500 524288 524288 1\n");
+  printf(" >>> distributed mode: \n");
+  printf(" >>> \t 0: Doing File System latency test locally without network.\n");
+  printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n");
+  printf(" Example: test  data/ 500 524288 524288 1 0\n");
 }
 
 void print_start_information( const int fileCount, const int fileSize, 
-    const int blockSize, const bool needclose, const enum test_mode mode) {
+			      const int blockSize, const bool needclose, const enum test_mode mode) {
   printf("Start test......\n");
   printf(">>> Total File to write: %d\n", fileCount);
   printf(">>> Total File to read: %dx5=%d\n", fileCount, 5*fileCount);
@@ -91,35 +95,48 @@ void print_start_information( const int fileCount, const int fileSize,
 
   char* mode_str;
   switch(mode) {
-    case MODE_AW:
-      mode_str = "aw";
-      break;
+  case MODE_AW:
+    mode_str = "aw";
+    break;
+
+  case MODE_HW:
+  case MODE_AR:
+  case MODE_HR:
+    printf("Mode not implemented yet.\n");
+    exit(-1);
+
+  default:
+    printf("Unsupported Mode. \n");
+    exit(-1);
+
   }
   printf(">>> Test Mode is: %s.\n", mode_str);
   printf("\n\n");
 }
 
-void init_fds( int* fd, int totalfiles, char* filename_prefix, int mode ) {
+void init_fds( FD* fd, int totalfiles, char* filename_prefix, int mode ) {
   int i = 0;
   for( ; i < totalfiles; i++) {
     char filename[MAX_FILENAME_LEN];
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, filename_prefix, i);
     if( ( fd[i] = open(filename, mode, 0666) ) <= 0 )
-      printf("Open file error: %s\n", filename);	  
+      printf("Open file error: %s\n", filename);
   }
 }
 
 
-void close_fds( int*fd, int totalfiles) {
+void close_fds( FD* fd, int totalfiles) {
   int i = 0;
   for( ; i < totalfiles; i++) {
     close(fd[i]);
   }
 }
 
-void do_file_read_test(const int fileCount, const int blockSize, const bool needclose) {
+void op_file_read(FD* fd, const int fileCount, const int blockSize, const bool needclose) {
   // Read 5-file
   int j=0;
+  char buf[MAX_BLOCK_SIZE] = {0};
+
   for(; j < 5; j++) {
     char filename[MAX_FILENAME_LEN];
 
@@ -137,11 +154,15 @@ void do_file_read_test(const int fileCount, const int blockSize, const bool need
 
 }
 
-void do_file_write_test(const int fileCount, const int blockSize, const bool needclose) {
+void op_file_create_write(FD* fd, const int fileCount, const int blockSize, 
+			  const bool needclose, const int fileName_idx) {
 
   // Write 1-file
   char filename[MAX_FILENAME_LEN];
-  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_w_prefix, i);
+  char buf[MAX_BLOCK_SIZE] = {0};
+
+  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path,
+	   G_filename_w_prefix, fileName_idx);
   int cur_fd;
   if(needclose) {
     cur_fd = open(filename, AW_FILE_MODE, 0666);
@@ -151,57 +172,81 @@ void do_file_write_test(const int fileCount, const int blockSize, const bool nee
     write(cur_fd, buf, blockSize);
     close(cur_fd);
   } else {
-    cur_fd = fd[i];
+    cur_fd = fd[fileName_idx];
     write(cur_fd, buf, blockSize);
     fsync(cur_fd);
   }
-
-
 }
 
-void do_append_write_test(int* fd, const int fileCount, const int fileSize, 
-    const int blockSize, const bool needclose) {
+// Create the testdir
+void create_test_dir() {
+  char mkdircmd[MAX_STR_LEN] = {0};
+  sprintf( mkdircmd, "mkdir -p %s", G_path);
+  system(mkdircmd);
+}
 
-  char buf[MAX_BLOCK_SIZE] = {0};
+void do_append_write_test_local(FD* fd, const int fileCount, const int fileSize,
+				const int blockSize, const bool needclose) {
+
   if(! needclose) {
     // Do not need close:
     // Open file before the test start, mode O_CREAT|O_APPEND|O_SYNC
     init_fds(fd, fileCount, G_filename_w_prefix, AW_FILE_MODE);
   }
-
-  char mkdircmd[MAX_STR_LEN] = {0};
-  sprintf( mkdircmd, "mkdir -p %s", G_path);
-  system(mkdircmd);
+  create_test_dir();
 
   int i=0;
-  int j=0;
-  for(; (blockSize * j) < fileSize; j++) {
 
-    // Each file only read/write a single blocksize of data
-    for(i=0; i < fileCount; i++) {
+  // Each file only read/write a single blocksize of data
+  for(i=0; i < fileCount; i++) {
 
-      struct timeval tv_begin, tv_end;    
-      gettimeofday(&tv_begin, NULL);
+    struct timeval tv_begin, tv_end;
+    gettimeofday(&tv_begin, NULL);
 
-      do_file_read_test(fileCount, blockSize, needclose);
-      do_file_write_test(fileCount, blockSize, needclose);
+    op_file_create_write(fd, fileCount, blockSize, needclose, i);
+    op_file_read(fd, fileCount, blockSize, needclose);
 
-      gettimeofday(&tv_end, NULL);
+    gettimeofday(&tv_end, NULL);
 
-      long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
-          - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
-      if(needclose) {
-        printf("Need Close: ");
-      } else {
-        printf("Do not need Close: ");
-      }
-      printf("%ld us\n", elapsed);
+    long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
+			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
+    if(needclose) {
+      printf("Need Close: ");
+    } else {
+      printf("Do not need Close: ");
     }
-  }  
+    printf("%lld us\n", elapsed);
+  }
+
   if(!needclose) {
     close_fds(fd, fileCount);
   }
 }
+
+
+// Write was done locally, while read was done remotely
+void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSize,
+				  const int blockSize, const bool needclose) {
+  
+
+}
+
+
+void do_append_write_test(FD* fd, const int fileCount, const int fileSize, 
+			  const int blockSize, const bool needclose, const bool distributed_mode) {
+  //Create 1000 files frist for read support
+  int read_fileCount = 5* fileCount;
+  prepare_env(read_fileCount, fileSize);
+
+  if(distributed_mode) {
+    do_append_write_test_remote(fd, fileCount, fileSize, blockSize, needclose);
+  } else {
+
+
+    do_append_write_test_local(fd, fileCount, fileSize, blockSize, needclose);
+  }
+}
+
 
 /**
  * Create read_fcnt files with the size: file_size to prepare for file read
@@ -218,19 +263,19 @@ void prepare_env(int read_fcnt, int file_size) {
   for( ; i < read_fcnt; i++) {
     char filename[MAX_FILENAME_LEN];
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, i);
-    //printf("prepare file:%s.\n", filename);
-    int* cur_fd = open(filename, AW_FILE_MODE, 0666);
+    printf("prepare file:%s.\n", filename);
+    FD cur_fd = ( FD )open(filename, AW_FILE_MODE, 0666);
     if(cur_fd <= 0 ) {
       printf("Open file error: %s\n", filename);
     }
     int cur_size = 0;
     while(cur_size < file_size ) {
       if( file_size - cur_size > blockSize) {
-        write(cur_fd, buf, blockSize);
-        cur_size += blockSize;
+	write(cur_fd, buf, blockSize);
+	cur_size += blockSize;
       } else {
-        write(cur_fd, buf, (file_size - cur_size ));
-        cur_size = file_size;
+	write(cur_fd, buf, (file_size - cur_size ));
+	cur_size = file_size;
       }
     }
     close(cur_fd);
@@ -240,10 +285,10 @@ void prepare_env(int read_fcnt, int file_size) {
 
 int main(int argc, char* argv[]) {
 
-  int fd[MAX_COUNT] = {0};
+  FD fd[MAX_COUNT] = {0};
 
   // variables for the test
-  if(argc != 6 ) {
+  if(argc != 7 ) {
     print_usage();
     exit(0);
   }
@@ -255,19 +300,27 @@ int main(int argc, char* argv[]) {
   int fileSize = atoi(argv[3]);
   int blockSize = atoi(argv[4]);
   bool needclose = atoi(argv[5]);
+  bool is_distributed = atoi(argv[6]);
   enum test_mode mode;
 
   mode = MODE_AW;
   print_start_information(fileCount, fileSize, blockSize, needclose, mode);
 
-  //Create 1000 files frist for read support
-  int read_fileCount = 5* fileCount;
-  prepare_env(read_fileCount, fileSize);
-
   switch(mode) {
-    case MODE_AW:
-      do_append_write_test(fd, fileCount, fileSize, blockSize, needclose);
-      break;
+  case MODE_AW:
+    do_append_write_test(fd, fileCount, fileSize, blockSize, needclose, is_distributed);
+    break;
+
+  case MODE_HW:
+  case MODE_AR:
+  case MODE_HR:
+    printf("Mode not implemented yet.\n");
+    exit(-1);
+
+  default:
+    printf("Unsupported Mode. \n");
+    exit(-1);
+
   }
 
   return 0;
