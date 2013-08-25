@@ -21,48 +21,13 @@
  *   2. Write is client, read is sever
  *   3. The whole work flow:
  *      a. Client write 1 file
- *      b. client tell the server to read 5 files.
- *      c. server read 5 files, and tell client that I have done
+ *      b. client tell the server to read READS_PER_WRITE files.
+ *      c. server read READS_PER_WRITE files, and tell client that I have done
  *      d. client report the whole latency
  *
  *
  */
-
-#include "sockperf.h"
-#include <time.h>
-#include <sys/time.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
-#define MAX_COUNT 1024
-#define MAX_BLOCK_SIZE 1024*1024
-#define FILENAME_FORMAT "%s/%s%04d"
-#define MAX_PATH_LEN  90
-#define MAX_STR_LEN 128
-#define MAX_FILENAME_LEN MAX_STR_LEN
-
-#define AW_FILE_MODE ( O_CREAT|O_APPEND|O_RDWR )
-#define HW_FILE_MODE ( O_CREAT|O_RDWR )
-#define AR_FILE_MODE ( O_CREAT|O_RDWR )
-#define HR_FILE_MODE ( O_CREAT|O_RDWR )
-
-
-enum  test_mode {
-  MODE_AW,
-  MODE_HW,
-  MODE_AR,
-  MODE_HR
-};
-
-char G_path[MAX_PATH_LEN] = {0};
-char* G_filename_r_prefix = "1MB_R_";
-char* G_filename_w_prefix = "1MB_W_";
-
-
+#include "FSLatency_distributed.h"
 
 void print_usage() {
   printf("Usage: test path testcount filesize(Byte) blocksize(Byte) close(1|0) distribued(0|1)\n");
@@ -80,10 +45,11 @@ void print_usage() {
 }
 
 void print_start_information( const int fileCount, const int fileSize, 
-			      const int blockSize, const bool needclose, const enum test_mode mode) {
+			      const int blockSize, const bool needclose,
+			      const enum test_mode mode) {
   printf("Start test......\n");
   printf(">>> Total File to write: %d\n", fileCount);
-  printf(">>> Total File to read: %dx5=%d\n", fileCount, 5*fileCount);
+  printf(">>> Total File to read: %dx%d=%d\n", fileCount, READS_PER_WRITE, READS_PER_WRITE * fileCount);
   printf(">>> Each File Read/Write Size: %d B\n", fileSize);
   printf(">>> Block Size per write: %d B\n", blockSize);
   printf(">>> File descriptor maintainance mode:");
@@ -118,7 +84,8 @@ void init_fds( FD* fd, int totalfiles, char* filename_prefix, int mode ) {
   int i = 0;
   for( ; i < totalfiles; i++) {
     char filename[MAX_FILENAME_LEN];
-    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, filename_prefix, i);
+    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, 
+	     G_path, filename_prefix, i);
     if( ( fd[i] = open(filename, mode, 0666) ) <= 0 )
       printf("Open file error: %s\n", filename);
   }
@@ -132,27 +99,6 @@ void close_fds( FD* fd, int totalfiles) {
   }
 }
 
-void op_file_read(FD* fd, const int fileCount, const int blockSize, const bool needclose) {
-  // Read 5-file
-  int j=0;
-  char buf[MAX_BLOCK_SIZE] = {0};
-
-  for(; j < 5; j++) {
-    char filename[MAX_FILENAME_LEN];
-
-    //Generate a random int between [0:5*fileCount]
-    int rand_i = rand() % (5*fileCount);
-    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
-
-    int read_fd = open(filename, O_RDONLY, 0);
-    if( read_fd <= 0 ) {
-      printf("Open file for read error: %s\n", filename);
-    }
-    read(read_fd, buf, blockSize);
-    close(read_fd);
-  }
-
-}
 
 void op_file_create_write(FD* fd, const int fileCount, const int blockSize, 
 			  const bool needclose, const int fileName_idx) {
@@ -178,16 +124,9 @@ void op_file_create_write(FD* fd, const int fileCount, const int blockSize,
   }
 }
 
-// Create the testdir
-void create_test_dir() {
-  char mkdircmd[MAX_STR_LEN] = {0};
-  sprintf( mkdircmd, "mkdir -p %s", G_path);
-  system(mkdircmd);
-}
 
 void do_append_write_test_local(FD* fd, const int fileCount, const int fileSize,
 				const int blockSize, const bool needclose) {
-
   if(! needclose) {
     // Do not need close:
     // Open file before the test start, mode O_CREAT|O_APPEND|O_SYNC
@@ -204,16 +143,74 @@ void do_append_write_test_local(FD* fd, const int fileCount, const int fileSize,
     gettimeofday(&tv_begin, NULL);
 
     op_file_create_write(fd, fileCount, blockSize, needclose, i);
-    op_file_read(fd, fileCount, blockSize, needclose);
+    op_file_read(READS_PER_WRITE * fileCount, blockSize);
 
     gettimeofday(&tv_end, NULL);
 
     long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
 			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
     if(needclose) {
-      printf("Need Close: ");
+      printf("Write with Close: ");
     } else {
-      printf("Do not need Close: ");
+      printf("Write without Close: ");
+    }
+    printf("%lld us\n", elapsed);
+  }
+
+  if(!needclose) {
+    close_fds(fd, fileCount);
+  }
+}
+
+// Write was done locally, while read was done remotely
+void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSize,
+				  const int blockSize, const bool needclose) {
+  if(! needclose) {
+    // Do not need close:
+    // Open file before the test start, mode O_CREAT|O_APPEND|O_SYNC
+    init_fds(fd, fileCount, G_filename_w_prefix, AW_FILE_MODE);
+  }
+  create_test_dir();
+
+  // Create a client socket
+  struct sockaddr_in servaddr;
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
+  memset(&servaddr, 0, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_port = htons(G_port);
+  servaddr.sin_addr.s_addr = inet_addr(G_ipaddr);
+
+
+  // Each file only read/write a single blocksize of data
+  int i=0;
+  for(i=0; i < fileCount; i++) {
+    connect(sock, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
+    struct timeval tv_begin, tv_end;
+    gettimeofday(&tv_begin, NULL);
+    
+    // 1. Local write
+    op_file_create_write(fd, fileCount, blockSize, needclose, i);
+
+
+    // 2. Remote read
+    char* message="read";
+    send(sock, message, strlen(message), 0); 
+
+    char done_msg[6]={0};
+    recv(sock, done_msg, 6,0);
+    if(done_msg[0] != 'D' ) {
+      printf("Remote File Read error.\n");
+      exit(-1);
+    }
+    gettimeofday(&tv_end, NULL);
+
+    long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
+			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
+    if(needclose) {
+      printf("Write with Close: ");
+    } else {
+      printf("Write without Close: ");
     }
     printf("%lld us\n", elapsed);
   }
@@ -224,63 +221,27 @@ void do_append_write_test_local(FD* fd, const int fileCount, const int fileSize,
 }
 
 
-// Write was done locally, while read was done remotely
-void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSize,
-				  const int blockSize, const bool needclose) {
-  
-
-}
-
-
 void do_append_write_test(FD* fd, const int fileCount, const int fileSize, 
 			  const int blockSize, const bool needclose, const bool distributed_mode) {
-  //Create 1000 files frist for read support
-  int read_fileCount = 5* fileCount;
-  prepare_env(read_fileCount, fileSize);
 
   if(distributed_mode) {
+    // Distributed mode
+    // 1. Read file preparation will be done by server
+
+    // 2. Do write-remote-reads test
     do_append_write_test_remote(fd, fileCount, fileSize, blockSize, needclose);
   } else {
+    // Local mode
 
-
+    // 1. prepare files for read support
+    int read_fileCount = READS_PER_WRITE * fileCount;
+    prepare_env(read_fileCount, fileSize);
+    
+    // 2. Do reads-write test locally
     do_append_write_test_local(fd, fileCount, fileSize, blockSize, needclose);
   }
 }
 
-
-/**
- * Create read_fcnt files with the size: file_size to prepare for file read
- *
- */
-void prepare_env(int read_fcnt, int file_size) {
-
-  printf("prepare env, read_fcnt:%d.\n", read_fcnt);
-
-  char buf[MAX_BLOCK_SIZE] = {0};
-  int blockSize=512*1024;
-
-  int i = 0;
-  for( ; i < read_fcnt; i++) {
-    char filename[MAX_FILENAME_LEN];
-    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, i);
-    printf("prepare file:%s.\n", filename);
-    FD cur_fd = ( FD )open(filename, AW_FILE_MODE, 0666);
-    if(cur_fd <= 0 ) {
-      printf("Open file error: %s\n", filename);
-    }
-    int cur_size = 0;
-    while(cur_size < file_size ) {
-      if( file_size - cur_size > blockSize) {
-	write(cur_fd, buf, blockSize);
-	cur_size += blockSize;
-      } else {
-	write(cur_fd, buf, (file_size - cur_size ));
-	cur_size = file_size;
-      }
-    }
-    close(cur_fd);
-  }
-}
 
 
 int main(int argc, char* argv[]) {
