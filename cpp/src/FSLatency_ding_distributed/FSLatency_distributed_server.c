@@ -43,12 +43,12 @@ void print_start_information(const int read_fcnt, const int read_filesize,
 int main(int argc, char **argv) {
   
   //Create 1000 files frist for read support
-  int fileCount=500;
+  int fileCount=10;
   int fileSize=524288;
   int blockSize=524288;
 
   int read_fileCount = READS_PER_WRITE * fileCount;  
-  prepare_env(read_fileCount, fileSize);
+
 
 
   
@@ -61,6 +61,8 @@ int main(int argc, char **argv) {
 
 
   print_start_information(fileCount, fileSize, blockSize, port);
+
+  prepare_env(read_fileCount, fileSize);
 
   struct sockaddr_in servaddr;  
   int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -96,7 +98,7 @@ int main(int argc, char **argv) {
       recv(clisock, message, messageLength,0);
 
       if(message[0]='r'){
-	printf(">>>\t >start read file");
+	//printf(">>>\t >start read file\n");
 	op_file_read(fileCount, blockSize);
       } else {
 	printf("Error Message. 'read' command is needed here.\n");
@@ -104,7 +106,7 @@ int main(int argc, char **argv) {
 
       char* done_msg = "Done!";
       send(clisock, done_msg,  strlen(done_msg), 0);
-      printf(">>>\t >Read files done! Notify the client.\n");
+      // printf(">>>\t >Read files done! Notify the client.\n");
     }
     close(clisock);
   }

@@ -42,8 +42,8 @@ typedef int bool;
 
 
 int G_port=0;
-char G_ipaddr[MAX_IP_LEN]={0};
-char G_path[MAX_PATH_LEN] = {0};
+char G_ipaddr[MAX_IP_LEN]={"127.0.0.1"};
+char G_path[MAX_PATH_LEN] = {"data/"};
 char* G_filename_r_prefix = "1MB_R_";
 char* G_filename_w_prefix = "1MB_W_";
 

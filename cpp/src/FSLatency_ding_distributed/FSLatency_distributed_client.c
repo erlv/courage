@@ -41,7 +41,8 @@ void print_usage() {
   printf(" >>> distributed mode: \n");
   printf(" >>> \t 0: Doing File System latency test locally without network.\n");
   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n");
-  printf(" Example: test  data/ 500 524288 524288 1 0\n");
+  printf(" >>> port: the port of server for distrituted test.\n");
+  printf(" Example: test  data/ 500 524288 524288 1 0 5678 \n");
 }
 
 void print_start_information( const int fileCount, const int fileSize, 
@@ -249,7 +250,7 @@ int main(int argc, char* argv[]) {
   FD fd[MAX_COUNT] = {0};
 
   // variables for the test
-  if(argc != 7 ) {
+  if(argc != 8 ) {
     print_usage();
     exit(0);
   }
@@ -262,6 +263,8 @@ int main(int argc, char* argv[]) {
   int blockSize = atoi(argv[4]);
   bool needclose = atoi(argv[5]);
   bool is_distributed = atoi(argv[6]);
+  G_port = atoi(argv[7]);
+
   enum test_mode mode;
 
   mode = MODE_AW;
