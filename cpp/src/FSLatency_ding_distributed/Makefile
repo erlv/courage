@@ -1,4 +1,4 @@
-CFLAG = -D_REENTRANT -Wall -pedantic 
+CFLAGS = -D_REENTRANT -Wall -pedantic 
 LDFLAGS = -lpthread
 
 ifdef DEBUG
