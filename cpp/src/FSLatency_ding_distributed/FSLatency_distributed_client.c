@@ -45,6 +45,26 @@ void print_usage() {
   printf(" Example: test  data/ 500 524288 524288 1 0 5678 \n");
 }
 
+
+void print_usage_new() {
+  printf("Usage: test distribued(0|1) port(int)\n");
+  printf(" >>> distributed mode: \n");
+  printf(" >>> \t 0: Doing File System latency test locally without network.\n");
+  printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n");
+  printf(" >>> port: the port of server for distrituted test.\n");
+  printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
+  printf(" >>> path: a avaible path that can be read/write\n");
+  printf(" >>> count: the number of files that need to be read/written\n");
+  printf(" >>> filesize: Each file size in Byte that will be write\n");
+  printf(" >>> blocksize: Block Size per read/write\n");
+  printf(" >>> close: \n");
+  printf(" >>> \t 0: Use open-write/read-close steps for each block.\n");
+  printf(" >>> \t 1: use  write-sync per block for each block.\n\n");
+  printf(" Example: test 1 5678 \n");
+  printf(" Example: test 0 \n");
+}
+
+
 void print_start_information( const int fileCount, const int fileSize, 
 			      const int blockSize, const bool needclose,
 			      const enum test_mode mode) {
@@ -181,11 +201,12 @@ void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSiz
   servaddr.sin_port = htons(G_port);
   servaddr.sin_addr.s_addr = inet_addr(G_ipaddr);
 
+  connect(sock, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
   // Each file only read/write a single blocksize of data
   int i=0;
   for(i=0; i < fileCount; i++) {
-    connect(sock, (struct sockaddr *)&servaddr, sizeof(servaddr));
+
 
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
@@ -250,20 +271,41 @@ int main(int argc, char* argv[]) {
   FD fd[MAX_COUNT] = {0};
 
   // variables for the test
-  if(argc != 8 ) {
-    print_usage();
+  //  if(argc != 8 ) {
+
+  if(argc == 1 || argc > 3) {
+    print_usage_new();
+    exit(0);
+  }
+
+  bool is_distributed = atoi(argv[1]);
+  if(is_distributed && (argc != 3) ) {
+    print_usage_new();
+    exit(0);
+  } else if( !is_distributed && (argc !=2)) {
+    print_usage_new();
     exit(0);
   }
 
   // init path
-  strcpy(G_path, argv[1]);
+  //strcpy(G_path, argv[1]);
+  //int fileCount = 
   // init total file count
-  int fileCount = atoi(argv[2]);
-  int fileSize = atoi(argv[3]);
-  int blockSize = atoi(argv[4]);
-  bool needclose = atoi(argv[5]);
-  bool is_distributed = atoi(argv[6]);
-  G_port = atoi(argv[7]);
+  /* int fileCount = atoi(argv[2]); */
+  /* int fileSize = atoi(argv[3]); */
+  /* int blockSize = atoi(argv[4]); */
+  /* bool needclose = atoi(argv[5]); */
+  /* bool is_distributed = atoi(argv[6]); */
+  /* G_port = atoi(argv[7]); */
+
+  if(is_distributed) {
+    G_port = atoi(argv[2]);
+  }
+
+  int fileCount = G_fileCount;
+  int fileSize = G_fileSize;
+  int blockSize = G_blockSize;
+  int needclose = G_needclose;
 
   enum test_mode mode;
 

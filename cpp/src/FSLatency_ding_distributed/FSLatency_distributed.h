@@ -28,7 +28,6 @@
 #define AR_FILE_MODE ( O_CREAT|O_RDWR )
 #define HR_FILE_MODE ( O_CREAT|O_RDWR )
 
-
 enum  test_mode {
   MODE_AW,
   MODE_HW,
@@ -43,9 +42,27 @@ typedef int bool;
 
 int G_port=0;
 char G_ipaddr[MAX_IP_LEN]={"127.0.0.1"};
-char G_path[MAX_PATH_LEN] = {"data/"};
+char G_path[MAX_PATH_LEN] = {"data"};
 char* G_filename_r_prefix = "1MB_R_";
 char* G_filename_w_prefix = "1MB_W_";
+int G_fileCount=10;
+int G_fileSize=524288;
+int G_blockSize=52428;
+int G_needclose=1;
+int G_0_20_us=0;
+int G_20_40_us=0;
+int G_40_60_us=0;
+int G_60_80_us=0;
+int G_80_100_us=0;
+int G_100_150_us=0;
+int G_150_300_us=0;
+int G_300_us=0;
+
+ssize_t read(int fd, void *buf, size_t count);
+int close(int fd);
+ssize_t write(int fd, const void *buf, size_t count);
+int fsync(int fd);
+in_addr_t inet_addr(const char *cp);
 
 
 void op_file_read( const int r_fileCount, const int blockSize) {
@@ -59,7 +76,7 @@ void op_file_read( const int r_fileCount, const int blockSize) {
     //Generate a random int between [0:READS_PER_WRITE*fileCount]
     int rand_i = rand() % (r_fileCount);
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
-
+    printf("Read %s.\n", filename);
     int read_fd = open(filename, O_RDONLY, 0);
     if( read_fd <= 0 ) {
       printf("Open file for read error: %s\n", filename);

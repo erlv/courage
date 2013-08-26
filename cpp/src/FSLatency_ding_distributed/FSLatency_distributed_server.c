@@ -43,9 +43,9 @@ void print_start_information(const int read_fcnt, const int read_filesize,
 int main(int argc, char **argv) {
   
   //Create 1000 files frist for read support
-  int fileCount=10;
-  int fileSize=524288;
-  int blockSize=524288;
+  int fileCount=G_fileCount;
+  int fileSize=G_fileSize;
+  int blockSize=G_blockSize;
 
   int read_fileCount = READS_PER_WRITE * fileCount;  
 
@@ -87,17 +87,15 @@ int main(int argc, char **argv) {
   printf(">>> start listening done. \n");
 
   // Accept socket connection
-  int servaddr_len = sizeof(servaddr);
   int clisock = accept(sock, (struct sockaddr *)NULL, NULL);
   if (clisock >= 0) {
     while(1) {
       int messageLength = 16;
       char message[messageLength+1];
-      int in, index = 0, limit = messageLength;
 
       recv(clisock, message, messageLength,0);
 
-      if(message[0]='r'){
+      if(message[0]=='r'){
 	//printf(">>>\t >start read file\n");
 	op_file_read(fileCount, blockSize);
       } else {
@@ -110,4 +108,5 @@ int main(int argc, char **argv) {
     }
     close(clisock);
   }
+  return 0;
 }
