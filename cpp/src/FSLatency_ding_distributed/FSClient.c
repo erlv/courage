@@ -46,7 +46,6 @@ void print_start_information( const int write_fileCount, const int read_fileCoun
   case MODE_AW:
     mode_str = "aw";
     break;
-
   case MODE_HW:
   case MODE_AR:
   case MODE_HR:
@@ -256,6 +255,5 @@ int main(int argc, char* argv[]) {
     printf("Unsupported Mode. \n");
     exit(-1);
   }
-
   return 0;
 }

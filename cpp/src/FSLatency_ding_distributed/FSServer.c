@@ -32,7 +32,6 @@ void print_start_information(const int read_fcnt, const int read_filesize,
 }
 
 
-
 int main(int argc, char **argv) {
   
   //Create 1000 files frist for read support

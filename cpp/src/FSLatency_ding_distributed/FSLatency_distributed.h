@@ -1,6 +1,3 @@
-#ifndef _FSLATENCY_DISTRIBUTED_H
-#define _FSLATENCY_DISTRIBUTED_H
-
 /*
  * FS Latency Distributed Test Tool
  *
@@ -8,6 +5,10 @@
  * Loongstore Inc.
  *
  */
+
+#ifndef _FSLATENCY_DISTRIBUTED_H
+#define _FSLATENCY_DISTRIBUTED_H
+
 
 #include <time.h>
 #include <sys/time.h>
