@@ -1,32 +1,16 @@
 #include "FSLatency_distributed.h"
 
-/* void print_usage() { */
-/*   printf("Usage: test_server read_path  filesize(Byte) blocksize(Byte)\n"); */
-/*   printf(" >>> path: a avaible path that can be read/write\n"); */
-/*   printf(" >>> count: the number of files that each notification \n"); */
-/*   printf(" >>> filesize: Each file size in Byte that will be write\n"); */
-/*   printf(" >>> blocksize: Block Size per read/write\n"); */
-/*   printf(" >>> close: \n"); */
-/*   printf(" >>> \t 0: Use open-write/read-close steps for each block.\n"); */
-/*   printf(" >>> \t 1: use  write-sync per block for each block.\n\n"); */
-/*   printf(" >>> distributed mode: \n"); */
-/*   printf(" >>> \t 0: Doing File System latency test locally without network.\n"); */
-/*   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n"); */
-/*   printf(" Example: test  data/ 500 524288 524288 1 0\n"); */
-
-/* } */
-
 void print_usage() {
-  printf("Usage: test path testcount filesize(Byte) blocksize(Byte) close(1|0) distribued(0|1)\n");
+  printf("Usage: FSServer count filesize distribued(1) port(int)\n");
+  printf(" >>> count: the number of files that need to be read/written\n");
+  printf(" >>> filesize: Each file size in Byte that will be write\n");
+  printf(" >>> distributed mode: \n");
+  printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n");
+  printf(" >>> port: the port of server for distrituted test.\n");
+  printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> path: a avaible path that can be read/write\n");
-  printf(" >>> count: the number of files that need to be read\n");
-  printf(" >>> filesize: Each file size in Byte that will be read\n");
-  printf(" >>> blocksize: Block Size per read\n");
-  printf(">>> When run this daemon, the FSLatency test should be in distributed mode.\n");
-  printf(">>> When compare with local mode, be sure that these parameters are the same for both modes.\n");
-
-  printf(" Example: test  data/ 500 524288 524288\n");
-
+  printf(" >>> blocksize: Block Size per read/write\n\n");
+  printf(" Example: FSServer  500 524288 1 5678 \n");
 }
 
 void print_start_information(const int read_fcnt, const int read_filesize,
@@ -43,22 +27,31 @@ void print_start_information(const int read_fcnt, const int read_filesize,
 int main(int argc, char **argv) {
   
   //Create 1000 files frist for read support
-  int fileCount=G_fileCount;
-  int fileSize=G_fileSize;
-  int blockSize=G_blockSize;
+  int fileCount, fileSize, blockSize, read_fileCount, port;
+  bool is_distributed;
 
-  int read_fileCount = READS_PER_WRITE * fileCount;  
+  if(argc != 5) {
+    printf("Wrong command line argument number!\n");
+    print_usage();
+    exit(0);
+  }
 
+  is_distributed = atoi(argv[3]);
+  if( !is_distributed) {
+    printf("Server daemon could only run in distributed mode.\n");
+    print_usage();
+    exit(0);
+  }
+
+  fileCount = atoi(argv[1]);
+  fileSize = atoi(argv[2]);
+  G_port = atoi(argv[4]);
+  blockSize=G_blockSize;
+  read_fileCount = READS_PER_WRITE * fileCount;  
 
 
   
-  int port=0;
-  if(argc < 2) {
-    port = 6789;
-  } else {
-    port = atoi(argv[1]);
-  }
-
+  port=G_port;
 
   print_start_information(fileCount, fileSize, blockSize, port);
 

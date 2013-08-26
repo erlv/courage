@@ -1,7 +1,7 @@
 
 all:
-	gcc -Wall -g3 -O0 FSLatency_distributed_server.c -o FSLatency_distributed_server
-	gcc -Wall -g3 -O0 FSLatency_distributed_client.c -o FSLatency_distributed_client
+	gcc -Wall -g3 -O0 FSLatency_distributed_server.c -o FSServer
+	gcc -Wall -g3 -O0 FSLatency_distributed_client.c -o FSClient
 
 clean:
-	rm -rf FSLatency_distributed_server FSLatency_distributed_client *~
+	rm -rf FSServer FSClient *~

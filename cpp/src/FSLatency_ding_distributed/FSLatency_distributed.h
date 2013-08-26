@@ -15,7 +15,7 @@
 
 #define MAX_COUNT 1024
 #define MAX_BLOCK_SIZE 1024*1024
-#define FILENAME_FORMAT "%s/%s%04d"
+#define FILENAME_FORMAT "%s/%s%09d"
 #define MAX_PATH_LEN  90
 #define MAX_STR_LEN 128
 #define MAX_FILENAME_LEN MAX_STR_LEN
@@ -47,17 +47,17 @@ char* G_filename_r_prefix = "1MB_R_";
 char* G_filename_w_prefix = "1MB_W_";
 int G_fileCount=10;
 int G_fileSize=524288;
-int G_blockSize=52428;
-int G_needclose=1;
-int G_0_20_us=0;
-int G_20_40_us=0;
-int G_40_60_us=0;
-int G_60_80_us=0;
-int G_80_100_us=0;
-int G_100_150_us=0;
-int G_150_300_us=0;
-int G_300_us=0;
-
+int G_blockSize=524288;
+int G_needclose=0;
+int G_0_20_ms=0;
+int G_20_40_ms=0;
+int G_40_60_ms=0;
+int G_60_80_ms=0;
+int G_80_100_ms=0;
+int G_100_150_ms=0;
+int G_150_300_ms=0;
+int G_300_ms=0;
+int G_total=0;
 ssize_t read(int fd, void *buf, size_t count);
 int close(int fd);
 ssize_t write(int fd, const void *buf, size_t count);
@@ -76,7 +76,7 @@ void op_file_read( const int r_fileCount, const int blockSize) {
     //Generate a random int between [0:READS_PER_WRITE*fileCount]
     int rand_i = rand() % (r_fileCount);
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
-    printf("Read %s.\n", filename);
+    //printf("Read %s.\n", filename);
     int read_fd = open(filename, O_RDONLY, 0);
     if( read_fd <= 0 ) {
       printf("Open file for read error: %s\n", filename);
@@ -101,7 +101,8 @@ void create_test_dir() {
  */
 void prepare_env(int read_fcnt, int file_size) {
 
-  printf("prepare env, read_fcnt:%d.\n", read_fcnt);
+  printf(">>> Prepare files for read, Total Count:%d.\n", read_fcnt);
+  create_test_dir();
 
   char buf[MAX_BLOCK_SIZE] = {0};
   int blockSize=512*1024;
@@ -110,7 +111,6 @@ void prepare_env(int read_fcnt, int file_size) {
   for( ; i < read_fcnt; i++) {
     char filename[MAX_FILENAME_LEN];
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, i);
-    printf("prepare file:%s.\n", filename);
     FD cur_fd = ( FD )open(filename, AW_FILE_MODE, 0666);
     if(cur_fd <= 0 ) {
       printf("Open file error: %s\n", filename);
@@ -127,4 +127,42 @@ void prepare_env(int read_fcnt, int file_size) {
     }
     close(cur_fd);
   }
+}
+
+// Record all the latency into several gloal var for distribution calculation
+void record_latency( const long long elapsed ) {
+  G_total++;
+  if( elapsed < 20000) {
+    G_0_20_ms++;
+  } else if ( elapsed < 40000) {
+    G_20_40_ms++;
+  } else if ( elapsed < 60000) {
+    G_40_60_ms++;
+  } else if ( elapsed < 80000) {
+    G_60_80_ms++;
+  } else if ( elapsed < 100000) {
+    G_80_100_ms++;
+  } else if ( elapsed < 150000) {
+    G_100_150_ms++;
+  } else if ( elapsed < 300000) {
+    G_150_300_ms++;
+  } else if ( elapsed > 300000) {
+    G_300_ms++;
+  }
+}
+
+void Analysis_distribution() {
+  float f_0_20_ms = (float)G_0_20_ms/(float)G_total*100;
+  float f_20_40_ms = (float)G_20_40_ms/(float)G_total*100;
+  float f_40_60_ms = (float)G_40_60_ms/(float)G_total*100;
+  float f_60_80_ms = (float)G_60_80_ms/(float)G_total*100;
+  float f_80_100_ms = (float)G_80_100_ms/(float)G_total*100;
+  float f_100_150_ms = (float)G_100_150_ms/(float)G_total*100;
+  float f_150_300_ms = (float)G_150_300_ms/(float)G_total*100;
+  float f_300_ms = (float)G_300_ms/(float)G_total*100;
+  printf("Latency Distribution:\n");
+  printf("Latency(ms)\t0~20\t20~40\t40~60\t60~80\t80~100\t100~150\t150~300\t>300\n");
+  printf("Percentage\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\n",
+	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms, f_80_100_ms, f_100_150_ms,f_150_300_ms,
+	 f_300_ms);
 }
