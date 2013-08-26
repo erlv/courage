@@ -54,8 +54,8 @@ int main(int argc, char **argv) {
   strcpy(G_path, argv[1]);
   fileCount = atoi(argv[2]);
   fileSize = atoi(argv[3]);
-  strcpy(G_ipaddr, argv[4]);
-  G_port = atoi(argv[5]);
+  strcpy(G_ipaddr, argv[5]);
+  G_port = atoi(argv[6]);
   blockSize=G_blockSize;
   read_fileCount = READS_PER_WRITE * fileCount;  
   

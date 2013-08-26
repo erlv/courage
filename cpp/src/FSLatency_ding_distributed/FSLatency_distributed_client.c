@@ -67,6 +67,7 @@ void op_file_create_write(FD* fd, const long long fileCount, const int blockSize
   // Write 1-file
   char filename[MAX_FILENAME_LEN];
   char buf[MAX_BLOCK_SIZE] = {0};
+  create_test_dir();
 
   snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path,
 	   G_filename_w_prefix, fileName_idx);
