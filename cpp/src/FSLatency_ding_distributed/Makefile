@@ -1,4 +1,4 @@
-CFLAGS = -D_REENTRANT -Wall -pedantic 
+CFLAGS = -D_REENTRANT -Wall 
 LDFLAGS = -lpthread
 
 ifdef DEBUG
@@ -16,4 +16,4 @@ FSClient: FSClient.o threadpool.o
 threadpool.o: threadpool.c threadpool.h
 
 clean:
-	rm -rf FSServer FSClient *~
+	rm -rf FSServer FSClient *~ *.o

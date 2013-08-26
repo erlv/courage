@@ -9,16 +9,16 @@
 #include "FSLatency_distributed.h"
 
 void print_usage() {
-  printf("Usage: FSServer count filesize distribued(1) port(int)\n");
+  printf("Usage: FSServer count filesize(KB) distribued(1) port(int)\n");
   printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of files that need to be read/written\n");
-  printf(" >>> filesize: Each file size in Byte that will be write\n");
+  printf(" >>> filesize: Each file size in KB that will be write\n");
   printf(" >>> distributed mode: \n");
   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n");
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
-  printf(" Example: FSServer /datapool  500 514000 1 127.0.0.1 5678 \n");
+  printf(" Example: FSServer /datapool  500 514 1 127.0.0.1 5678 \n");
 }
 
 void print_start_information(const int read_fcnt, const int read_filesize,
@@ -27,8 +27,8 @@ void print_start_information(const int read_fcnt, const int read_filesize,
   printf(">>> Listen port: %d.\n", port);
   printf(">>> Total read file count: %d.\n", read_fcnt);
   printf(">>> Read from Path:%s.\n", G_path);
-  printf(">>> Each read file size: %d.\n", read_filesize);
-  printf(">>> Each read block size: %d.\n", read_blocksize);
+  printf(">>> Each read file size: %dKB.\n", read_filesize);
+  printf(">>> Each read block size: %dB.\n", read_blocksize);
 }
 
 
@@ -53,15 +53,20 @@ int main(int argc, char **argv) {
   }
   strcpy(G_path, argv[1]);
   fileCount = atoi(argv[2]);
-  fileSize = atoi(argv[3]);
+  int KfileSize = atoi(argv[3]);
+  fileSize = KfileSize*1024;
   strcpy(G_ipaddr, argv[5]);
   G_port = atoi(argv[6]);
   blockSize=G_blockSize;
+
   read_fileCount = READS_PER_WRITE * fileCount;  
+  if(read_fileCount > 100000) {
+    read_fileCount = 100000;
+  }
   
   port=G_port;
 
-  print_start_information(fileCount, fileSize, blockSize, port);
+  print_start_information(read_fileCount, KfileSize, blockSize, port);
 
   prepare_env(read_fileCount, fileSize);
 
@@ -99,7 +104,7 @@ int main(int argc, char **argv) {
 
       if(message[0]=='r'){
 	//printf(">>>\t >start read file\n");
-	op_file_read(fileCount, blockSize);
+	op_file_read(read_fileCount, blockSize);
       } else {
 	printf("Error Message. 'read' command is needed here.\n");
       }

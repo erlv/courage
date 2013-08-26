@@ -20,6 +20,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
+#include "threadpool.h"
 
 #define READS_PER_WRITE 5
 
@@ -72,6 +73,12 @@ int close(int fd);
 ssize_t write(int fd, const void *buf, size_t count);
 int fsync(int fd);
 in_addr_t inet_addr(const char *cp);
+
+// Used for multithread read file generation.
+#define THREAD 16
+#define QUEUE 256
+pthread_mutex_t lock;
+threadpool_t *pool;
 
 
 void op_file_read( const long long r_fileCount, const int blockSize) {
@@ -146,7 +153,7 @@ void prepare_env(long long read_fcnt, int file_size) {
   create_test_dir();
 
   int SINGLE_STEP=300;
-  if( read_fcnt < SINGLE_STEP*20) {
+  if( read_fcnt < SINGLE_STEP*400) {
     long long i = 0;
     for( ; i < read_fcnt; i+=SINGLE_STEP) {
       printf("\r>>>> Current process:%3.1f%%.", (float)i/(float)read_fcnt*100);
@@ -155,8 +162,15 @@ void prepare_env(long long read_fcnt, int file_size) {
     } 
     printf("\r>>>> Current process:%3.1f%%.\n", (float)100);
   } else {
-    // Too many files need to be create, using multithread method.
-    
+    printf("Too many file creation will take a long time.\n");
+    /* // Too many files need to be create, using multithread method. */
+    /* pthread_mutex_init(&lock, NULL); */
+    /* assert(pool = threadpool_creat(THREAD, QUEUE, 0)!= NULL); */
+    /* printf("Thread pool Started with %d threads and %d queue size.\n", THREAD, QUEUE); */
+
+    /* while (threadpool_add(pool, &single_step_create, NULL, 0) ==0)) */
+    /* } */
+    /* assert */
 
   }
   printf(" Prepare Read files Done!\n");

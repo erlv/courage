@@ -9,10 +9,10 @@
 #include "FSLatency_distributed.h"
 
 void print_usage() {
-  printf("Usage: FSClient path count filesize distribued(0|1) ip port(int)\n");
+  printf("Usage: FSClient path count filesize(KB) distribued(0|1) ip port(int)\n");
   printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of files that need to be read/written\n");
-  printf(" >>> filesize: Each file size in Byte that will be write\n");
+  printf(" >>> filesize: Each file size in KB that will be write\n");
   printf(" >>> distributed mode: \n");
   printf(" >>> \t 0: Doing File System latency test locally without network.\n");
   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n");
@@ -20,8 +20,8 @@ void print_usage() {
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n");
-  printf(" Example: FSClient /datapool/ 500 514000 1 127.0.0.1 5678 \n");
-  printf(" Example: FSClient /datapool/ 500 514000 0 \n");
+  printf(" Example: FSClient /datapool/ 500 514 1 127.0.0.1 5678 \n");
+  printf(" Example: FSClient /datapool/ 500 514 0 \n");
 }
 
 
@@ -31,7 +31,7 @@ void print_start_information( const int fileCount, const int fileSize,
   printf(">>> Total File to write: %d\n", fileCount);
   printf(">>> File Write to: %s\n", G_path);
   printf(">>> Total File to read: %dx%d=%d\n", fileCount, READS_PER_WRITE, READS_PER_WRITE * fileCount);
-  printf(">>> Each File Read/Write Size: %d B\n", fileSize);
+  printf(">>> Each File Read/Write Size: %d KB\n", fileSize);
   printf(">>> Block Size per write: %d B\n", blockSize);
 
   if( is_distributed) {
@@ -81,20 +81,21 @@ void op_file_create_write(FD* fd, const long long fileCount, const int blockSize
 }
 
 
-void do_append_write_test_local(FD* fd, const long long  fileCount, const int fileSize,
+void do_append_write_test_local(FD* fd, const long long  write_fileCount, 
+				const long long read_fileCount, const int fileSize,
 				const int blockSize, const bool needclose) {
   // Each file only read/write a single blocksize of data
   long long i=0;
 
-  for(i=0; i < fileCount; i++) {
-    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)fileCount*100);
+  for(i=0; i < write_fileCount; i++) {
+    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
     fflush(0);
 
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
 
-    op_file_create_write(fd, fileCount, blockSize, needclose, i);
-    op_file_read(READS_PER_WRITE * fileCount, blockSize);
+    op_file_create_write(fd, write_fileCount, blockSize, needclose, i);
+    op_file_read(read_fileCount, blockSize);
 
     gettimeofday(&tv_end, NULL);
 
@@ -117,7 +118,7 @@ void do_append_write_test_local(FD* fd, const long long  fileCount, const int fi
 }
 
 // Write was done locally, while read was done remotely
-void do_append_write_test_remote( FD* fd, const long long  fileCount, const int fileSize,
+void do_append_write_test_remote( FD* fd, const long long  write_fileCount, const int fileSize,
 				  const int blockSize, const bool needclose) {
 
   // Create a client socket
@@ -136,15 +137,15 @@ void do_append_write_test_remote( FD* fd, const long long  fileCount, const int 
 
   // Each file only read/write a single blocksize of data
   long long i=0;
-  for(i=0; i < fileCount; i++) {
-    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)fileCount*100);
+  for(i=0; i < write_fileCount; i++) {
+    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
     fflush(0);
     
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
     
     // 1. Local write
-    op_file_create_write(fd, fileCount, blockSize, needclose, i);
+    op_file_create_write(fd, write_fileCount, blockSize, needclose, i);
 
 
     // 2. Remote read
@@ -170,7 +171,7 @@ void do_append_write_test_remote( FD* fd, const long long  fileCount, const int 
 }
 
 
-void do_append_write_test(FD* fd, const long long fileCount, const int fileSize, 
+void do_append_write_test(FD* fd, const long long write_fileCount, const int fileSize, 
 			  const int blockSize, const bool needclose, const bool distributed_mode) {
   if(distributed_mode) {
     // Distributed mode
@@ -178,16 +179,19 @@ void do_append_write_test(FD* fd, const long long fileCount, const int fileSize,
     // Nothing need to do;
 
     // 2. Do write-remote-reads test
-    do_append_write_test_remote(fd, fileCount, fileSize, blockSize, needclose);
+    do_append_write_test_remote(fd, write_fileCount, fileSize, blockSize, needclose);
 
   } else {
     // Local mode
     // 1. prepare files for read support
-    long long  read_fileCount = READS_PER_WRITE * fileCount;
+    long long  read_fileCount = READS_PER_WRITE * write_fileCount;
+    if(read_fileCount > 100000) {
+      read_fileCount=100000;
+    }
     prepare_env(read_fileCount, fileSize);
    
     // 2. Do reads-write test locally
-    do_append_write_test_local(fd, fileCount, fileSize, blockSize, needclose);
+    do_append_write_test_local(fd, write_fileCount, read_fileCount, fileSize, blockSize, needclose);
   }
 }
 
@@ -218,7 +222,8 @@ int main(int argc, char* argv[]) {
 
   strcpy(G_path, argv[1]);
   fileCount = atoi(argv[2]);
-  fileSize = atoi(argv[3]);
+  int KfileSize = atoi(argv[3]);
+  fileSize = KfileSize*1024;
   if(is_distributed) {
     strcpy(G_ipaddr, argv[5]);
     G_port = atoi(argv[6]);
@@ -228,7 +233,7 @@ int main(int argc, char* argv[]) {
 
   enum test_mode mode;
   mode = MODE_AW;
-  print_start_information(fileCount, fileSize, blockSize, needclose, mode, is_distributed);
+  print_start_information(fileCount, KfileSize, blockSize, needclose, mode, is_distributed);
 
   switch(mode) {
   case MODE_AW:
