@@ -9,18 +9,19 @@
 #include "FSLatency_distributed.h"
 
 void print_usage() {
-  printf("Usage: FSClient count filesize distribued(0|1) port(int)\n");
+  printf("Usage: FSClient path count filesize distribued(0|1) ip port(int)\n");
+  printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of files that need to be read/written\n");
   printf(" >>> filesize: Each file size in Byte that will be write\n");
   printf(" >>> distributed mode: \n");
   printf(" >>> \t 0: Doing File System latency test locally without network.\n");
   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n");
+  printf(" >>> ip: the IP address of server for distrituted test.\n");
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
-  printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> blocksize: Block Size per read/write\n");
-  printf(" Example: FSClient  500 524288 1 5678 \n");
-  printf(" Example: FSClient  500 524288 0 \n");
+  printf(" Example: FSClient /datapool/ 500 514000 1 127.0.0.1 5678 \n");
+  printf(" Example: FSClient /datapool/ 500 514000 0 \n");
 }
 
 
@@ -28,6 +29,7 @@ void print_start_information( const int fileCount, const int fileSize,
 			      const int blockSize, const bool needclose,
 			      const enum test_mode mode, const bool is_distributed) {
   printf(">>> Total File to write: %d\n", fileCount);
+  printf(">>> File Write to: %s\n", G_path);
   printf(">>> Total File to read: %dx%d=%d\n", fileCount, READS_PER_WRITE, READS_PER_WRITE * fileCount);
   printf(">>> Each File Read/Write Size: %d B\n", fileSize);
   printf(">>> Block Size per write: %d B\n", blockSize);
@@ -126,8 +128,9 @@ void do_append_write_test_remote( FD* fd, const long long  fileCount, const int 
   servaddr.sin_addr.s_addr = inet_addr(G_ipaddr);
 
   if(connect(sock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-    printf("FSServer connect error:\t Is FSServer started?\n");
-    printf("\t\tHave it done the Read file preparation phase?\n");
+    printf("FSServer connect error. Please Check:\n\t1.Is FSServer started?\n");
+    printf("\t2.Have it done the Read file preparation phase?\n");
+    exit(0);
   }
 
   // Each file only read/write a single blocksize of data
@@ -195,24 +198,29 @@ int main(int argc, char* argv[]) {
   int fileSize, blockSize;
   bool needclose, is_distributed;
 
-  if(argc < 4 || argc > 5) {
+  if(!(argc ==5  || argc ==7)) {
+    printf("Error: does not have correct number of parameter.\n");
     print_usage();
     exit(0);
   }
 
-  is_distributed = atoi(argv[3]);
-  if(is_distributed && argc != 5 ) {
+  is_distributed = atoi(argv[4]);
+  if(is_distributed && argc != 7 ) {
+    printf("Error: Please check the parameter for Distributed mode.\n");
     print_usage();
     exit(0);
-  } else if( !is_distributed && (argc !=4)) {
+  } else if( !is_distributed && (argc !=5)) {
+    printf("Error: Please check the parameter for local mode.\n");
     print_usage();
     exit(0);
   }
 
-  fileCount = atoi(argv[1]);
-  fileSize = atoi(argv[2]);
+  strcpy(G_path, argv[1]);
+  fileCount = atoi(argv[2]);
+  fileSize = atoi(argv[3]);
   if(is_distributed) {
-    G_port = atoi(argv[4]);
+    strcpy(G_ipaddr, argv[5]);
+    G_port = atoi(argv[6]);
   }
   blockSize = G_blockSize;
   needclose = G_needclose;

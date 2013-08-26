@@ -19,7 +19,7 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
+#include <string.h>
 
 #define READS_PER_WRITE 5
 
@@ -27,7 +27,7 @@
 #define MAX_COUNT 1024
 #define MAX_BLOCK_SIZE 1024*1024
 #define FILENAME_FORMAT "%s/%s%09lld"
-#define MAX_PATH_LEN  90
+#define MAX_PATH_LEN  160
 #define MAX_STR_LEN 128
 #define MAX_FILENAME_LEN MAX_STR_LEN
 #define MAX_IP_LEN 15

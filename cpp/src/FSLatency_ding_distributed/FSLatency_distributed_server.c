@@ -10,15 +10,15 @@
 
 void print_usage() {
   printf("Usage: FSServer count filesize distribued(1) port(int)\n");
+  printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of files that need to be read/written\n");
   printf(" >>> filesize: Each file size in Byte that will be write\n");
   printf(" >>> distributed mode: \n");
   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n");
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
-  printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
-  printf(" Example: FSServer  500 524288 1 5678 \n");
+  printf(" Example: FSServer /datapool  500 514000 1 127.0.0.1 5678 \n");
 }
 
 void print_start_information(const int read_fcnt, const int read_filesize,
@@ -26,6 +26,7 @@ void print_start_information(const int read_fcnt, const int read_filesize,
   printf("Starting FSLatency distributed server daemon...\n");
   printf(">>> Listen port: %d.\n", port);
   printf(">>> Total read file count: %d.\n", read_fcnt);
+  printf(">>> Read from Path:%s.\n", G_path);
   printf(">>> Each read file size: %d.\n", read_filesize);
   printf(">>> Each read block size: %d.\n", read_blocksize);
 }
@@ -38,7 +39,7 @@ int main(int argc, char **argv) {
   int fileCount, fileSize, blockSize, read_fileCount, port;
   bool is_distributed;
 
-  if(argc != 5) {
+  if(argc != 7) {
     printf("Wrong command line argument number!\n");
     print_usage();
     exit(0);
@@ -50,14 +51,13 @@ int main(int argc, char **argv) {
     print_usage();
     exit(0);
   }
-
-  fileCount = atoi(argv[1]);
-  fileSize = atoi(argv[2]);
-  G_port = atoi(argv[4]);
+  strcpy(G_path, argv[1]);
+  fileCount = atoi(argv[2]);
+  fileSize = atoi(argv[3]);
+  strcpy(G_ipaddr, argv[4]);
+  G_port = atoi(argv[5]);
   blockSize=G_blockSize;
   read_fileCount = READS_PER_WRITE * fileCount;  
-
-
   
   port=G_port;
 
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
   servaddr.sin_port = htons(port);
 
   if(bind(sock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-    perror("bind");
+    perror("Sockect Bind");
     exit(-1);
   }
 
