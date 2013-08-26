@@ -1,3 +1,11 @@
+/*
+ * FS Latency Distributed Test Tool
+ *
+ * Author: Ling Kun  <lingkun@loongstore.com.cn>
+ * Loongstore Inc.
+ *
+ */
+
 #include "FSLatency_distributed.h"
 
 void print_usage() {
@@ -81,6 +89,7 @@ int main(int argc, char **argv) {
 
   // Accept socket connection
   int clisock = accept(sock, (struct sockaddr *)NULL, NULL);
+  printf(">>> Receive connection from client, under client's direction now.\n");
   if (clisock >= 0) {
     while(1) {
       int messageLength = 16;

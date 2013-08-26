@@ -1,32 +1,11 @@
 /*
- * FS Latency Test Case that support:
- *   1. Write Latency:
- *     1. Append write(aw): Each write will append at the end of the file
- *     2. head write(hw): Each write will write to the head of the file.
- *          There will be no block allocation operation in FS.
- *   2. Read Latency:
- *     1. Append Read(ar): maintain an offset in the program so that the read
- *           can continue to read the full data of the file.
- *     2. head Read(hr): Each read will read from only the head of the file, 
- *           so that it is only read a single block in the cluster.
+ * FS Latency Distributed Test Tool
  *
- *
- * Author: Ling Kun  <lkun.erlv@gmail.com>
+ * Author: Ling Kun  <lingkun@loongstore.com.cn>
+ * Loongstore Inc.
  *
  */
 
-/**
- * TODO:
- *   1. Distributed mode for read/write file test
- *   2. Write is client, read is sever
- *   3. The whole work flow:
- *      a. Client write 1 file
- *      b. client tell the server to read READS_PER_WRITE files.
- *      c. server read READS_PER_WRITE files, and tell client that I have done
- *      d. client report the whole latency
- *
- *
- */
 #include "FSLatency_distributed.h"
 
 void print_usage() {
@@ -80,28 +59,8 @@ void print_start_information( const int fileCount, const int fileSize,
   printf("Start test......\n");
 }
 
-void init_fds( FD* fd, int totalfiles, char* filename_prefix, int mode ) {
-  int i = 0;
-  for( ; i < totalfiles; i++) {
-    char filename[MAX_FILENAME_LEN];
-    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, 
-	     G_path, filename_prefix, i);
-    if( ( fd[i] = open(filename, mode, 0666) ) <= 0 )
-      printf("Open file error: %s\n", filename);
-  }
-}
-
-
-void close_fds( FD* fd, int totalfiles) {
-  int i = 0;
-  for( ; i < totalfiles; i++) {
-    close(fd[i]);
-  }
-}
-
-
-void op_file_create_write(FD* fd, const int fileCount, const int blockSize, 
-			  const bool needclose, const int fileName_idx) {
+void op_file_create_write(FD* fd, const long long fileCount, const int blockSize, 
+			  const bool needclose, const long long  fileName_idx) {
 
   // Write 1-file
   char filename[MAX_FILENAME_LEN];
@@ -110,33 +69,23 @@ void op_file_create_write(FD* fd, const int fileCount, const int blockSize,
   snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path,
 	   G_filename_w_prefix, fileName_idx);
   int cur_fd;
-  if(needclose) {
-    cur_fd = open(filename, AW_FILE_MODE, 0666);
-    if(cur_fd <= 0 ) {
-      printf("Open file error: %s\n", filename);
-    }
-    write(cur_fd, buf, blockSize);
-    close(cur_fd);
-  } else {
-    cur_fd = fd[fileName_idx];
-    write(cur_fd, buf, blockSize);
-    fsync(cur_fd);
+  cur_fd = open(filename, AW_FILE_MODE, 0666);
+  if(cur_fd <= 0 ) {
+    printf("Open file error: %s\n", filename);
   }
+  write(cur_fd, buf, blockSize);
+  close(cur_fd);
 }
 
 
-void do_append_write_test_local(FD* fd, const int fileCount, const int fileSize,
+void do_append_write_test_local(FD* fd, const long long  fileCount, const int fileSize,
 				const int blockSize, const bool needclose) {
-  if(! needclose) {
-    // Do not need close:
-    // Open file before the test start, mode O_CREAT|O_APPEND|O_SYNC
-    init_fds(fd, fileCount, G_filename_w_prefix, AW_FILE_MODE);
-  }
-
-  int i=0;
-
   // Each file only read/write a single blocksize of data
+  long long i=0;
+
   for(i=0; i < fileCount; i++) {
+    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)fileCount*100);
+    fflush(0);
 
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
@@ -158,22 +107,15 @@ void do_append_write_test_local(FD* fd, const int fileCount, const int fileSize,
     /* } */
     // printf("Latency:%lld us\n", elapsed);
   }
+  printf("\rAppend Write Test process:%3.1f%%.\n\n\n", (float)100);
   
   Analysis_distribution();
   
-  if(!needclose) {
-    close_fds(fd, fileCount);
-  }
 }
 
 // Write was done locally, while read was done remotely
-void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSize,
+void do_append_write_test_remote( FD* fd, const long long  fileCount, const int fileSize,
 				  const int blockSize, const bool needclose) {
-  if(! needclose) {
-    // Do not need close:
-    // Open file before the test start, mode O_CREAT|O_APPEND|O_SYNC
-    init_fds(fd, fileCount, G_filename_w_prefix, AW_FILE_MODE);
-  }
 
   // Create a client socket
   struct sockaddr_in servaddr;
@@ -189,10 +131,11 @@ void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSiz
   }
 
   // Each file only read/write a single blocksize of data
-  int i=0;
+  long long i=0;
   for(i=0; i < fileCount; i++) {
-
-
+    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)fileCount*100);
+    fflush(0);
+    
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
     
@@ -215,21 +158,15 @@ void do_append_write_test_remote( FD* fd, const int fileCount, const int fileSiz
 			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
 
     record_latency( elapsed);
-    /* if(needclose) { */
-    /*   printf("Write with Close: "); */
-    /* } else { */
-    /*   printf("Write without Close: "); */
-    /* } */
     //printf("Latency:%lld us\n", elapsed);
   }
+  printf("\rAppend Write Test process:%3.1f%%.\n\n", (float)100);
+
   Analysis_distribution();
-  if(!needclose) {
-    close_fds(fd, fileCount);
-  }
 }
 
 
-void do_append_write_test(FD* fd, const int fileCount, const int fileSize, 
+void do_append_write_test(FD* fd, const long long fileCount, const int fileSize, 
 			  const int blockSize, const bool needclose, const bool distributed_mode) {
   if(distributed_mode) {
     // Distributed mode
@@ -242,7 +179,7 @@ void do_append_write_test(FD* fd, const int fileCount, const int fileSize,
   } else {
     // Local mode
     // 1. prepare files for read support
-    int read_fileCount = READS_PER_WRITE * fileCount;
+    long long  read_fileCount = READS_PER_WRITE * fileCount;
     prepare_env(read_fileCount, fileSize);
    
     // 2. Do reads-write test locally
@@ -254,7 +191,8 @@ void do_append_write_test(FD* fd, const int fileCount, const int fileSize,
 int main(int argc, char* argv[]) {
 
   FD fd[MAX_COUNT] = {0};
-  int fileCount, fileSize, blockSize;
+  long long  fileCount;
+  int fileSize, blockSize;
   bool needclose, is_distributed;
 
   if(argc < 4 || argc > 5) {
@@ -274,7 +212,7 @@ int main(int argc, char* argv[]) {
   fileCount = atoi(argv[1]);
   fileSize = atoi(argv[2]);
   if(is_distributed) {
-      G_port = atoi(argv[4]);
+    G_port = atoi(argv[4]);
   }
   blockSize = G_blockSize;
   needclose = G_needclose;

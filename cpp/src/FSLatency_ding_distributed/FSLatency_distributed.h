@@ -1,3 +1,14 @@
+#ifndef _FSLATENCY_DISTRIBUTED_H
+#define _FSLATENCY_DISTRIBUTED_H
+
+/*
+ * FS Latency Distributed Test Tool
+ *
+ * Author: Ling Kun  <lingkun@loongstore.com.cn>
+ * Loongstore Inc.
+ *
+ */
+
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -15,7 +26,7 @@
 
 #define MAX_COUNT 1024
 #define MAX_BLOCK_SIZE 1024*1024
-#define FILENAME_FORMAT "%s/%s%09d"
+#define FILENAME_FORMAT "%s/%s%09lld"
 #define MAX_PATH_LEN  90
 #define MAX_STR_LEN 128
 #define MAX_FILENAME_LEN MAX_STR_LEN
@@ -38,26 +49,24 @@ enum  test_mode {
 typedef int FD;
 typedef int bool;
 
-
-
 int G_port=0;
 char G_ipaddr[MAX_IP_LEN]={"127.0.0.1"};
 char G_path[MAX_PATH_LEN] = {"data"};
 char* G_filename_r_prefix = "1MB_R_";
 char* G_filename_w_prefix = "1MB_W_";
-int G_fileCount=10;
-int G_fileSize=524288;
-int G_blockSize=524288;
-int G_needclose=0;
-int G_0_20_ms=0;
-int G_20_40_ms=0;
-int G_40_60_ms=0;
-int G_60_80_ms=0;
-int G_80_100_ms=0;
-int G_100_150_ms=0;
-int G_150_300_ms=0;
-int G_300_ms=0;
-int G_total=0;
+long long G_fileCount=10;
+long long G_fileSize=524288;
+long long G_blockSize=524288;
+long long G_needclose=1;
+long long G_0_20_ms=0;
+long long G_20_40_ms=0;
+long long G_40_60_ms=0;
+long long G_60_80_ms=0;
+long long G_80_100_ms=0;
+long long G_100_150_ms=0;
+long long G_150_300_ms=0;
+long long G_300_ms=0;
+long long G_total=0;
 ssize_t read(int fd, void *buf, size_t count);
 int close(int fd);
 ssize_t write(int fd, const void *buf, size_t count);
@@ -65,7 +74,7 @@ int fsync(int fd);
 in_addr_t inet_addr(const char *cp);
 
 
-void op_file_read( const int r_fileCount, const int blockSize) {
+void op_file_read( const long long r_fileCount, const int blockSize) {
   // Read READS_PER_WRITE-file
   int j=0;
   char buf[MAX_BLOCK_SIZE] = {0};
@@ -74,7 +83,7 @@ void op_file_read( const int r_fileCount, const int blockSize) {
     char filename[MAX_FILENAME_LEN];
 
     //Generate a random int between [0:READS_PER_WRITE*fileCount]
-    int rand_i = rand() % (r_fileCount);
+    long long rand_i = rand() % (r_fileCount);
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
     //printf("Read %s.\n", filename);
     int read_fd = open(filename, O_RDONLY, 0);
@@ -99,16 +108,19 @@ void create_test_dir() {
  * Create read_fcnt files with the size: file_size to prepare for file read
  *
  */
-void prepare_env(int read_fcnt, int file_size) {
+void prepare_env(long long read_fcnt, int file_size) {
 
-  printf(">>> Prepare files for read, Total Count:%d.\n", read_fcnt);
+  printf(">>> Prepare files for read, Total Count:%lld .\n", read_fcnt);
   create_test_dir();
 
   char buf[MAX_BLOCK_SIZE] = {0};
   int blockSize=512*1024;
 
-  int i = 0;
+  long long i = 0;
   for( ; i < read_fcnt; i++) {
+    printf("\r>>>> Current process:%3.1f%%.", (float)i/(float)read_fcnt*100);
+    fflush(0);
+
     char filename[MAX_FILENAME_LEN];
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, i);
     FD cur_fd = ( FD )open(filename, AW_FILE_MODE, 0666);
@@ -117,16 +129,18 @@ void prepare_env(int read_fcnt, int file_size) {
     }
     int cur_size = 0;
     while(cur_size < file_size ) {
-      if( file_size - cur_size > blockSize) {
+      if( (file_size - cur_size) > blockSize) {
 	write(cur_fd, buf, blockSize);
 	cur_size += blockSize;
-      } else {
+      } else if( (file_size - cur_size) > 0) {
 	write(cur_fd, buf, (file_size - cur_size ));
 	cur_size = file_size;
       }
     }
-    close(cur_fd);
+    close(cur_fd);    
   }
+  printf("\r>>>> Current process:%3.1f%%.\n", (float)100);
+  printf(" Prepare Read files Done!\n");
 }
 
 // Record all the latency into several gloal var for distribution calculation
@@ -166,3 +180,5 @@ void Analysis_distribution() {
 	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms, f_80_100_ms, f_100_150_ms,f_150_300_ms,
 	 f_300_ms);
 }
+
+#endif /* _FSLATENCY_DISTRIBUTED_H */
