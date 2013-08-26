@@ -103,24 +103,14 @@ void create_test_dir() {
 }
 
 
-
 /**
- * Create read_fcnt files with the size: file_size to prepare for file read
+ *
  *
  */
-void prepare_env(long long read_fcnt, int file_size) {
+void single_step_create( const long long index_start, const long long index_end) {
 
-  printf(">>> Prepare files for read, Total Count:%lld .\n", read_fcnt);
-  create_test_dir();
-
-  char buf[MAX_BLOCK_SIZE] = {0};
-  int blockSize=512*1024;
-
-  long long i = 0;
-  for( ; i < read_fcnt; i++) {
-    printf("\r>>>> Current process:%3.1f%%.", (float)i/(float)read_fcnt*100);
-    fflush(0);
-
+  long long i;
+  for( i= index_start; i < index_end; i++) {
     char filename[MAX_FILENAME_LEN];
     snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, i);
     FD cur_fd = ( FD )open(filename, AW_FILE_MODE, 0666);
@@ -139,7 +129,34 @@ void prepare_env(long long read_fcnt, int file_size) {
     }
     close(cur_fd);    
   }
+}
+
+
+/**
+ * Create read_fcnt files with the size: file_size to prepare for file read
+ *
+ */
+void prepare_env(long long read_fcnt, int file_size) {
+
+  printf(">>> Prepare files for read, Total Count:%lld .\n", read_fcnt);
+  create_test_dir();
+
+  char buf[MAX_BLOCK_SIZE] = {0};
+  int blockSize=512*1024;
+
+  int SINGLE_STEP=300;
+  long long i = 0;
+  for( ; i < read_fcnt; i+=SINGLE_STEP) {
+    printf("\r>>>> Current process:%3.1f%%.", (float)i/(float)read_fcnt*100);
+    fflush(0);
+    single_step_create(i, i+SINGLE_STEP);
+  }
   printf("\r>>>> Current process:%3.1f%%.\n", (float)100);
+  } else{
+    // Too many files need to be create, using multithread method.
+    
+
+  }
   printf(" Prepare Read files Done!\n");
 }
 

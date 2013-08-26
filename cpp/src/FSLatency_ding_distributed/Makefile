@@ -1,7 +1,19 @@
+CFLAG = -D_REENTRANT -Wall -pedantic 
+LDFLAGS = -lpthread
 
-all:
-	gcc -Wall -g3 -O0 FSLatency_distributed_server.c -o FSServer
-	gcc -Wall -g3 -O0 FSLatency_distributed_client.c -o FSClient
+ifdef DEBUG
+CFLAGS += -g3 -O0
+LDFLAGS += -g3 -O0
+endif
+
+TARGETS = FSServer FSClient
+
+all: $(TARGETS)
+
+
+FSServer: FSServer.o threadpool.o
+FSClient: FSClient.o threadpool.o
+threadpool.o: threadpool.c threadpool.h
 
 clean:
 	rm -rf FSServer FSClient *~
