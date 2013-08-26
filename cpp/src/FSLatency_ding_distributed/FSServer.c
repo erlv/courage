@@ -60,8 +60,8 @@ int main(int argc, char **argv) {
   blockSize=G_blockSize;
 
   read_fileCount = READS_PER_WRITE * fileCount;  
-  if(read_fileCount > 100000) {
-    read_fileCount = 100000;
+  if(read_fileCount > MAX_READ_FILE_CNT) {
+    read_fileCount = MAX_READ_FILE_CNT;
   }
   
   port=G_port;
@@ -90,11 +90,11 @@ int main(int argc, char **argv) {
     perror("listen");
     exit(-1);
   }
-  printf(">>> start listening done. \n");
+  printf(">>> start listening... Please start FSClient remotely. \n");
 
   // Accept socket connection
   int clisock = accept(sock, (struct sockaddr *)NULL, NULL);
-  printf(">>> Receive connection from client, under client's direction now.\n");
+  printf(">>> Received connection from FSClient.\n");
   if (clisock >= 0) {
     while(1) {
       int messageLength = 16;

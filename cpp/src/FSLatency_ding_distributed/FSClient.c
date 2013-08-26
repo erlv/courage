@@ -25,12 +25,13 @@ void print_usage() {
 }
 
 
-void print_start_information( const int fileCount, const int fileSize, 
+void print_start_information( const int write_fileCount, const int read_fileCount,
+			      const int fileSize, 
 			      const int blockSize, const bool needclose,
 			      const enum test_mode mode, const bool is_distributed) {
-  printf(">>> Total File to write: %d\n", fileCount);
+  printf(">>> Total File to write: %d\n", write_fileCount);
   printf(">>> File Write to: %s\n", G_path);
-  printf(">>> Total File to read: %dx%d=%d\n", fileCount, READS_PER_WRITE, READS_PER_WRITE * fileCount);
+  printf(">>> Randomly read from %d files\n", read_fileCount);
   printf(">>> Each File Read/Write Size: %d KB\n", fileSize);
   printf(">>> Block Size per write: %d B\n", blockSize);
 
@@ -88,8 +89,10 @@ void do_append_write_test_local(FD* fd, const long long  write_fileCount,
   long long i=0;
 
   for(i=0; i < write_fileCount; i++) {
-    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
-    fflush(0);
+    if(i%SINGLE_STEP == 0) {
+      printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
+      fflush(0);
+    }
 
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
@@ -138,9 +141,11 @@ void do_append_write_test_remote( FD* fd, const long long  write_fileCount, cons
   // Each file only read/write a single blocksize of data
   long long i=0;
   for(i=0; i < write_fileCount; i++) {
-    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
-    fflush(0);
-    
+    if(i%SINGLE_STEP == 0) {
+      printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
+      fflush(0);
+    }
+
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
     
@@ -171,8 +176,9 @@ void do_append_write_test_remote( FD* fd, const long long  write_fileCount, cons
 }
 
 
-void do_append_write_test(FD* fd, const long long write_fileCount, const int fileSize, 
-			  const int blockSize, const bool needclose, const bool distributed_mode) {
+void do_append_write_test(FD* fd, const long long write_fileCount, const long long read_fileCount,
+			  const int fileSize, const int blockSize, const bool needclose,
+			  const bool distributed_mode) {
   if(distributed_mode) {
     // Distributed mode
     // 1. Read file preparation will be done by server
@@ -184,10 +190,6 @@ void do_append_write_test(FD* fd, const long long write_fileCount, const int fil
   } else {
     // Local mode
     // 1. prepare files for read support
-    long long  read_fileCount = READS_PER_WRITE * write_fileCount;
-    if(read_fileCount > 100000) {
-      read_fileCount=100000;
-    }
     prepare_env(read_fileCount, fileSize);
    
     // 2. Do reads-write test locally
@@ -222,6 +224,12 @@ int main(int argc, char* argv[]) {
 
   strcpy(G_path, argv[1]);
   fileCount = atoi(argv[2]);
+  int write_fileCount = fileCount;
+  int read_fileCount = write_fileCount * READS_PER_WRITE;
+  if(fileCount* READS_PER_WRITE > MAX_READ_FILE_CNT) {
+    read_fileCount = MAX_READ_FILE_CNT;
+  }
+
   int KfileSize = atoi(argv[3]);
   fileSize = KfileSize*1024;
   if(is_distributed) {
@@ -233,11 +241,11 @@ int main(int argc, char* argv[]) {
 
   enum test_mode mode;
   mode = MODE_AW;
-  print_start_information(fileCount, KfileSize, blockSize, needclose, mode, is_distributed);
+  print_start_information(write_fileCount, read_fileCount, KfileSize, blockSize, needclose, mode, is_distributed);
 
   switch(mode) {
   case MODE_AW:
-    do_append_write_test(fd, fileCount, fileSize, blockSize, needclose, is_distributed);
+    do_append_write_test(fd, write_fileCount, read_fileCount, fileSize, blockSize, needclose, is_distributed);
     break;
   case MODE_HW:
   case MODE_AR:

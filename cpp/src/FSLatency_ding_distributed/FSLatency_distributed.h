@@ -32,8 +32,8 @@
 #define MAX_STR_LEN 128
 #define MAX_FILENAME_LEN MAX_STR_LEN
 #define MAX_IP_LEN 15
-
-
+#define MAX_READ_FILE_CNT 50000
+#define SINGLE_STEP 300
 
 #define AW_FILE_MODE ( O_CREAT|O_APPEND|O_RDWR )
 #define HW_FILE_MODE ( O_CREAT|O_RDWR )
@@ -152,7 +152,7 @@ void prepare_env(long long read_fcnt, int file_size) {
   printf(">>> Prepare files for read, Total Count:%lld .\n", read_fcnt);
   create_test_dir();
 
-  int SINGLE_STEP=300;
+
   if( read_fcnt < SINGLE_STEP*400) {
     long long i = 0;
     for( ; i < read_fcnt; i+=SINGLE_STEP) {
