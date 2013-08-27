@@ -37,9 +37,7 @@ void print_start_information(const int read_fcnt, const int read_filesize,
   } else {
     printf(">>> Use single thread to read files.\n");
   }
-
 }
-
 
 
 int main(int argc, char **argv) {
@@ -84,11 +82,12 @@ int main(int argc, char **argv) {
 
   if(G_is_multithread_read) {
     printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
-    sem_init(&sem,0,0);
-    pthread_mutex_init(&lock,NULL);
     int i=0;
     for(;  i < READS_PER_WRITE; i++) {
-      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, NULL);
+      sem_init(&sem_read_start[i],0,0);
+      sem_init(&sem_read_end[i],0,0);
+      G_thread_idx[i]=i;
+      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, &G_thread_idx[i]);
     }
   }
 
@@ -133,7 +132,6 @@ int main(int argc, char **argv) {
 
       char* done_msg = "Done!";
       send(clisock, done_msg,  strlen(done_msg), 0);
-      // printf(">>>\t >Read files done! Notify the client.\n");
     }
     close(clisock);
   }

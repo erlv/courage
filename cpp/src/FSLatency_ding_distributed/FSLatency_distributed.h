@@ -20,7 +20,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-//#include "threadpool.h"
 #include <pthread.h>
 #include <semaphore.h>
 
@@ -80,10 +79,11 @@ in_addr_t inet_addr(const char *cp);
 // Used for multithread read file
 #define MAX_THREAD_NUM 256
 #define MIN_THREAD_NUM 5
-pthread_mutex_t lock;
 pthread_t G_t[READS_PER_WRITE]={0};
-sem_t sem;
-volatile int G_thread_read=READS_PER_WRITE;
+int G_thread_idx[READS_PER_WRITE]={0};
+sem_t sem_read_start[READS_PER_WRITE];
+sem_t sem_read_end[READS_PER_WRITE];
+
 
 void single_file_read() {
   long long r_fileCount = G_fileCount;// *(long long int*) arg;
@@ -102,16 +102,18 @@ void single_file_read() {
   close(read_fd);
 }
 
-void single_file_read_thread() {
-  printf(">>> Threads: start Thread 0x%x and wait\n", (unsigned int)pthread_self());
+void single_file_read_thread(void* args) {
+  int thread_idx = *(int*) args;
+  printf(">>> Threads: start Thread %d: 0x%x and wait\n", thread_idx,
+	 (unsigned int)pthread_self());
+
+
   while(1) {
-    sem_wait(&sem);
-    printf(">>>> start read. 0x%x\n", (unsigned int)pthread_self());
+    sem_wait(&sem_read_start[thread_idx]);
+    //    printf(">>>> start read. %d: 0x%x\n", thread_idx, (unsigned int)pthread_self());
     single_file_read();
-    pthread_mutex_lock(&lock);
-    G_thread_read--;
-    pthread_mutex_unlock(&lock);
-    
+    sem_post(&sem_read_end[thread_idx]);
+    //    printf(">>>> read finished. %d.\n", thread_idx);
   }
 }
 
@@ -127,21 +129,13 @@ void op_file_read_multi_thread(const long long r_fileCount, const int blockSize)
   // Tell all the thread to start read
   int i=0;
   for(;  i < READS_PER_WRITE; i++) {
-    sem_post(&sem);
+    sem_post(&sem_read_start[i]);
   }
-  //wait all the thread to finish
-  int sem_value = -1;
-  sem_getvalue(&sem, &sem_value);
-  while(sem_value) {
-    //printf(">>> Keep on waiting all thread to start read.%d\n", sem_value);
-    sem_getvalue(&sem, &sem_value);
-  }
-  printf(">>> All thread have start read.\n");
-  
-  // Wait until G_thread_read to 1, that is all threads have done
-  // their reads.
-  while(G_thread_read > 1 ) {
-    continue;
+
+  // Wait all thread to end
+  i=0;
+  for(;  i < READS_PER_WRITE; i++) {
+    sem_wait(&sem_read_end[i]);
   }
 }
 
@@ -230,13 +224,13 @@ void record_latency( const long long elapsed ) {
   } else if ( elapsed < 100000) {
     G_80_100_ms++;
   } else if ( elapsed < 150000) {
-    printf("Long Latency 100~150ms: %lld.\n", elapsed);
+    printf("Long Latency 100~150ms: %lld us.\n", elapsed);
     G_100_150_ms++;
   } else if ( elapsed < 300000) {
-    printf("Long Latency 150~300ms: %lld.\n", elapsed);
+    printf("Long Latency 150~300ms: %lld us.\n", elapsed);
     G_150_300_ms++;
   } else if ( elapsed > 300000) {
-    printf("Long Latency >300ms: %lld.\n", elapsed);
+    printf("Long Latency >300ms: %lld us.\n", elapsed);
     G_300_ms++;
   }
 }
@@ -256,8 +250,5 @@ void Analysis_distribution() {
 	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms, f_80_100_ms, f_100_150_ms,f_150_300_ms,
 	 f_300_ms);
 }
-
-// End Thread pool related code
-
 
 #endif /* _FSLATENCY_DISTRIBUTED_H */

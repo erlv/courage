@@ -1,10 +1,8 @@
 CFLAGS = -D_REENTRANT -Wall 
 LDFLAGS = -lpthread
 
-ifdef DEBUG
 CFLAGS += -g3 -O0
 LDFLAGS += -g3 -O0
-endif
 
 TARGETS = FSServer FSClient
 

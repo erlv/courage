@@ -95,8 +95,10 @@ void do_append_write_test_local(FD* fd, const long long  write_fileCount,
   long long i=0;
 
   for(i=0; i < write_fileCount; i++) {
-    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
-    fflush(0);
+    if( i % 200 == 0 ) {
+      printf("\rWrite Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
+      fflush(0);
+    }
 
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
@@ -112,15 +114,15 @@ void do_append_write_test_local(FD* fd, const long long  write_fileCount,
     record_latency(elapsed);
 
   }
-  printf("\rAppend Write Test process:%3.1f%%.\n\n\n", (float)100);
+  printf("\rWrite Test process:%3.1f%%.\n\n\n", (float)100);
   
   Analysis_distribution();
   
 }
 
 // Write was done locally, while read was done remotely
-void do_append_write_test_remote( FD* fd, const long long  write_fileCount, const int fileSize,
-				  const int blockSize) {
+void do_append_write_test_remote( FD* fd, const long long  write_fileCount, 
+				  const int fileSize, const int blockSize) {
 
   // Create a client socket
   struct sockaddr_in servaddr;
@@ -139,8 +141,10 @@ void do_append_write_test_remote( FD* fd, const long long  write_fileCount, cons
   // Each file only read/write a single blocksize of data
   long long i=0;
   for(i=0; i < write_fileCount; i++) {
-    printf("\rAppend Write Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
-    fflush(0);
+    if( i % 200 == 0 ) {
+      printf("\rWrite Test process:%3.1f%%.", (float)i/(float)write_fileCount*100);
+      fflush(0);
+    }
     
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
@@ -166,7 +170,7 @@ void do_append_write_test_remote( FD* fd, const long long  write_fileCount, cons
     record_latency( elapsed);
     //printf("Latency:%lld us\n", elapsed);
   }
-  printf("\rAppend Write Test process:%3.1f%%.\n\n", (float)100);
+  printf("\rWrite Test process:%3.1f%%.\n\n", (float)100);
 
   Analysis_distribution();
 }
@@ -241,11 +245,12 @@ int main(int argc, char* argv[]) {
 
   if (G_is_multithread_read) {
     printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
-    sem_init(&sem,0,0);
-    pthread_mutex_init(&lock,NULL);
     int i=0;
     for(;  i < READS_PER_WRITE; i++) {
-      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, NULL);
+      sem_init(&sem_read_start[i],0,0);
+      sem_init(&sem_read_end[i],0,0);
+      G_thread_idx[i]=i;
+      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, &G_thread_idx[i]);
     }
   }
   switch(mode) {
