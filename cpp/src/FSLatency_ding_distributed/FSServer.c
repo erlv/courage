@@ -9,16 +9,19 @@
 #include "FSLatency_distributed.h"
 
 void print_usage() {
-  printf("Usage: FSServer count filesize(KB) distribued(1) port(int)\n");
+  printf("Usage: FSServer count filesize(KB) MultiReader(0|1) distribued(1) port(int)\n");
   printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of files that need to be read/written\n");
   printf(" >>> filesize: Each file size in KB that will be write\n");
+  printf(" >>> MultiReader:\n");
+  printf(" >>> \t 0: Use single thread to do %d file read.\n", READS_PER_WRITE);
+  printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
   printf(" >>> distributed mode: \n");
   printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n");
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
-  printf(" Example: FSServer /datapool  500 514 1 127.0.0.1 5678 \n");
+  printf(" Example: FSServer /datapool  500 514 1 1 127.0.0.1 5678 \n");
 }
 
 void print_start_information(const int read_fcnt, const int read_filesize,
@@ -29,7 +32,14 @@ void print_start_information(const int read_fcnt, const int read_filesize,
   printf(">>> Read from Path:%s.\n", G_path);
   printf(">>> Each read file size: %dKB.\n", read_filesize);
   printf(">>> Each read block size: %dB.\n", read_blocksize);
+  if( G_is_multithread_read) {
+    printf(">>> Use Multithread to read files.\n");
+  } else {
+    printf(">>> Use single thread to read files.\n");
+  }
+
 }
+
 
 
 int main(int argc, char **argv) {
@@ -38,13 +48,15 @@ int main(int argc, char **argv) {
   int fileCount, fileSize, blockSize, read_fileCount, port;
   bool is_distributed;
 
-  if(argc != 7) {
+  if(argc != 8) {
     printf("Wrong command line argument number!\n");
     print_usage();
     exit(0);
   }
 
-  is_distributed = atoi(argv[3]);
+  is_distributed = atoi(argv[5]);
+  G_is_distributed = is_distributed;
+
   if( !is_distributed) {
     printf("Server daemon could only run in distributed mode.\n");
     print_usage();
@@ -52,10 +64,13 @@ int main(int argc, char **argv) {
   }
   strcpy(G_path, argv[1]);
   fileCount = atoi(argv[2]);
+  G_fileCount = fileCount;
   int KfileSize = atoi(argv[3]);
   fileSize = KfileSize*1024;
-  strcpy(G_ipaddr, argv[5]);
-  G_port = atoi(argv[6]);
+  G_fileSize= fileSize;
+  G_is_multithread_read = atoi(argv[4]);
+  strcpy(G_ipaddr, argv[6]);
+  G_port = atoi(argv[7]);
   blockSize=G_blockSize;
 
   read_fileCount = READS_PER_WRITE * fileCount;  
@@ -64,10 +79,18 @@ int main(int argc, char **argv) {
   }
   
   port=G_port;
-
   print_start_information(read_fileCount, KfileSize, blockSize, port);
-
   prepare_env(read_fileCount, fileSize);
+
+  if(G_is_multithread_read) {
+    printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
+    sem_init(&sem,0,0);
+    pthread_mutex_init(&lock,NULL);
+    int i=0;
+    for(;  i < READS_PER_WRITE; i++) {
+      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, NULL);
+    }
+  }
 
   struct sockaddr_in servaddr;  
   int sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -89,11 +112,11 @@ int main(int argc, char **argv) {
     perror("listen");
     exit(-1);
   }
-  printf(">>> start listening... Please start FSClient remotely. \n");
+  printf(">>> start listening done. \n");
 
   // Accept socket connection
   int clisock = accept(sock, (struct sockaddr *)NULL, NULL);
-  printf(">>> Received connection from FSClient.\n");
+  printf(">>> Receive connection from client, under client's direction now.\n");
   if (clisock >= 0) {
     while(1) {
       int messageLength = 16;

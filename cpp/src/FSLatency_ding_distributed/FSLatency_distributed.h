@@ -1,3 +1,6 @@
+#ifndef _FSLATENCY_DISTRIBUTED_H
+#define _FSLATENCY_DISTRIBUTED_H
+
 /*
  * FS Latency Distributed Test Tool
  *
@@ -5,10 +8,6 @@
  * Loongstore Inc.
  *
  */
-
-#ifndef _FSLATENCY_DISTRIBUTED_H
-#define _FSLATENCY_DISTRIBUTED_H
-
 
 #include <time.h>
 #include <sys/time.h>
@@ -21,7 +20,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "threadpool.h"
+//#include "threadpool.h"
+#include <pthread.h>
+#include <semaphore.h>
 
 #define READS_PER_WRITE 5
 
@@ -34,7 +35,7 @@
 #define MAX_FILENAME_LEN MAX_STR_LEN
 #define MAX_IP_LEN 15
 #define MAX_READ_FILE_CNT 50000
-#define SINGLE_STEP 300
+
 
 #define AW_FILE_MODE ( O_CREAT|O_APPEND|O_RDWR )
 #define HW_FILE_MODE ( O_CREAT|O_RDWR )
@@ -58,8 +59,9 @@ char* G_filename_r_prefix = "1MB_R_";
 char* G_filename_w_prefix = "1MB_W_";
 long long G_fileCount=10;
 long long G_fileSize=524288;
-long long G_blockSize=524288;
-long long G_needclose=1;
+long long G_blockSize=514*1024;
+bool G_is_distributed=0;
+bool G_is_multithread_read=1;
 long long G_0_20_ms=0;
 long long G_20_40_ms=0;
 long long G_40_60_ms=0;
@@ -75,31 +77,79 @@ ssize_t write(int fd, const void *buf, size_t count);
 int fsync(int fd);
 in_addr_t inet_addr(const char *cp);
 
-// Used for multithread read file generation.
-#define THREAD 16
-#define QUEUE 256
+// Used for multithread read file
+#define MAX_THREAD_NUM 256
+#define MIN_THREAD_NUM 5
 pthread_mutex_t lock;
-threadpool_t *pool;
+pthread_t G_t[READS_PER_WRITE]={0};
+sem_t sem;
+volatile int G_thread_read=READS_PER_WRITE;
 
+void single_file_read() {
+  long long r_fileCount = G_fileCount;// *(long long int*) arg;
+  long long rand_i = rand() % (r_fileCount);
+  int blockSize = G_blockSize;//*( int *)(arg+ sizeof(long long int));
 
-void op_file_read( const long long r_fileCount, const int blockSize) {
+  char buf[MAX_BLOCK_SIZE] = {0};
+  char filename[MAX_FILENAME_LEN];
+  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
+  //printf("Read %s.\n", filename);
+  int read_fd = open(filename, O_RDONLY, 0);
+  if( read_fd <= 0 ) {
+    printf("Open file for read error: %s\n", filename);
+  }
+  read(read_fd, buf, blockSize);
+  close(read_fd);
+}
+
+void single_file_read_thread() {
+  printf(">>> Threads: start Thread 0x%x and wait\n", (unsigned int)pthread_self());
+  while(1) {
+    sem_wait(&sem);
+    printf(">>>> start read. 0x%x\n", (unsigned int)pthread_self());
+    single_file_read();
+    pthread_mutex_lock(&lock);
+    G_thread_read--;
+    pthread_mutex_unlock(&lock);
+    
+  }
+}
+
+void op_file_read_single_thread( const long long r_fileCount, const int blockSize) {
   // Read READS_PER_WRITE-file
   int j=0;
-  char buf[MAX_BLOCK_SIZE] = {0};
-
   for(; j < READS_PER_WRITE; j++) {
-    char filename[MAX_FILENAME_LEN];
+    single_file_read();
+  }
+}
 
-    //Generate a random int between [0:READS_PER_WRITE*fileCount]
-    long long rand_i = rand() % (r_fileCount);
-    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
-    //printf("Read %s.\n", filename);
-    int read_fd = open(filename, O_RDONLY, 0);
-    if( read_fd <= 0 ) {
-      printf("Open file for read error: %s\n", filename);
-    }
-    read(read_fd, buf, blockSize);
-    close(read_fd);
+void op_file_read_multi_thread(const long long r_fileCount, const int blockSize) {
+  // Tell all the thread to start read
+  int i=0;
+  for(;  i < READS_PER_WRITE; i++) {
+    sem_post(&sem);
+  }
+  //wait all the thread to finish
+  int sem_value = -1;
+  sem_getvalue(&sem, &sem_value);
+  while(sem_value) {
+    //printf(">>> Keep on waiting all thread to start read.%d\n", sem_value);
+    sem_getvalue(&sem, &sem_value);
+  }
+  printf(">>> All thread have start read.\n");
+  
+  // Wait until G_thread_read to 1, that is all threads have done
+  // their reads.
+  while(G_thread_read > 1 ) {
+    continue;
+  }
+}
+
+void op_file_read(const long long r_fileCount, const int blockSize) {
+  if(G_is_multithread_read) {
+    op_file_read_multi_thread(r_fileCount, blockSize);
+  } else {
+    op_file_read_single_thread(r_fileCount, blockSize);
   }
 }
 
@@ -110,7 +160,6 @@ void create_test_dir() {
   system(mkdircmd);
 }
 
-
 /**
  *
  *
@@ -120,7 +169,7 @@ void single_step_create( const long long index_start, const long long index_end,
 
   long long i;
   char buf[MAX_BLOCK_SIZE] = {0};
-  int blockSize=512*1024;
+  int blockSize=G_blockSize;
 
   for( i= index_start; i < index_end; i++) {
     char filename[MAX_FILENAME_LEN];
@@ -143,7 +192,6 @@ void single_step_create( const long long index_start, const long long index_end,
   }
 }
 
-
 /**
  * Create read_fcnt files with the size: file_size to prepare for file read
  *
@@ -153,7 +201,7 @@ void prepare_env(long long read_fcnt, int file_size) {
   printf(">>> Prepare files for read, Total Count:%lld .\n", read_fcnt);
   create_test_dir();
 
-
+  int SINGLE_STEP=300;
   if( read_fcnt < SINGLE_STEP*400) {
     long long i = 0;
     for( ; i < read_fcnt; i+=SINGLE_STEP) {
@@ -164,15 +212,6 @@ void prepare_env(long long read_fcnt, int file_size) {
     printf("\r>>>> Current process:%3.1f%%.\n", (float)100);
   } else {
     printf("Too many file creation will take a long time.\n");
-    /* // Too many files need to be create, using multithread method. */
-    /* pthread_mutex_init(&lock, NULL); */
-    /* assert(pool = threadpool_creat(THREAD, QUEUE, 0)!= NULL); */
-    /* printf("Thread pool Started with %d threads and %d queue size.\n", THREAD, QUEUE); */
-
-    /* while (threadpool_add(pool, &single_step_create, NULL, 0) ==0)) */
-    /* } */
-    /* assert */
-
   }
   printf(" Prepare Read files Done!\n");
 }
@@ -191,10 +230,13 @@ void record_latency( const long long elapsed ) {
   } else if ( elapsed < 100000) {
     G_80_100_ms++;
   } else if ( elapsed < 150000) {
+    printf("Long Latency 100~150ms: %lld.\n", elapsed);
     G_100_150_ms++;
   } else if ( elapsed < 300000) {
+    printf("Long Latency 150~300ms: %lld.\n", elapsed);
     G_150_300_ms++;
   } else if ( elapsed > 300000) {
+    printf("Long Latency >300ms: %lld.\n", elapsed);
     G_300_ms++;
   }
 }
@@ -214,5 +256,8 @@ void Analysis_distribution() {
 	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms, f_80_100_ms, f_100_150_ms,f_150_300_ms,
 	 f_300_ms);
 }
+
+// End Thread pool related code
+
 
 #endif /* _FSLATENCY_DISTRIBUTED_H */
