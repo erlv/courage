@@ -74,8 +74,6 @@ ssize_t write(int fd, const void *buf, size_t count);
 int fsync(int fd);
 in_addr_t inet_addr(const char *cp);
 
-
-
 void print_whole_usage() {
   printf("Usage: FSLatency l|s|c \n");
   printf(">>> Do FileSystem latency test in local or distributed mode, using single/multi thread read \n");
@@ -96,7 +94,7 @@ void print_server_usage() {
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
-  printf("Example: FSServer /datapool  500 514 1 5678 \n");
+  printf("Example: FSLatency s /datapool  500 514 1 5678 \n");
 }
 
 void print_client_usage() {
@@ -108,7 +106,7 @@ void print_client_usage() {
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n");
-  printf("\nExample: FSLatency-c /datapool/ 500 514 127.0.0.1 5678 \n");
+  printf("\nExample: FSLatency c /datapool/ 500 514 127.0.0.1 5678 \n");
 }
 
 void print_local_usage() {
@@ -121,7 +119,7 @@ void print_local_usage() {
   printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
-  printf("Example: FSLatency-l /datapool/ 500 514 1 \n");
+  printf("Example: FSLatency l /datapool/ 500 514 1 \n");
 }
 
 
@@ -331,11 +329,11 @@ void create_test_dir() {
  */
 void op_file_create_write(const long long  fileName_idx) {
 
+  create_test_dir();
+
   // Write 1-file
   char filename[MAX_FILENAME_LEN];
   char buf[MAX_BLOCK_SIZE] = {0};
-
-
   snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path,
 	   G_filename_w_prefix, fileName_idx);
   int cur_fd;
@@ -514,7 +512,7 @@ void do_test_server() {
  */
 void prepare_env() {
 
-  printf(">>> Prepare files for read, Total Count:%lld .\n", G_read_fileCount);
+  printf(">>> Prepare %lld files for read....\n", G_read_fileCount);
   create_test_dir();
   char buf[MAX_BLOCK_SIZE] = {0};  
   long long i = 0;
