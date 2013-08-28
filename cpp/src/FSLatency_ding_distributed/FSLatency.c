@@ -1,12 +1,14 @@
 /*
- * FS Latency Distributed Test Tool
+ * FS Latency Test Tool
  *
  * Author: Ling Kun  <lingkun@loongstore.com.cn>
+ * 
  * Loongstore Inc.
+ * 
+ * 2013-8-28
  *
  */
 
-//#include "FSCommon.h"
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
@@ -237,14 +239,11 @@ void Analysis_distribution() {
  * Perform the single file read operation
  * The filename is generated randomly
  */
-void single_file_read() {
-  long long r_fileCount = G_read_fileCount;
-  long long rand_i = rand() % (r_fileCount);
+void single_file_read(long long file_id) {
   int blockSize = G_blockSize;
-
   char buf[MAX_BLOCK_SIZE] = {0};
   char filename[MAX_FILENAME_LEN];
-  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, rand_i);
+  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, file_id);
   int read_fd = open(filename, O_RDONLY, 0);
   if( read_fd <= 0 ) {
     printf("Open file for read error: %s\n", filename);
@@ -260,6 +259,7 @@ void single_file_read() {
  */
 void single_file_read_thread(void* args) {
   int thread_idx = *(int*) args;
+  long long rand_step = (G_read_fileCount/READS_PER_WRITE)*thread_idx;
   printf(">>> Threads: start Thread %d: 0x%x and wait\n", thread_idx,
 	 (unsigned int)pthread_self());
 
@@ -267,7 +267,11 @@ void single_file_read_thread(void* args) {
     // Wait for main thread to post sem_read_start[thread_idx]
     sem_wait(&sem_read_start[thread_idx]);
 
-    single_file_read();
+    // Add rand_step to rand() return value, so that each thread could 
+    // use a more random file id.
+    long long rand_i = (rand()+ rand_step) % (G_read_fileCount);
+
+    single_file_read(rand_i);
 
     // Tell main thread that I have done file read!
     sem_post(&sem_read_end[thread_idx]);
@@ -281,7 +285,8 @@ void single_file_read_thread(void* args) {
 void op_file_read_single_thread() {
   int j=0;
   for(; j < READS_PER_WRITE; j++) {
-    single_file_read();
+    long long rand_i = rand() % (G_read_fileCount);
+    single_file_read(rand_i);
   }
 }
 
