@@ -1,9 +1,8 @@
 /*
  * FS Latency Test Tool
  *
- * Author: Ling Kun  <lingkun@loongstore.com.cn>
+ * Author: Ling Kun  <lkun.erlv@gmail.com>
  * 
- * Loongstore Inc.
  * 
  * 2013-8-28
  *
