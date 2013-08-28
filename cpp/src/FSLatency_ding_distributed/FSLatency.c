@@ -22,8 +22,6 @@
 #include <semaphore.h>
 
 #define READS_PER_WRITE 5
-
-
 #define MAX_COUNT 1024
 #define MAX_BLOCK_SIZE 1024*1024
 #define FILENAME_FORMAT "%s/%s%09lld"
@@ -33,12 +31,15 @@
 #define MAX_IP_LEN 15
 #define MAX_READ_FILE_CNT 50000
 
-// Used for multithread read file
-#define MAX_THREAD_NUM 256
-#define MIN_THREAD_NUM 5
 
 typedef int FD;
 typedef int bool;
+
+enum T_testRole {
+  ROLE_SERVER,
+  ROLE_CLIENT,
+  ROLE_LOCAL,
+};
 
 char G_path[MAX_PATH_LEN] = {"data"};
 char* G_filename_w_prefix = "1MB_W_";
@@ -46,10 +47,10 @@ char* G_filename_r_prefix = "1MB_R_";
 long long G_write_fileCount=0;
 long long G_read_fileCount=0;
 char G_ipaddr[MAX_IP_LEN]={"127.0.0.1"};
+int G_port = 5678;
 int G_fileSize=524288;
 int G_kfileSize=514;
 int G_blockSize=514*1024;
-bool G_is_distributed=0;
 bool G_is_multithread_read=1;
 long long G_0_20_ms=0;
 long long G_20_40_ms=0;
@@ -60,6 +61,7 @@ long long G_100_150_ms=0;
 long long G_150_300_ms=0;
 long long G_300_ms=0;
 long long G_total=0;
+enum T_testRole G_testRole=ROLE_LOCAL;
 
 pthread_t G_t[READS_PER_WRITE]={0};
 int G_thread_idx[READS_PER_WRITE]={0};
@@ -73,51 +75,70 @@ int fsync(int fd);
 in_addr_t inet_addr(const char *cp);
 
 
+
+void print_whole_usage() {
+  printf("Usage: FSLatency l|s|c \n");
+  printf(">>> Do FileSystem latency test in local or distributed mode, using single/multi thread read \n");
+  printf(" FSLatency l : Do latency test in local mode, all read/write is done locally.\n");
+  printf(" FSLatency s : Do latency test in distributed mode-server  read side.\n");
+  printf(" FSLatency c : Do latency test in distributed mode-client  write side.\n");
+  printf(">>> Please run the above command for more detailed usage information.\n");
+}
+
 void print_server_usage() {
-  printf("Usage: FSLatency-s count filesize(KB) MultiReader(0|1) port(int)\n");
-  printf(" >>> path: a avaible path that can be read/write\n");
-  printf(" >>> count: the number of files that need to be read/written\n");
-  printf(" >>> filesize: Each file size in KB that will be write\n");
+  printf("Usage: FSLatency s path count filesize(KB) MultiReader(0|1) port(int)\n");
+  printf(" >>> path: a avaible path where read perform\n");
+  printf(" >>> count: the number of tests\n");
+  printf(" >>> filesize: Each file size in KB that will be generated to read\n");
   printf(" >>> MultiReader:\n");
   printf(" >>> \t 0: Use single thread to do %d file read.\n", READS_PER_WRITE);
   printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
-  printf(" >>> distributed mode: \n");
-  printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n");
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
-  printf(" Example: FSServer /datapool  500 514 1 1 127.0.0.1 5678 \n");
+  printf("Example: FSServer /datapool  500 514 1 5678 \n");
 }
 
 void print_client_usage() {
-  printf("Usage: FSLatency-c  path count filesize(KB) ip port(int)\n");
-  printf(" >>> path: a avaible path that can be read/write\n");
-  printf(" >>> count: the number of files that need to be read/written\n");
+  printf("Usage: FSLatency c  path count filesize(KB) ip port(int)\n");
+  printf(" >>> path: a avaible path that can be write\n");
+  printf(" >>> count: the number of test that need to be done\n");
   printf(" >>> filesize: Each file size in KB that will be write\n");
-  printf(" >>> MultiReader:\n");
-  printf(" >>> \t 0: Use single thread to do %d file read.\n", READS_PER_WRITE);
-  printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
-  printf(" >>> distributed mode: \n");
-  printf(" >>> \t 0: Doing File System latency test locally without network.\n");
-  printf(" >>> \t 1: Doing FS latency test distributedly, please enter the ip/port later.\n\n");
   printf(" >>> ip: the IP address of server for distrituted test.\n");
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n");
-  printf(" Example: FSClient /datapool/ 500 514 1 1 127.0.0.1 5678 \n");
-  printf(" Example: FSClient /datapool/ 500 514 0 0 \n");
+  printf("\nExample: FSLatency-c /datapool/ 500 514 127.0.0.1 5678 \n");
 }
+
+void print_local_usage() {
+  printf("Usage: FSLatency l  path count filesize(KB) MultiReader(0|1)\n");
+  printf(" >>> path: a avaible path that can be read/write\n");
+  printf(" >>> count: the number of test that need to be done\n");
+  printf(" >>> filesize: Each file size in KB that will be write\n");
+  printf(" >>> MultiReader:\n");
+  printf(" >>> \t 0: Use single thread to do %d file read.\n", READS_PER_WRITE);
+  printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
+  printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
+  printf(" >>> blocksize: Block Size per read/write\n\n");
+  printf("Example: FSLatency-l /datapool/ 500 514 1 \n");
+}
+
 
 void print_usage() {
   if(G_testRole == ROLE_SERVER) {
     print_server_usage();
-  } else {
+  } else if(G_testRole == ROLE_LOCAL) {
+    print_local_usage();
+  } else if(G_testRole == ROLE_CLIENT) {
     print_client_usage();
+  } else {
+    print_whole_usage();
   }
 }
 
-void print_client_start_information() {
-  printf("Starting FSLatency distributed Server...\n");
+void print_server_start_information() {
+  printf("Starting FSLatency distributed test: Server...\n");
   printf(">>> Listen port: %d.\n", G_port);
   printf(">>> Total read file count: %lld.\n", G_read_fileCount);
   printf(">>> Read from Path:%s.\n", G_path);
@@ -128,12 +149,25 @@ void print_client_start_information() {
   } else {
     printf(">>> Use single thread to read files.\n");
   }
+
+  printf("\n Start test....\n");
 }
 
 void print_client_start_information() {
+  printf("Starting FSLatency distributed test: Client...\n");
   printf(">>> Total File to write: %lld\n", G_write_fileCount);
   printf(">>> File Write to: %s\n", G_path);
-  printf(">>> Total File to read: %lld\n", G_read_fileCount);
+  printf(">>> Each Writen-file Size: %d KB\n", G_kfileSize);
+  printf(">>> Block Size per write: %d B\n", G_blockSize);
+  printf(">>> FSLatency test server: %s:%d\n", G_ipaddr, G_port);
+  printf("\nStart test......\n");
+}
+
+void print_local_start_information() {
+  printf("Starting FSLatency test: Local mode...\n");
+  printf(">>> File read/write Path: %s.\n", G_path);
+  printf(">>> Total test or file-write count: %lld\n", G_write_fileCount);
+  printf(">>> Total file-read count: %lld\n", G_read_fileCount);
   printf(">>> Each File Read/Write Size: %d KB\n", G_kfileSize);
   printf(">>> Block Size per write: %d B\n", G_blockSize);
   if( G_is_multithread_read) {
@@ -141,24 +175,23 @@ void print_client_start_information() {
   } else {
     printf(">>> Use single thread to read files.\n");
   }
-
-  if( G_is_distributed) {
-    printf(">>> Read File will be  done by sever: %s:%d\n", G_ipaddr, G_port);
-  } else {
-    printf(">>> Read File is done locally.\n");
-  }
   printf("Start test......\n");
 }
 
 void print_start_information() {
   if(G_testRole == ROLE_SERVER) {
     print_server_start_information();
-  } else {
+  } else if( G_testRole == ROLE_CLIENT) {
     print_client_start_information();
+  } else if( G_testRole == ROLE_LOCAL) {
+    print_local_start_information();
   }
 }
 
-// Record all the latency into several gloal var for distribution calculation
+/**
+ * Record all the latency into several gloal var 
+ *for distribution calculation
+ */
 void record_latency( const long long elapsed ) {
   G_total++;
   if( elapsed < 20000) {
@@ -183,6 +216,9 @@ void record_latency( const long long elapsed ) {
   }
 }
 
+/**
+ * Analyse the recorded latency of the whole test
+ */
 void Analysis_distribution() {
   float f_0_20_ms = (float)G_0_20_ms/(float)G_total*100;
   float f_20_40_ms = (float)G_20_40_ms/(float)G_total*100;
@@ -199,6 +235,10 @@ void Analysis_distribution() {
 	 f_300_ms);
 }
 
+/**
+ * Perform the single file read operation
+ * The filename is generated randomly
+ */
 void single_file_read() {
   long long r_fileCount = G_read_fileCount;
   long long rand_i = rand() % (r_fileCount);
@@ -215,26 +255,42 @@ void single_file_read() {
   close(read_fd);
 }
 
+/**
+ * An thread which will perform one single file read operation 
+ * under the main thread's control using sem_read_start[thread_idx] and 
+ * sem_read_end[thread_idx]
+ */
 void single_file_read_thread(void* args) {
   int thread_idx = *(int*) args;
   printf(">>> Threads: start Thread %d: 0x%x and wait\n", thread_idx,
 	 (unsigned int)pthread_self());
 
   while(1) {
+    // Wait for main thread to post sem_read_start[thread_idx]
     sem_wait(&sem_read_start[thread_idx]);
+
     single_file_read();
+
+    // Tell main thread that I have done file read!
     sem_post(&sem_read_end[thread_idx]);
   }
 }
 
+/**
+ * Read multiple  files in a single thread.
+ *
+ */
 void op_file_read_single_thread() {
-  // Read READS_PER_WRITE-file
   int j=0;
   for(; j < READS_PER_WRITE; j++) {
     single_file_read();
   }
 }
 
+/**
+ * Read Multiple files in multithread.
+ * Each thread will read only one file.
+ */
 void op_file_read_multi_thread() {
   // Tell all the thread to start read
   int i=0;
@@ -249,6 +305,9 @@ void op_file_read_multi_thread() {
   }
 }
 
+/**
+ * Perform the file read operation
+ */
 void op_file_read() { 
   if(G_is_multithread_read) {
     op_file_read_multi_thread();
@@ -257,41 +316,19 @@ void op_file_read() {
   }
 }
 
-// Create the testdir
+/**
+ * Perpare for the test dir
+ * This function is called before any file read/write start
+ */
 void create_test_dir() {
   char mkdircmd[MAX_STR_LEN] = {0};
   sprintf( mkdircmd, "mkdir -p %s", G_path);
   system(mkdircmd);
 }
 
-void single_step_create( const long long index_start, const long long index_end) {
-
-  long long i;
-  char buf[MAX_BLOCK_SIZE] = {0};
-  int blockSize=G_blockSize;
-
-  for( i= index_start; i < index_end; i++) {
-    char filename[MAX_FILENAME_LEN];
-    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, i);
-    FD cur_fd = ( FD )open(filename, (O_CREAT|O_APPEND|O_RDWR), 0666);
-    if(cur_fd <= 0 ) {
-      printf("Open file error: %s\n", filename);
-    }
-    int cur_size = 0;
-    while(cur_size < G_fileSize ) {
-      if( (G_fileSize - cur_size) > blockSize) {
-	write(cur_fd, buf, blockSize);
-	cur_size += blockSize;
-      } else if( (G_fileSize - cur_size) > 0) {
-	write(cur_fd, buf, (G_fileSize - cur_size ));
-	cur_size = G_fileSize;
-      }
-    }
-    close(cur_fd);    
-  }
-}
-
-
+/**
+ * Perform the file create and write operation
+ */
 void op_file_create_write(const long long  fileName_idx) {
 
   // Write 1-file
@@ -311,6 +348,9 @@ void op_file_create_write(const long long  fileName_idx) {
 }
 
 
+/**
+ * Do the FS Latency in local mode
+ */
 void do_test_local() {
   // Each file only read/write a single blocksize of data
   long long i=0;
@@ -341,10 +381,15 @@ void do_test_local() {
   
 }
 
-// Write was done locally, while read was done remotely
-void do_test_remote( ) {
+/**
+ * Do the FS Latency in distributed mode--the client side
+ *
+ * The Write of client side is done locally, and
+ * it will ask the server to read, and wait untile the read is done.
+ */
+void do_test_client( ) {
 
-  // Create a client socket
+  // STEP1: Create a client socket
   struct sockaddr_in servaddr;
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   memset(&servaddr, 0, sizeof(servaddr));
@@ -352,70 +397,120 @@ void do_test_remote( ) {
   servaddr.sin_port = htons(G_port);
   servaddr.sin_addr.s_addr = inet_addr(G_ipaddr);
 
+  // STEP2: Connect to the Server side
   if(connect(sock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
     printf("FSServer connect error. Please Check:\n\t1.Is FSServer started?\n");
     printf("\t2.Have it done the Read file preparation phase?\n");
     exit(0);
   }
 
-  // Each file only read/write a single blocksize of data
+  // STEP3: Start the stest 
   long long i=0;
   for(i=0; i < G_write_fileCount; i++) {
+    // STEP3.1: report the whole progress of the test.
     if( i % 200 == 0 ) {
       printf("\rWrite Test process:%3.1f%%.", (float)i/(float)G_write_fileCount*100);
       fflush(0);
     }
     
+    // STEP3.2: Start timing
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
     
-    // 1. Local write
+    // STEP3.3: Perform local write operation
     op_file_create_write(i);
 
 
-    // 2. Remote read
+    // STEP3.4: Ask remote server to perform read operation
     char* message="read";
     send(sock, message, strlen(message), 0); 
+
+    // STEP3.5: Waiting for the remote server operation done message
     char done_msg[6]={0};
     recv(sock, done_msg, 6,0);
+    
     if(done_msg[0] != 'D' ) {
       printf("Remote File Read error.\n");
       exit(-1);
     }
+    // STEP3.6: Stop timing
     gettimeofday(&tv_end, NULL);
+
 
     long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
 			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
-
+    // STEP 3.7: Record the latecny
     record_latency( elapsed);
   }
+  // Just used to make the output works smothly
   printf("\rWrite Test process:%3.1f%%.\n\n", (float)100);
 
+  // STEP 4: Analyse all the recorded latency
   Analysis_distribution();
 }
 
+/**
+ * Do the FS Latency in distributed mode--the server side
+ *
+ * It will:
+ *  1. wait for the client to connect
+ *  2. start single/multiple thread file reading when the client tell it to do.
+ *  3. Tell the client that read have done
+ *  4. wait for the client's next command
+ */
+void do_test_server() {
 
-void do_test() {
-  if(G_is_distributed) {
-    // Distributed mode
-    // 1. Read file preparation will be done by server
-    // Nothing need to do;
+  // STEP1: Create and init the socket, and listen to the port specified by user
+  struct sockaddr_in servaddr;  
+  int sock = socket(AF_INET, SOCK_STREAM, 0);
 
-    // 2. Do write-remote-reads test
-    do_test_remote();
+  memset(&servaddr, 0, sizeof(servaddr));
+  servaddr.sin_family = AF_INET;
+  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  servaddr.sin_port = htons(G_port);
+  if(bind(sock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
+    perror("Sockect Bind");
+    exit(-1);
+  }
+  printf(">>> Network listen port binding done.\n");
+  if (listen(sock, 5)<0) {
+    /* if listen failed then display error and exit */
+    perror("listen");
+    exit(-1);
+  }
+  printf(">>> start listening done. \n");
 
-  } else {
-    // Local mode
-    // 1. prepare files for read support
-    prepare_env();
-   
-    // 2. Do reads-write test locally
-    do_test_local();
+  // STEP2: wait for the socket connection from client
+  int clisock = accept(sock, (struct sockaddr *)NULL, NULL);
+  printf(">>> Receive connection from client, under client's direction now.\n");
+
+
+  // STEP3: Wait for client command, and do the read files operation
+  if (clisock >= 0) {
+    while(1) {
+      int messageLength = 16;
+      char message[messageLength+1];
+
+      // STEP3.1 wait for client command
+      recv(clisock, message, messageLength,0);
+
+      // STEP3.2 Start files read operation
+      if(message[0]=='r'){
+	op_file_read();
+      } else {
+	printf("Error Message. 'read' command is needed here.\n");
+      }
+      
+      // STEP3.3 Tell client that read operation is done.
+      char* done_msg = "Done!";
+      send(clisock, done_msg,  strlen(done_msg), 0);
+    }
+    close(clisock);
   }
 }
 
 /**
- * Create read_fcnt files with the size: file_size to prepare for file read
+ * Create G_read_fileCount files with the size: file_size to prepare for file read
  */
 void prepare_env() {
 
@@ -450,36 +545,43 @@ void prepare_env() {
 }
 
 
-
-enum T_testRole {
-  ROLE_SERVER,
-  ROLE_CLIENT,
-};
-
-void parse_options() {
-
-  if(!(argc == 7  || argc ==9)) {
-    printf("Error: does not have correct number of parameter.\n");
-    print_usage();
+/**
+ * Parse all the user specified options 
+ */
+void parse_options(int argc, char** argv) {
+  
+  if(argc < 2 ) {
+    print_whole_usage();
     exit(0);
   }
 
-  if(argv[1][0] == 's' ) {
-    G_testRole = ROLE_SERVER;
-  } else if (argv[1][0] == 'c') {
-    G_testRole = ROLE_CLIENT;
+  if( strlen(argv[1]) == 1) {
+    if(argv[1][0] == 's') {
+      G_testRole = ROLE_SERVER;
+    } else if (argv[1][0] == 'c') {
+      G_testRole = ROLE_CLIENT;
+    } else if (argv[1][0] == 'l') {
+      G_testRole = ROLE_LOCAL;
+    } else {
+      printf("Error: Not an available row, only Server(s)/Client(c) is acceptable.\n");
+      print_whole_usage();
+      exit(0);
+    }
   } else {
-    printf("Error: Not an available row, only Server(s)/Client(c) is acceptable.\n");
-    print_usage();
+    printf("Error: please pick up a role first for the test");
+    print_whole_usage();
     exit(0);
   }
 
-  G_is_distributed = atoi(argv[6]);
-  if(G_is_distributed && argc != 9 ) {
-    printf("Error: Please check the parameter for Distributed mode.\n");
+  if(G_testRole == ROLE_CLIENT && argc != 7 ) {
+    printf("Error: Please check the parameter for Distributed mode client side.\n");
     print_usage();
     exit(0);
-  } else if( !G_is_distributed && (argc != 7)) {
+  } else if(G_testRole == ROLE_SERVER && argc != 7 ) {
+    printf("Error: Please check the parameter for Distributed mode Server side.\n");
+    print_usage();
+    exit(0);
+  } else if( G_testRole== ROLE_LOCAL && (argc != 6)) {
     printf("Error: Please check the parameter for local mode.\n");
     print_usage();
     exit(0);
@@ -490,40 +592,39 @@ void parse_options() {
   G_write_fileCount = atoi(argv[3]);
   G_kfileSize = atoi(argv[4]);
   G_fileSize = G_kfileSize*1024;
-  G_is_multithread_read = atoi(argv[5]);
-  if(G_is_distributed) {
-    strcpy(G_ipaddr, argv[7]);
-    G_port = atoi(argv[8]);
+
+  switch(G_testRole) {
+    
+  case ROLE_SERVER:
+    G_is_multithread_read = atoi(argv[5]);
+    G_port = atoi(argv[6]);
+    break;
+  case ROLE_LOCAL:
+    G_is_multithread_read = atoi(argv[5]);
+    break;  
+  case ROLE_CLIENT:
+    strcpy(G_ipaddr, argv[5]);
+    G_port = atoi(argv[6]);
+    break;
   }
+  
   G_read_fileCount = READS_PER_WRITE * G_write_fileCount;
   if(G_read_fileCount > MAX_READ_FILE_CNT) {
     G_read_fileCount= MAX_READ_FILE_CNT;
   }
 }
 
-
-int main(int argc, char* argv[]) {
-  parse_options();
-  print_start_information();
-
-  if (G_is_multithread_read) {
-    printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
-    int i=0;
-    for(;  i < READS_PER_WRITE; i++) {
-      sem_init(&sem_read_start[i],0,0);
-      sem_init(&sem_read_end[i],0,0);
-      G_thread_idx[i]=i;
-      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, &G_thread_idx[i]);
-    }
-  }
-  do_test();
-  return 0;
-}
-
+/**
+ * The main function of the program
+ */
 int main(int argc, char **argv) {
-  
-  prepare_env();
 
+  // STEP1: Parse all options
+  parse_options(argc, argv);
+
+
+  // STEP2: if using multithread read, create semaphores used for 
+  //        file read control.
   if(G_is_multithread_read) {
     printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
     int i=0;
@@ -535,47 +636,16 @@ int main(int argc, char **argv) {
     }
   }
 
-  struct sockaddr_in servaddr;  
-  int sock = socket(AF_INET, SOCK_STREAM, 0);
-
-  memset(&servaddr, 0, sizeof(servaddr));
-  servaddr.sin_family = AF_INET;
-  servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  servaddr.sin_port = htons(G_port);
-
-  if(bind(sock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0) {
-    perror("Sockect Bind");
-    exit(-1);
-  }
-
-  printf(">>> Network listen port binding done.\n");
-  if (listen(sock, 5)<0) {
-    /* if listen failed then display error and exit */
-    perror("listen");
-    exit(-1);
-  }
-  printf(">>> start listening done. \n");
-
-  // Accept socket connection
-  int clisock = accept(sock, (struct sockaddr *)NULL, NULL);
-  printf(">>> Receive connection from client, under client's direction now.\n");
-  if (clisock >= 0) {
-    while(1) {
-      int messageLength = 16;
-      char message[messageLength+1];
-
-      recv(clisock, message, messageLength,0);
-
-      if(message[0]=='r'){
-	op_file_read();
-      } else {
-	printf("Error Message. 'read' command is needed here.\n");
-      }
-
-      char* done_msg = "Done!";
-      send(clisock, done_msg,  strlen(done_msg), 0);
-    }
-    close(clisock);
+  // STEP3: Perform the test according to its role
+  if(G_testRole == ROLE_LOCAL) {
+    prepare_env();
+    do_test_local();
+  } else if (G_testRole == ROLE_SERVER ) {
+    prepare_env();
+    do_test_server();
+  } else if ( G_testRole == ROLE_CLIENT ) {
+    do_test_client();
   }
   return 0;
 }
+  
