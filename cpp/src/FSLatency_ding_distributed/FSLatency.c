@@ -260,10 +260,8 @@ void Analysis_distribution() {
  * Perform the single file read operation
  * The filename is generated randomly
  */
-void single_file_read(long long file_id) {
+void single_file_read(long long file_id,  char* filename, char* buf) {
   int blockSize = G_blockSize;
-  char buf[MAX_BLOCK_SIZE] = {0};
-  char filename[MAX_FILENAME_LEN];
   snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, file_id);
   int read_fd = open(filename, O_RDONLY, 0);
   if( read_fd <= 0 ) {
@@ -283,6 +281,8 @@ void single_file_read_thread(void* args) {
   long long rand_step = (G_read_fileCount/READS_PER_WRITE)*thread_idx;
   printf(">>> Threads: start Thread %d: 0x%x and wait\n", thread_idx,
 	 (unsigned int)pthread_self());
+  char buf[MAX_BLOCK_SIZE] = {0};
+  char filename[MAX_FILENAME_LEN]={0};
 
   while(1) {
     // Wait for main thread to post sem_read_start[thread_idx]
@@ -292,7 +292,7 @@ void single_file_read_thread(void* args) {
     // use a more random file id.
     long long rand_i = (rand()+ rand_step) % (G_read_fileCount);
 
-    single_file_read(rand_i);
+    single_file_read(rand_i, buf, filename);
 
     // Tell main thread that I have done file read!
     sem_post(&sem_read_end[thread_idx]);
@@ -314,10 +314,13 @@ void op_file_read_async_io() {
  *
  */
 void op_file_read_single_thread() {
+  char buf[MAX_BLOCK_SIZE] = {0};
+  char filename[MAX_FILENAME_LEN]={0};
+
   int j=0;
   for(; j < READS_PER_WRITE; j++) {
     long long rand_i = rand() % (G_read_fileCount);
-    single_file_read(rand_i);
+    single_file_read(rand_i, buf, filename);
   }
 }
 
@@ -397,27 +400,24 @@ void do_test_local() {
       fflush(0);
     }
 
+    create_test_dir();
+
     struct timeval tv_begin, tv_end;
     gettimeofday(&tv_begin, NULL);
-    create_test_dir();
     op_file_create_write(i);
     op_file_read();
-
     gettimeofday(&tv_end, NULL);
+
 
     long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
 			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
-
     record_latency(elapsed);
-
     if( i%5000 == 0 ) {
       Analysis_distribution();
     }
   }
   printf("\rWrite Test process:%3.1f%%.\n\n\n", (float)100);
-  
   Analysis_distribution();
-  
 }
 
 /**
@@ -466,18 +466,19 @@ void do_test_client( ) {
 
     // STEP3.5: Waiting for the remote server operation done message
     char done_msg[6]={0};
-    recv(sock, done_msg, 6,0);
+    recv(sock, done_msg, 6, 0);
     
     if(done_msg[0] != 'D' ) {
       printf("Remote File Read error.\n");
       exit(-1);
     }
+
     // STEP3.6: Stop timing
     gettimeofday(&tv_end, NULL);
 
-
     long long elapsed = ( ( tv_end.tv_sec * 1000000 + tv_end.tv_usec)
 			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
+
     // STEP 3.7: Record the latecny
     record_latency( elapsed);
 
