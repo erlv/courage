@@ -3,10 +3,12 @@
  *
  * Author: Ling Kun  <lkun.erlv@gmail.com>
  * 
- * 
  * 2013-8-28
  *
  */
+
+
+// TODO: Add asyncio support
 
 #include <time.h>
 #include <sys/time.h>
@@ -42,6 +44,12 @@ enum T_testRole {
   ROLE_LOCAL,
 };
 
+enum T_readMode {
+  MODE_SINGLETHREAD,
+  MODE_MULTITHREAD,
+  MODE_ASYNCIO,
+};
+
 char G_path[MAX_PATH_LEN] = {"data"};
 char* G_filename_w_prefix = "1MB_W_";
 char* G_filename_r_prefix = "1MB_R_";
@@ -52,7 +60,7 @@ int G_port = 5678;
 int G_fileSize=524288;
 int G_kfileSize=514;
 int G_blockSize=514*1024;
-bool G_is_multithread_read=1;
+enum T_readMode G_ReadMode=MODE_SINGLETHREAD;
 long long G_0_20_ms=0;
 long long G_20_40_ms=0;
 long long G_40_60_ms=0;
@@ -77,7 +85,7 @@ in_addr_t inet_addr(const char *cp);
 
 void print_whole_usage() {
   printf("Usage: FSLatency l|s|c \n");
-  printf(">>> Do FileSystem latency test in local or distributed mode, using single/multi thread read \n");
+  printf(">>> Do FileSystem latency test in local or distributed mode, using single-thread,multi-thread, async-io read \n");
   printf(" FSLatency l : Do latency test in local mode, all read/write is done locally.\n");
   printf(" FSLatency s : Do latency test in distributed mode-server  read side.\n");
   printf(" FSLatency c : Do latency test in distributed mode-client  write side.\n");
@@ -85,13 +93,14 @@ void print_whole_usage() {
 }
 
 void print_server_usage() {
-  printf("Usage: FSLatency s path count filesize(KB) MultiReader(0|1) port(int)\n");
+  printf("Usage: FSLatency s path count filesize(KB) ReaderMode(0|1|2) port(int)\n");
   printf(" >>> path: a avaible path where read perform\n");
   printf(" >>> count: the number of tests\n");
   printf(" >>> filesize: Each file size in KB that will be generated to read\n");
   printf(" >>> MultiReader:\n");
   printf(" >>> \t 0: Use single thread to do %d file read.\n", READS_PER_WRITE);
   printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
+  printf(" >>> \t 2: Use Async-io interface to do %d file read.\n", READS_PER_WRITE);
   printf(" >>> port: the port of server for distrituted test.\n");
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
@@ -111,13 +120,14 @@ void print_client_usage() {
 }
 
 void print_local_usage() {
-  printf("Usage: FSLatency l  path count filesize(KB) MultiReader(0|1)\n");
+  printf("Usage: FSLatency l  path count filesize(KB) ReaderMode(0|1)\n");
   printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of test that need to be done\n");
   printf(" >>> filesize: Each file size in KB that will be write\n");
   printf(" >>> MultiReader:\n");
   printf(" >>> \t 0: Use single thread to do %d file read.\n", READS_PER_WRITE);
   printf(" >>> \t 1: Use multi-thread to do %d file read.\n", READS_PER_WRITE);
+  printf(" >>> \t 2: Use Async-io interface to do %d file read.\n", READS_PER_WRITE);
   printf(" \n The Following config could be changed in FSLatency_distributed.h\n");
   printf(" >>> blocksize: Block Size per read/write\n\n");
   printf("Example: FSLatency l /datapool/ 500 514 1 \n");
@@ -143,10 +153,12 @@ void print_server_start_information() {
   printf(">>> Read from Path:%s.\n", G_path);
   printf(">>> Each read file size: %dKB.\n", G_kfileSize);
   printf(">>> Each read block size: %dB.\n", G_blockSize);
-  if( G_is_multithread_read) {
+  if( G_ReadMode == MODE_MULTITHREAD) {
     printf(">>> Use Multithread to read files.\n");
-  } else {
+  } else if(G_ReadMode == MODE_SINGLETHREAD) {
     printf(">>> Use single thread to read files.\n");
+  } else if( G_ReadMode == MODE_ASYNCIO) {
+    printf(">>> Use single thread Async io to read files.\n");
   }
 
   printf("\n Start test....\n");
@@ -169,10 +181,12 @@ void print_local_start_information() {
   printf(">>> Total file-read count: %lld\n", G_read_fileCount);
   printf(">>> Each File Read/Write Size: %d KB\n", G_kfileSize);
   printf(">>> Block Size per write: %d B\n", G_blockSize);
-  if( G_is_multithread_read) {
+  if( G_ReadMode == MODE_MULTITHREAD) {
     printf(">>> Use Multithread to read files.\n");
-  } else {
+  } else if(G_ReadMode == MODE_SINGLETHREAD) {
     printf(">>> Use single thread to read files.\n");
+  } else if( G_ReadMode == MODE_ASYNCIO) {
+    printf(">>> Use single thread Async io to read files.\n");
   }
   printf("Start test......\n");
 }
@@ -278,6 +292,15 @@ void single_file_read_thread(void* args) {
 }
 
 /**
+ * Read multiple files in async io mode using a single thread 
+ */
+void op_file_read_async_io() {
+  // TODO: Not implement yet.
+
+}
+
+
+/**
  * Read multiple  files in a single thread.
  *
  */
@@ -311,10 +334,12 @@ void op_file_read_multi_thread() {
  * Perform the file read operation
  */
 void op_file_read() { 
-  if(G_is_multithread_read) {
+  if(G_ReadMode == MODE_MULTITHREAD) {
     op_file_read_multi_thread();
-  } else {
+  } else if(G_ReadMode == MODE_SINGLETHREAD) {
     op_file_read_single_thread();
+  } else if (G_ReadMode == MODE_ASYNCIO) {
+    op_file_read_async_io();
   }
 }
 
@@ -589,6 +614,22 @@ void parse_options(int argc, char** argv) {
     exit(0);
   }
 
+  if(G_testRole == ROLE_SERVER || G_testRole == ROLE_LOCAL) {
+    switch(atoi(argv[5])) {
+    case 0:
+      G_ReadMode = MODE_SINGLETHREAD;
+      break;
+    case 1:
+      G_ReadMode = MODE_MULTITHREAD;
+      break;
+    case 2:
+      G_ReadMode = MODE_ASYNCIO;
+      break;
+    default:
+      printf("Error: Please check ReaderMode parameter.\n");
+      print_usage();
+    }
+  }
 
   strcpy(G_path, argv[2]);
   G_write_fileCount = atoi(argv[3]);
@@ -598,11 +639,9 @@ void parse_options(int argc, char** argv) {
   switch(G_testRole) {
     
   case ROLE_SERVER:
-    G_is_multithread_read = atoi(argv[5]);
     G_port = atoi(argv[6]);
     break;
   case ROLE_LOCAL:
-    G_is_multithread_read = atoi(argv[5]);
     break;  
   case ROLE_CLIENT:
     strcpy(G_ipaddr, argv[5]);
@@ -627,7 +666,7 @@ int main(int argc, char **argv) {
 
   // STEP2: if using multithread read, create semaphores used for 
   //        file read control.
-  if(G_is_multithread_read) {
+  if(G_ReadMode == MODE_MULTITHREAD) {
     printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
     int i=0;
     for(;  i < READS_PER_WRITE; i++) {
