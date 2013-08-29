@@ -120,7 +120,7 @@ void print_client_usage() {
 }
 
 void print_local_usage() {
-  printf("Usage: FSLatency l  path count filesize(KB) ReaderMode(0|1)\n");
+  printf("Usage: FSLatency l  path count filesize(KB) ReaderMode(0|1|2)\n");
   printf(" >>> path: a avaible path that can be read/write\n");
   printf(" >>> count: the number of test that need to be done\n");
   printf(" >>> filesize: Each file size in KB that will be write\n");
@@ -160,8 +160,6 @@ void print_server_start_information() {
   } else if( G_ReadMode == MODE_ASYNCIO) {
     printf(">>> Use single thread Async io to read files.\n");
   }
-
-  printf("\n Start test....\n");
 }
 
 void print_client_start_information() {
@@ -171,7 +169,6 @@ void print_client_start_information() {
   printf(">>> Each Writen-file Size: %d KB\n", G_kfileSize);
   printf(">>> Block Size per write: %d B\n", G_blockSize);
   printf(">>> FSLatency test server: %s:%d\n", G_ipaddr, G_port);
-  printf("\nStart test......\n");
 }
 
 void print_local_start_information() {
@@ -188,10 +185,11 @@ void print_local_start_information() {
   } else if( G_ReadMode == MODE_ASYNCIO) {
     printf(">>> Use single thread Async io to read files.\n");
   }
-  printf("Start test......\n");
+
 }
 
 void print_start_information() {
+  printf("------ Running Parameter ------\n");
   if(G_testRole == ROLE_SERVER) {
     print_server_start_information();
   } else if( G_testRole == ROLE_CLIENT) {
@@ -199,6 +197,9 @@ void print_start_information() {
   } else if( G_testRole == ROLE_LOCAL) {
     print_local_start_information();
   }
+  printf("-------------------------------\n\n");
+
+  printf("\nStart test......\n");
 }
 
 /**
@@ -296,7 +297,8 @@ void single_file_read_thread(void* args) {
  */
 void op_file_read_async_io() {
   // TODO: Not implement yet.
-
+  printf("Not Implement yet.\n");
+  exit(0);
 }
 
 
@@ -676,6 +678,8 @@ int main(int argc, char **argv) {
       pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, &G_thread_idx[i]);
     }
   }
+
+  print_start_information();
 
   // STEP3: Perform the test according to its role
   if(G_testRole == ROLE_LOCAL) {

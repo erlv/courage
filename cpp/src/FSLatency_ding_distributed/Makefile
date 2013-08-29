@@ -1,5 +1,5 @@
 CFLAGS =  -Wall 
-LDFLAGS = -lpthread
+LDFLAGS = -lpthread 
 
 CFLAGS += -g3 -O0
 LDFLAGS += -g3 -O0
