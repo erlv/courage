@@ -411,7 +411,7 @@ void do_test_local() {
     record_latency(elapsed);
 
     if( i%5000 == 0 ) {
-      Analysis_istribution();
+      Analysis_distribution();
     }
   }
   printf("\rWrite Test process:%3.1f%%.\n\n\n", (float)100);
@@ -482,7 +482,7 @@ void do_test_client( ) {
     record_latency( elapsed);
 
     if( i%5000 == 0 ) {
-      Analysis_istribution();
+      Analysis_distribution();
     }
   }
   // Just used to make the output works smothly
