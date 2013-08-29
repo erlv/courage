@@ -190,6 +190,13 @@ void print_local_start_information() {
 
 void print_start_information() {
   printf("------ Running Parameter ------\n");
+
+  // Output the start time
+  time_t now = time(0);
+  char buff[100];
+  strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000\n", localtime(&now));
+  printf(">>> Start Time: %s\n", buff);
+ 
   if(G_testRole == ROLE_SERVER) {
     print_server_start_information();
   } else if( G_testRole == ROLE_CLIENT) {
@@ -242,7 +249,7 @@ void Analysis_distribution() {
   float f_100_150_ms = (float)G_100_150_ms/(float)G_total*100;
   float f_150_300_ms = (float)G_150_300_ms/(float)G_total*100;
   float f_300_ms = (float)G_300_ms/(float)G_total*100;
-  printf("Latency Distribution:\n");
+  printf("Latency Distribution for %lld test:\n", G_total);
   printf("Latency(ms)\t0~20\t20~40\t40~60\t60~80\t80~100\t100~150\t150~300\t>300\n");
   printf("Percentage\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\n",
 	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms, f_80_100_ms, f_100_150_ms,f_150_300_ms,
@@ -403,6 +410,9 @@ void do_test_local() {
 
     record_latency(elapsed);
 
+    if( i%5000 == 0 ) {
+      Analysis_istribution();
+    }
   }
   printf("\rWrite Test process:%3.1f%%.\n\n\n", (float)100);
   
@@ -470,6 +480,10 @@ void do_test_client( ) {
 			  - (tv_begin.tv_sec * 1000000 + tv_begin.tv_usec));
     // STEP 3.7: Record the latecny
     record_latency( elapsed);
+
+    if( i%5000 == 0 ) {
+      Analysis_istribution();
+    }
   }
   // Just used to make the output works smothly
   printf("\rWrite Test process:%3.1f%%.\n\n", (float)100);
