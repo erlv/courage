@@ -286,10 +286,13 @@ void single_file_read_thread(void* args) {
 
   while(1) {
     // Wait for main thread to post sem_read_start[thread_idx]
+
     // Sometimes sem_wait will return -1 left semaphore unchanged on error,
     // We need to take care of this
-    while(sem_wait(&sem_read_start[thread_idx]) == -1) {
-      continue;
+    int ret_val;
+    while( ret_val = sem_wait(&sem_read_start[thread_idx])) {
+      if(ret_val == -1 )
+	continue;
     }
 
     // Add rand_step to rand() return value, so that each thread could 
@@ -342,13 +345,13 @@ void op_file_read_multi_thread() {
   // Wait all thread to end
   i=0;
   for(;  i < READS_PER_WRITE; i++) {
-
     // Sometimes sem_wait will return -1 left semaphore unchanged on error,
     // We need to take care of this
-    while(sem_wait(&sem_read_start[i]) == -1) {
-      continue;
+    int ret_val;
+    while( ret_val = sem_wait(&sem_read_start[i])) {
+      if( ret_val == -1)
+	continue;
     }
-
   }
 }
 
@@ -379,8 +382,6 @@ void create_test_dir() {
  * Perform the file create and write operation
  */
 void op_file_create_write(const long long  fileName_idx) {
-
-  create_test_dir();
 
   // Write 1-file
   char filename[MAX_FILENAME_LEN];
