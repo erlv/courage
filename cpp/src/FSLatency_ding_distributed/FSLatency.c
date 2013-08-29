@@ -57,7 +57,7 @@ long long G_write_fileCount=0;
 long long G_read_fileCount=0;
 char G_ipaddr[MAX_IP_LEN]={"127.0.0.1"};
 int G_port = 5678;
-int G_fileSize=524288;
+int G_fileSize=514*1024;
 int G_kfileSize=514;
 int G_blockSize=514*1024;
 enum T_readMode G_ReadMode=MODE_SINGLETHREAD;
@@ -151,8 +151,8 @@ void print_server_start_information() {
   printf(">>> Listen port: %d.\n", G_port);
   printf(">>> Total read file count: %lld.\n", G_read_fileCount);
   printf(">>> Read from Path:%s.\n", G_path);
-  printf(">>> Each read file size: %dKB.\n", G_kfileSize);
-  printf(">>> Each read block size: %dB.\n", G_blockSize);
+  printf(">>> Each read file size: %d KB.\n", G_kfileSize);
+  printf(">>> Each read block size: %d B.\n", G_blockSize);
   if( G_ReadMode == MODE_MULTITHREAD) {
     printf(">>> Use Multithread to read files.\n");
   } else if(G_ReadMode == MODE_SINGLETHREAD) {
@@ -286,7 +286,11 @@ void single_file_read_thread(void* args) {
 
   while(1) {
     // Wait for main thread to post sem_read_start[thread_idx]
-    sem_wait(&sem_read_start[thread_idx]);
+    // Sometimes sem_wait will return -1 left semaphore unchanged on error,
+    // We need to take care of this
+    while(sem_wait(&sem_read_start[thread_idx]) == -1) {
+      continue;
+    }
 
     // Add rand_step to rand() return value, so that each thread could 
     // use a more random file id.
@@ -338,7 +342,13 @@ void op_file_read_multi_thread() {
   // Wait all thread to end
   i=0;
   for(;  i < READS_PER_WRITE; i++) {
-    sem_wait(&sem_read_end[i]);
+
+    // Sometimes sem_wait will return -1 left semaphore unchanged on error,
+    // We need to take care of this
+    while(sem_wait(&sem_read_start[thread_idx]) == -1) {
+      continue;
+    }
+
   }
 }
 
@@ -443,6 +453,7 @@ void do_test_client( ) {
     exit(0);
   }
 
+  create_test_dir();
   // STEP3: Start the stest 
   long long i=0;
   for(i=0; i < G_write_fileCount; i++) {
@@ -573,16 +584,7 @@ void prepare_env() {
     if(cur_fd <= 0 ) {
       printf("Open file error: %s\n", filename);
     }
-    int cur_size = 0;
-    while(cur_size < G_fileSize ) {
-      if( (G_fileSize - cur_size) > G_blockSize) {
-	write(cur_fd, buf, G_blockSize);
-	cur_size += G_blockSize;
-      } else if( (G_fileSize - cur_size) > 0) {
-	write(cur_fd, buf, (G_fileSize - cur_size ));
-	cur_size = G_fileSize;
-      }
-    }
+    write(cur_fd, buf, G_blockSize);
     close(cur_fd);    
   }
   printf("\r>>>> Current process:%3.1f%%.\n", (float)100);
@@ -670,6 +672,7 @@ void parse_options(int argc, char** argv) {
   if(G_read_fileCount > MAX_READ_FILE_CNT) {
     G_read_fileCount= MAX_READ_FILE_CNT;
   }
+  G_blockSize = G_fileSize;
 }
 
 /**
