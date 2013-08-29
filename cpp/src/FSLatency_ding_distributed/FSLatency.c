@@ -348,7 +348,7 @@ void op_file_read_multi_thread() {
     // Sometimes sem_wait will return -1 left semaphore unchanged on error,
     // We need to take care of this
     int ret_val;
-    while( ret_val = sem_wait(&sem_read_start[i])) {
+    while( ret_val = sem_wait(&sem_read_end[i])) {
       if( ret_val == -1)
 	continue;
     }
