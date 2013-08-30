@@ -52,8 +52,8 @@ enum T_readMode {
 };
 
 char G_path[MAX_PATH_LEN] = {"data"};
-char* G_filename_w_prefix = "1MB_W_";
-char* G_filename_r_prefix = "1MB_R_";
+char* G_filename_w_prefix = "514KB_W_";
+char* G_filename_r_prefix = "514KB_R_";
 long long G_write_fileCount=0;
 long long G_read_fileCount=0;
 char G_ipaddr[MAX_IP_LEN]={"127.0.0.1"};
@@ -73,6 +73,8 @@ long long G_300_ms=0;
 long long G_total=0;
 enum T_testRole G_testRole=ROLE_LOCAL;
 
+char* G_async_buf_vec[READS_PER_WRITE] = {0};
+struct aiocb* G_async_cb;
 pthread_t G_t[READS_PER_WRITE]={0};
 int G_thread_idx[READS_PER_WRITE]={0};
 sem_t sem_read_start[READS_PER_WRITE];
@@ -195,7 +197,7 @@ void print_start_information() {
   // Output the start time
   time_t now = time(0);
   char buff[100];
-  strftime(buff, 100, "%Y-%m-%d %H:%M:%S.000\n", localtime(&now));
+  strftime(buff, 100, "%Y-%m-%d %H:%M:%S", localtime(&now));
   printf(">>> Start Time: %s\n", buff);
  
   if(G_testRole == ROLE_SERVER) {
@@ -319,15 +321,13 @@ void single_file_read_thread(void* args) {
  * Read multiple files in async io mode using a single thread 
  */
 void op_file_read_async_io() {
-  char* buf_vec[READS_PER_WRITE] = {0};
+
   char filename[MAX_FILENAME_LEN]={0};
+
   int i;
 
-  for(i=0; i < READS_PER_WRITE; i++) {
-    buf_vec[i] = (char*) malloc(sizeof(char)*MAX_BLOCK_SIZE);
-  }
-  struct aiocb* cb = (struct aiocb*) calloc(sizeof(struct aiocb), READS_PER_WRITE);
   FD read_fd[READS_PER_WRITE]={0};
+  memset(G_async_cb, 0, sizeof(struct aiocb)*READS_PER_WRITE);
 
   for( i=0; i < READS_PER_WRITE; i++) {
 
@@ -336,41 +336,50 @@ void op_file_read_async_io() {
 	     G_filename_r_prefix, rand_i);
     read_fd[i] = open(filename, O_RDONLY, 0);
     if( read_fd[i] == -1) {
-      printf("open %s error", filename);
+      printf("open %s error\n", filename);
     }
 
-    cb[i].aio_nbytes = G_blockSize;
-    cb[i].aio_fildes = read_fd[i];
-    cb[i].aio_offset = 0;
-    cb[i].aio_buf = buf_vec[i];
+    G_async_cb[i].aio_nbytes = G_blockSize;
+    G_async_cb[i].aio_fildes = read_fd[i];
+    G_async_cb[i].aio_offset = 0;
+    G_async_cb[i].aio_buf = G_async_buf_vec[i];
 
-    if(aio_read(&cb[i]) == -1) {
+    if(aio_read(&G_async_cb[i]) == -1) {
       printf("Unable to create read request for %d:%s.\n", i, filename);
       close(read_fd[i]);
     }
   }
 
+  // Wait until all the aio event have done
+  struct aiocb* iocb_lst[READS_PER_WRITE]={0};
+  int count=0;
   for(i=0; i < READS_PER_WRITE; i++) {
-    // Wait until the aio is done
-    while(aio_error(&cb[i] )== EINPROGRESS) {
+    iocb_lst[i]=&G_async_cb[i];
+  }
+  while(aio_suspend((const struct aiocb * const*)iocb_lst, READS_PER_WRITE,NULL )) {
+    count++;
+    if(count == READS_PER_WRITE)
+      break;
+    else
       continue;
-    }    
-    int numBytes = aio_return(&cb[i]);
-    if(numBytes == -1 ) {
-      perror("Read error!");
-    }
-  }
-
-  for(i=0; i < READS_PER_WRITE; i++) {
-    close(read_fd[i]);
-  }
+  }    
   
 #ifdef READ_CHECK
   // Check whether the read bytes is correct
   for(i=0; i < READS_PER_WRITE; i++) {
-    printf("%s\n", buf_vec[i]);
+    // Wait until the aio is done
+    int numBytes = aio_return(&G_async_cb[i]);
+    if(numBytes == -1 ) {
+      perror("Read error!");
+    }
+    printf("%s\n", G_async_buf_vec[i]);
   }
 #endif
+
+  for(i=0; i < READS_PER_WRITE; i++) {
+    close(read_fd[i]);
+  }
+
   
 }
 
@@ -739,6 +748,41 @@ void parse_options(int argc, char** argv) {
   G_blockSize = G_fileSize;
 }
 
+
+void Init_testEnv() {
+
+  int i;
+  if(G_testRole == ROLE_LOCAL || G_testRole == ROLE_SERVER) {
+    
+    if(G_ReadMode == MODE_MULTITHREAD) {
+      printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
+
+      for(i=0;  i < READS_PER_WRITE; i++) {
+	sem_init(&sem_read_start[i],0,0);
+	sem_init(&sem_read_end[i],0,0);
+	G_thread_idx[i]=i;
+	pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, &G_thread_idx[i]);
+      }
+    } else if ( G_ReadMode == MODE_ASYNCIO) { 
+      for(i=0; i < READS_PER_WRITE; i++) {
+	G_async_buf_vec[i] = (char*) malloc(sizeof(char)*MAX_BLOCK_SIZE);
+      }
+      
+      G_async_cb = (struct aiocb*) calloc(sizeof(struct aiocb), READS_PER_WRITE);
+    }
+  }
+}
+
+void destroy_testEnv() {
+
+  free(G_async_cb);
+  int i;
+  for(i=0; i < READS_PER_WRITE; i++) {
+    free(G_async_buf_vec[i]);
+  }
+
+}
+
 /**
  * The main function of the program
  */
@@ -750,17 +794,7 @@ int main(int argc, char **argv) {
 
   // STEP2: if using multithread read, create semaphores used for 
   //        file read control.
-  if(G_ReadMode == MODE_MULTITHREAD) {
-    printf(">>> Init %d threads for multiple thread read.\n", READS_PER_WRITE);
-    int i=0;
-    for(;  i < READS_PER_WRITE; i++) {
-      sem_init(&sem_read_start[i],0,0);
-      sem_init(&sem_read_end[i],0,0);
-      G_thread_idx[i]=i;
-      pthread_create(&G_t[i],NULL, (void*)single_file_read_thread, &G_thread_idx[i]);
-    }
-  }
-
+  Init_testEnv();
   print_start_information();
 
   // STEP3: Perform the test according to its role
@@ -773,6 +807,8 @@ int main(int argc, char **argv) {
   } else if ( G_testRole == ROLE_CLIENT ) {
     do_test_client();
   }
+
+  destroy_testEnv();
   return 0;
 }
   
