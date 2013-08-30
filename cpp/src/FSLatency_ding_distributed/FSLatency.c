@@ -33,7 +33,7 @@
 #define MAX_STR_LEN 128
 #define MAX_FILENAME_LEN MAX_STR_LEN
 #define MAX_IP_LEN 15
-#define MAX_READ_FILE_CNT 50000
+#define MAX_READ_FILE_CNT 200000
 
 
 typedef int FD;
@@ -276,7 +276,7 @@ void single_file_read(long long file_id,  char* filename,
 
 #ifdef READ_CHECK
   // Check whether the read bytes is correct
-    printf("%s\n", buf);
+    printf(" Single File Read:%s\n", buf);
 #endif
 
   close(read_fd);
@@ -321,7 +321,6 @@ void single_file_read_thread(void* args) {
  * Read multiple files in async io mode using a single thread 
  */
 void op_file_read_async_io() {
-
   char filename[MAX_FILENAME_LEN]={0};
 
   int i;
@@ -351,17 +350,13 @@ void op_file_read_async_io() {
   }
 
   // Wait until all the aio event have done
-  struct aiocb* iocb_lst[READS_PER_WRITE]={0};
-  int count=0;
+  struct aiocb* iocb_lst[1]={0};
   for(i=0; i < READS_PER_WRITE; i++) {
-    iocb_lst[i]=&G_async_cb[i];
-  }
-  while(aio_suspend((const struct aiocb * const*)iocb_lst, READS_PER_WRITE,NULL )) {
-    count++;
-    if(count == READS_PER_WRITE)
-      break;
-    else
-      continue;
+    iocb_lst[0]=&G_async_cb[i];
+    int ret_value=aio_suspend((const struct aiocb * const*)iocb_lst, 1,NULL );
+    if(ret_value != 0 ) {
+	perror("Read error.\n");
+    }	
   }    
   
 #ifdef READ_CHECK
@@ -372,7 +367,7 @@ void op_file_read_async_io() {
     if(numBytes == -1 ) {
       perror("Read error!");
     }
-    printf("%s\n", G_async_buf_vec[i]);
+    printf("Async IO read:%s\n", G_async_buf_vec[i]);
   }
 #endif
 
@@ -457,8 +452,14 @@ void op_file_create_write(const long long  fileName_idx) {
   int cur_fd;
   cur_fd = open(filename, ( O_CREAT|O_APPEND|O_RDWR ), 0666);
   if(cur_fd <= 0 ) {
-    printf("Open file error: %s\n", filename);
+    printf("Open file for write error: %s\n", filename);
   }
+
+#ifdef READ_CHECK
+  // Make each file contain different content for read content check
+  snprintf(buf, MAX_BLOCK_SIZE, "filecontent:%s", filename);
+#endif
+
   write(cur_fd, buf, G_blockSize);
   close(cur_fd);
 }
@@ -654,7 +655,7 @@ void prepare_env() {
 
 #ifdef READ_CHECK
     // Make each file contain different content for read content check
-    snprintf(buf, MAX_BLOCK_SIZE, "filecontent:%10d", i);
+    snprintf(buf, MAX_BLOCK_SIZE, "%s filecontent:%lld", filename, i);
 #endif
 
     write(cur_fd, buf, G_blockSize);
