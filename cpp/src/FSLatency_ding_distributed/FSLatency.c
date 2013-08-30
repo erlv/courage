@@ -320,15 +320,13 @@ void single_file_read_thread(void* args) {
  */
 void op_file_read_async_io() {
   char* buf_vec[READS_PER_WRITE] = {0};
-
+  char filename[MAX_FILENAME_LEN]={0};
   int i;
+
   for(i=0; i < READS_PER_WRITE; i++) {
     buf_vec[i] = (char*) malloc(sizeof(char)*MAX_BLOCK_SIZE);
   }
-
-  char filename[MAX_FILENAME_LEN]={0};
-
-  struct aiocb* cb = (struct aiocb*) malloc(sizeof(struct aiocb)*READS_PER_WRITE);
+  struct aiocb* cb = (struct aiocb*) calloc(sizeof(struct aiocb), READS_PER_WRITE);
   FD read_fd[READS_PER_WRITE]={0};
 
   for( i=0; i < READS_PER_WRITE; i++) {
@@ -350,20 +348,15 @@ void op_file_read_async_io() {
       printf("Unable to create read request for %d:%s.\n", i, filename);
       close(read_fd[i]);
     }
-    printf("Request enqueued! Read: %s\n", filename);
   }
-  for(i=0; i < READS_PER_WRITE; i++) {
 
+  for(i=0; i < READS_PER_WRITE; i++) {
     // Wait until the aio is done
     while(aio_error(&cb[i] )== EINPROGRESS) {
       continue;
-    }
-    
+    }    
     int numBytes = aio_return(&cb[i]);
-    printf("numBytes:%d\n", numBytes);
-    if(numBytes != -1 ) {
-      printf("%d read successed.!\n", i);
-    }else {
+    if(numBytes == -1 ) {
       perror("Read error!");
     }
   }
