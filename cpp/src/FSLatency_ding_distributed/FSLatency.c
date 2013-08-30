@@ -11,6 +11,7 @@
 // TODO: Add asyncio support
 
 #include <time.h>
+#include <aio.h>
 #include <sys/time.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -23,7 +24,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <semaphore.h>
-
+#include <errno.h>
 #define READS_PER_WRITE 5
 #define MAX_COUNT 1024
 #define MAX_BLOCK_SIZE 1024*1024
@@ -270,6 +271,12 @@ void single_file_read(long long file_id,  char* filename,
     printf("Open file for read error: %s\n", filename);
   }
   read(read_fd, buf, blockSize);
+
+#ifdef READ_CHECK
+  // Check whether the read bytes is correct
+    printf("%s\n", buf);
+#endif
+
   close(read_fd);
 }
 
@@ -293,10 +300,8 @@ void single_file_read_thread(void* args) {
 
     // Sometimes sem_wait will return -1 left semaphore 
     // unchanged on error, We need to take care of this
-    int ret_val;
-    while( ret_val = sem_wait(&sem_read_start[thread_idx])) {
-      if(ret_val == -1 )
-	continue;
+    while( sem_wait(&sem_read_start[thread_idx]) == -1) {
+      continue;
     }
 
     // Add rand_step to rand() return value, so that each thread
@@ -314,42 +319,66 @@ void single_file_read_thread(void* args) {
  * Read multiple files in async io mode using a single thread 
  */
 void op_file_read_async_io() {
-  // TODO: Not implement yet.
-  int efd, fd, epfd;
-  io_context_t ctx;
-  struct timespec tms;
-  struct io_event events[NUM_EVENTS];
-  struct custom_iocb iocbs[NUM_EVENTS];
-  struct iocb *iocbps[NUM_EVENTS];
-  struct custom_iocb* iocbp;
-  struct epoll_event epevent;
-  char* buf;
-  if(posix_memalign(&buf, ALIGN_SIZE, MAX_BLOCKSIZE)) {
-    perror("posix_memalign");
-    exit(0);
+  char* buf_vec[READS_PER_WRITE] = {0};
+
+  int i;
+  for(i=0; i < READS_PER_WRITE; i++) {
+    buf_vec[i] = (char*) malloc(sizeof(char)*MAX_BLOCK_SIZE);
   }
 
-  char filename[MAX_FILENAME_LEN] = {0};
+  char filename[MAX_FILENAME_LEN]={0};
 
-  efd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC );
-  if( efd == -1) {
-    perror("eventfd");
-    exit(0);
+  struct aiocb* cb = (struct aiocb*) malloc(sizeof(struct aiocb)*READS_PER_WRITE);
+  FD read_fd[READS_PER_WRITE]={0};
+
+  for( i=0; i < READS_PER_WRITE; i++) {
+
+    long long rand_i = (rand()) % (G_read_fileCount);
+    snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path,
+	     G_filename_r_prefix, rand_i);
+    read_fd[i] = open(filename, O_RDONLY, 0);
+    if( read_fd[i] == -1) {
+      printf("open %s error", filename);
+    }
+
+    cb[i].aio_nbytes = G_blockSize;
+    cb[i].aio_fildes = read_fd[i];
+    cb[i].aio_offset = 0;
+    cb[i].aio_buf = buf_vec[i];
+
+    if(aio_read(&cb[i]) == -1) {
+      printf("Unable to create read request for %d:%s.\n", i, filename);
+      close(read_fd[i]);
+    }
+    printf("Request enqueued! Read: %s\n", filename);
   }
-  if(io_setup(8192, &ctx)) {
-    perror("io_setup");
-    exit(0);
+  for(i=0; i < READS_PER_WRITE; i++) {
+
+    // Wait until the aio is done
+    while(aio_error(&cb[i] )== EINPROGRESS) {
+      continue;
+    }
+    
+    int numBytes = aio_return(&cb[i]);
+    printf("numBytes:%d\n", numBytes);
+    if(numBytes != -1 ) {
+      printf("%d read successed.!\n", i);
+    }else {
+      perror("Read error!");
+    }
   }
 
-  long long rand_i = (rand()) % (G_read_fileCount);
-  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, 
-	   G_filename_r_prefix, rand_i);
-  int read_fd = open(filename, O_RDONLY, 0);
-  if( read_fd == -1) {
-    perror("open");
-    exit(0);
+  for(i=0; i < READS_PER_WRITE; i++) {
+    close(read_fd[i]);
   }
-
+  
+#ifdef READ_CHECK
+  // Check whether the read bytes is correct
+  for(i=0; i < READS_PER_WRITE; i++) {
+    printf("%s\n", buf_vec[i]);
+  }
+#endif
+  
 }
 
 
@@ -384,10 +413,8 @@ void op_file_read_multi_thread() {
   for(;  i < READS_PER_WRITE; i++) {
     // Sometimes sem_wait will return -1 left semaphore unchanged on error,
     // We need to take care of this
-    int ret_val;
-    while( ret_val = sem_wait(&sem_read_end[i])) {
-      if( ret_val == -1)
-	continue;
+    while( sem_wait(&sem_read_end[i]) == -1 ) {
+      continue;
     }
   }
 }
@@ -622,6 +649,12 @@ void prepare_env() {
     if(cur_fd <= 0 ) {
       printf("Open file error: %s\n", filename);
     }
+
+#ifdef READ_CHECK
+    // Make each file contain different content for read content check
+    snprintf(buf, MAX_BLOCK_SIZE, "filecontent:%10d", i);
+#endif
+
     write(cur_fd, buf, G_blockSize);
     close(cur_fd);    
   }

@@ -1,12 +1,11 @@
-#include <sys/types.h>
 #include <aio.h>
+#include <sys/types.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <iostream>
+#include <stdio.h>
 
-using namespace std;
 
-const int SIZE_TO_READ = 100;
+#define SIZE_TO_READ 100
 
 int main()
 {
@@ -15,17 +14,17 @@ int main()
 	
   if (file == -1)
     {
-      cout << "Unable to open file!" << endl;
+      printf("Unable to open file!\n");
       return 1;
     }
 	
   // create the buffer
-  char* buffer = new char[SIZE_TO_READ];
+  char buffer[SIZE_TO_READ] = {0};
 	
   // create the control block structure
-  aiocb cb;
+  struct aiocb cb;
 	
-  memset(&cb, 0, sizeof(aiocb));
+  memset(&cb, 0, sizeof(struct aiocb));
   cb.aio_nbytes = SIZE_TO_READ;
   cb.aio_fildes = file;
   cb.aio_offset = 0;
@@ -34,28 +33,28 @@ int main()
   // read!
   if (aio_read(&cb) == -1)
     {
-      cout << "Unable to create request!" << endl;
+      printf("Unable to create request!\n");
       close(file);
     }
 	
-  cout << "Request enqueued!" << endl;
+  printf("Request enqueued!\n");
 	
   // wait until the request has finished
   while(aio_error(&cb) == EINPROGRESS)
     {
-      cout << "Working..." << endl;
+      printf( "Working...\n");
     }
 	
   // success?
   int numBytes = aio_return(&cb);
 	
   if (numBytes != -1)
-    cout << "Success!" << endl;
+    printf("Success!\n");
   else
-    cout << "Error!" << endl;
+    printf("Error!\n");
 		
   // now clean up
-  delete[] buffer;
+  //  delete[] buffer;
   close(file);
 	
   return 0;
