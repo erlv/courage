@@ -252,17 +252,19 @@ void Analysis_distribution() {
   printf("Latency Distribution for %lld test:\n", G_total);
   printf("Latency(ms)\t0~20\t20~40\t40~60\t60~80\t80~100\t100~150\t150~300\t>300\n");
   printf("Percentage\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\t%5.2f%%\n",
-	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms, f_80_100_ms, f_100_150_ms,f_150_300_ms,
-	 f_300_ms);
+	 f_0_20_ms, f_20_40_ms, f_40_60_ms,f_60_80_ms,
+	 f_80_100_ms, f_100_150_ms,f_150_300_ms, f_300_ms);
 }
 
 /**
  * Perform the single file read operation
  * The filename is generated randomly
  */
-void single_file_read(long long file_id,  char* filename, char* buf) {
+void single_file_read(long long file_id,  char* filename, 
+		      char* buf) {
   int blockSize = G_blockSize;
-  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, G_filename_r_prefix, file_id);
+  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, 
+	   G_filename_r_prefix, file_id);
   int read_fd = open(filename, O_RDONLY, 0);
   if( read_fd <= 0 ) {
     printf("Open file for read error: %s\n", filename);
@@ -278,8 +280,10 @@ void single_file_read(long long file_id,  char* filename, char* buf) {
  */
 void single_file_read_thread(void* args) {
   int thread_idx = *(int*) args;
-  long long rand_step = (G_read_fileCount/READS_PER_WRITE)*thread_idx;
-  printf(">>> Threads: start Thread %d: 0x%x and wait\n", thread_idx,
+  long long rand_step = 
+    (G_read_fileCount/READS_PER_WRITE)*thread_idx;
+  printf(">>> Threads: start Thread %d: 0x%x and wait\n", 
+	 thread_idx,
 	 (unsigned int)pthread_self());
   char buf[MAX_BLOCK_SIZE] = {0};
   char filename[MAX_FILENAME_LEN]={0};
@@ -287,16 +291,16 @@ void single_file_read_thread(void* args) {
   while(1) {
     // Wait for main thread to post sem_read_start[thread_idx]
 
-    // Sometimes sem_wait will return -1 left semaphore unchanged on error,
-    // We need to take care of this
+    // Sometimes sem_wait will return -1 left semaphore 
+    // unchanged on error, We need to take care of this
     int ret_val;
     while( ret_val = sem_wait(&sem_read_start[thread_idx])) {
       if(ret_val == -1 )
 	continue;
     }
 
-    // Add rand_step to rand() return value, so that each thread could 
-    // use a more random file id.
+    // Add rand_step to rand() return value, so that each thread
+    // could use a more random file id.
     long long rand_i = (rand()+ rand_step) % (G_read_fileCount);
 
     single_file_read(rand_i, buf, filename);
@@ -311,8 +315,41 @@ void single_file_read_thread(void* args) {
  */
 void op_file_read_async_io() {
   // TODO: Not implement yet.
-  printf("Not Implement yet.\n");
-  exit(0);
+  int efd, fd, epfd;
+  io_context_t ctx;
+  struct timespec tms;
+  struct io_event events[NUM_EVENTS];
+  struct custom_iocb iocbs[NUM_EVENTS];
+  struct iocb *iocbps[NUM_EVENTS];
+  struct custom_iocb* iocbp;
+  struct epoll_event epevent;
+  char* buf;
+  if(posix_memalign(&buf, ALIGN_SIZE, MAX_BLOCKSIZE)) {
+    perror("posix_memalign");
+    exit(0);
+  }
+
+  char filename[MAX_FILENAME_LEN] = {0};
+
+  efd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC );
+  if( efd == -1) {
+    perror("eventfd");
+    exit(0);
+  }
+  if(io_setup(8192, &ctx)) {
+    perror("io_setup");
+    exit(0);
+  }
+
+  long long rand_i = (rand()) % (G_read_fileCount);
+  snprintf(filename, MAX_FILENAME_LEN, FILENAME_FORMAT, G_path, 
+	   G_filename_r_prefix, rand_i);
+  int read_fd = open(filename, O_RDONLY, 0);
+  if( read_fd == -1) {
+    perror("open");
+    exit(0);
+  }
+
 }
 
 
