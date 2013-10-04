@@ -1,0 +1,6 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =4
+let g:netrw_dirhist_1='/home/zsb-newsletter/maillister'
+let g:netrw_dirhist_2='/home/zsb-newsletter/maillister/app/core/management/commands'
+let g:netrw_dirhist_3='/home/erlv/projects/fslatency_ding/all/readClient/allClient'
+let g:netrw_dirhist_4='/home/erlv/Develop/loongstore/hadoop/hadoop-1.2.0'
