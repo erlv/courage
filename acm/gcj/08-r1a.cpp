@@ -20,6 +20,10 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
+// For quick problem solver, using long long will help to handle overflow problems.
+// So try to use big data types.
+// strtok(): a cstring function. Used to find the next token in a string. 
+//            we could also specify the seperator.
 
 long long min_scalar_product( vector<long long> a, vector<long long> b) {
   long long res_1;
