@@ -5,7 +5,7 @@
   The Toolchain is a popular toolchain widely used for not only C/C++ programming, 
   but also some other kind of works like Tenzing, Impala,etc.
 
-  All the following writing is based on Clang/LLVM 3.3.
+  All the following writing is based on Clang/LLVM 3.7.
 
 ** Links
    - “Clang” CFE Internals Manual[fn:1]
@@ -123,6 +123,9 @@ Clang is the FE of the toolchain, support:
 ** LLVM Optimizer
 
 
+* Best Practice
+** How to add intrinsics in LLVM
+   AMD guys proposed an intrisnic added [[patch|https://groups.google.com/forum/#!topic/llvm-dev/S3P1Sh3H--Q]] for LLVM which shows some idea about how to add intrinsic.
 
 * Footnotes
 
