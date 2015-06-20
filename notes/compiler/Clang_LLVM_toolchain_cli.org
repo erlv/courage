@@ -1,0 +1,69 @@
+#+TITLE:Clang+LLVM工具链命令行程序大揭密
+
+* Clang+LLVM工具链中的那些命令
+| 分类     | 可执行文件名称 | 简介                       |
+| 基本命令 | llvm-as        | LLVM汇编器                 |
+|          | llvm-dis       | LLVM反汇编器               |
+|          | opt            | LLVM优化器                 |
+|          | llv            | LLVM静态编译器             |
+|          | lli            | LLVM字节码可执行文件生成器 |
+|          | llvm-link      | LLVM字节码链接器           |
+|          | llvm-ar        | LLVM的压缩器                 |
+|          | llvm-nm        | LLVM的                      |
+|          |                |                            |
+
+|          | clang-check         | Clang 静态分析工具         |
+|          | clang               | Clang+LLVM工具链的标配前端 |
+|          | clang-format        | 代码格式化工具             |
+|          | c-index-test        |                            |
+|          | clang-tblgen        |                            |
+|          | llvm-pdbdump        |                            |
+|          | llvm-dsymutil       |                            |
+|          | verify-uselistorder |                            |
+|          | llvm-cxxdump        |                            |
+|          | yaml2obj            |                            |
+|          | obj2yaml            |                            |
+|          | llvm-symbolizer     |                            |
+|          | llvm-profdata       |                            |
+|          | llvm-mcmarkup       |                            |
+|          | llmv-stress         |                            |
+|          | llvm-size           |                            |
+|          | llvm-cov            |                            |
+|          | llvm-dwarfdump      |                            |
+|          | llvm-rtdyld         |                            |
+|          | llvm-readobj        |                            |
+|          | macho-dump          |                            |
+|          | llvm-diff           |                            |
+|          | llvm-bcanalyzer     |                            |
+|          | bugpoint            |                            |
+|          | llvm-mc             |                            |
+|          | llvm-extract        |                            |
+|          | lli-child-target    |                            |
+|          | lli                 |                            |
+|          | llvm-link           |                            |
+|          | llvm-nm             |                            |
+|          | llvm-ar             |                            |
+|          | llc                 |                            |
+
+
+
+|      | llvm-config         |                            |
+|      | not                 |                            |
+|      | count               |                            |
+|      | llvm-tblgen         |                            |
+|      | FileCheck           |                            |
+
+
+* 基于Clang的工具
+
+** Clang-check
+   这是Clang自己提供的静态分析工具。它能对代码进行一些静态分析和查错工作
+
+http://eli.thegreenplace.net/2014/05/21/compilation-databases-for-clang-based-tools
+
+
+** Clang-format
+
+
+** lcov
+   

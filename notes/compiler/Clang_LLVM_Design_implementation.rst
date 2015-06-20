@@ -1,13 +1,19 @@
-#+title: CLang/LLVM Design and Implementation
+======================================
+ CLang/LLVM Design and Implementation
+======================================
 
-* Objective
+===========
+ Objective
+===========
   This document want to record the learning of design and implementation of Clang and LLVM. 
   The Toolchain is a popular toolchain widely used for not only C/C++ programming, 
   but also some other kind of works like Tenzing, Impala,etc.
 
   All the following writing is based on Clang/LLVM 3.7.
 
-** Links
+=========
+  Links
+=========
    - “Clang” CFE Internals Manual[fn:1]
    -
    
@@ -125,8 +131,11 @@ Clang is the FE of the toolchain, support:
 
 * Best Practice
 ** How to add intrinsics in LLVM
-   AMD guys proposed an intrisnic added [[patch|https://groups.google.com/forum/#!topic/llvm-dev/S3P1Sh3H--Q]] for LLVM which shows some idea about how to add intrinsic.
+   AMD guys proposed an intrisnic added [patch|https://groups.google.com/forum/#!topic/llvm-dev/S3P1Sh3H--Q] for LLVM which shows some idea about how to add intrinsic.
 
+
+
+   
 * Footnotes
 
 [fn:1] http://clang.llvm.org/docs/InternalsManual.html
