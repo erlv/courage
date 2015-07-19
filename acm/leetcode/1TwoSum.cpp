@@ -18,6 +18,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <map>
 
 // C++:
 //  1. declared without init vector will be empty.
@@ -55,7 +56,6 @@ class Solution {
       return res; // return empty res
     }
 };
-#endif
 
 class node {
 public:
@@ -106,11 +106,39 @@ class Solution {
         return res;
     }
 };
+#endif
+
+class Solution {
+public:
+  vector<int> twoSum(vector<int>& nums, int target) {
+     map<int, int> hash;
+     vector<int> res;
+    
+     int i=0;
+     for(; i < nums.size(); i++) {
+        int cur = nums[i];
+        if (hash.end() != hash.find(cur) && i != hash[i]) {
+          res.push_back(hash[i]+1);
+          res.push_back(i+1);
+          return res;
+        } else {
+          int key = target - cur;
+          std::pair<int, int> tmp_tuple(key, i);
+          hash.insert(tmp_tuple);
+        }
+     }
+     // The code should not run to here, but we need a return value here to 
+     // make everything works well. An assert is better here.
+     return res;
+  }
+};
 
 int main() {
   Solution sol; // Can we init a class this way on stack
-  vector<int> in {591,955,829,805,312,83,764,841,12,744,104,773,627,306,731,539,349,811,662,341,465,300,491,423,569,405,508,802,500,747,689,506,129,325,918,606,918,370,623,905,321,670,879,607,140,543,997,530,356,446,444,184,787,199,614,685,778,929,819,612,737,344,471,645,726};
-  int target = 789;
+ // vector<int> in {591,955,829,805,312,83,764,841,12,744,104,773,627,306,731,539,349,811,662,341,465,300,491,423,569,405,508,802,500,747,689,506,129,325,918,606,918,370,623,905,321,670,879,607,140,543,997,530,356,446,444,184,787,199,614,685,778,929,819,612,737,344,471,645,726};
+  //int target = 789;
+  vector<int> in {3,2,4};
+  int target = 6;
   vector<int> out = sol.twoSum(in, target);
   print(out);
   return 0;
