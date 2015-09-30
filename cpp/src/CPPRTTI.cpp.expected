@@ -1,0 +1,14 @@
+call Base Constructor
+call Base Constructor
+call Derived Constructor
+a is P4Base
+b is P4Base
+*a is 4Base
+*b is 7Derived
+c is i
+typeid(int) is i
+typeid(Derived) is 7Derived
+a VS b: equal
+c VS d: equal
+c type is int
+c type is my_int
