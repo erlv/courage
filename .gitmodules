@@ -1,9 +1,6 @@
 [submodule "ml_cloud/triton"]
 	path = ml_cloud/triton
 	url = git@github.com:erlv/triton.git
-[submodule "ml_cloud/pytorch"]
-	path = ml_cloud/pytorch
-	url = git@github.com:erlv/pytorch.git
 [submodule "ml_cloud/llvm_sycl"]
 	path = ml_cloud/llvm_sycl
 	url = git@github.com:erlv/llvm_sycl.git
