@@ -4,3 +4,12 @@
 [submodule "ml_cloud/llvm_sycl"]
 	path = ml_cloud/llvm_sycl
 	url = git@github.com:erlv/llvm_sycl.git
+[submodule "ml_cloud/hpytorch_nocuda"]
+	path = ml_cloud/hpytorch_nocuda
+	url = git@github.com:erlv/hpytorch_nocuda.git
+[submodule "ml_cloud/pytorch"]
+	path = ml_cloud/pytorch
+	url = git@github.com:pytorch/pytorch.git
+[submodule "ml_cloud/ml_cloud/cuda-samples"]
+	path = ml_cloud/ml_cloud/cuda-samples
+	url = git@github.com:NVIDIA/cuda-samples.git
